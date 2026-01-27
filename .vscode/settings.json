@@ -1,0 +1,19 @@
+{
+    "git.ignoreLimitWarning": true,
+    "jdk.advanced.disable.nbjavac": false,
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default",
+                "enableSsl": "Disabled"
+            },
+            "previewLimit": 500,
+            "server": "localhost",
+            "port": 3306,
+            "driver": "MySQL",
+            "name": "project",
+            "database": "user_db",
+            "username": "manibabu"
+        }
+    ]
+}

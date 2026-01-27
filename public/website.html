@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FOOD STALLS</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="website.css">
+</head>
+<body>
+    <header>
+        <style>.logo {position: absolute; right: 0; top: 0;}</style>
+         <img src="https://happenings.lpu.in/wp-content/uploads/2016/06/logo-1.png" alt="logo" class="logo" height="110" width="250">
+        <h1 style="font-size: 500; text-align: left; font-style: inherit;">Welcome to LPU FOOD STALLS</h1>
+    </header>
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="#foodstalls">Food Stalls</a>
+        <a href="#teapoint">Tea Points</a>
+        <a href="#rating">Rating</a>
+        <a href="#contact">Contact</a>
+        <a href="#" id="logout">Logout</a>
+  </nav>
+  <script>document.getElementById('logout').addEventListener('click', function (e) {
+    e.preventDefault();
+
+    fetch('/logout', {
+        method: 'POST',
+        credentials: 'include', // Ensure cookies are sent with the request
+    })
+    .then(response => {
+        if (response.ok) {
+            // Redirect to login page
+            window.location.href = 'loginpage.html';
+        } else {
+            alert('Failed to log out');
+        }
+    })
+    .catch(err => {
+        console.error('Error logging out:', err);
+    });
+});
+</script>
+  
+    <div class="search-container">
+        <script>
+            function validateForm() 
+            {let x = document.forms["myForm"]["fname"].value;
+              if (x == "") {
+                alert("Name must be filled out");
+                return false;
+              }
+            }
+            </script>
+            </head>
+            <body>
+            <form name="myForm" action="/dom1.html" onsubmit="return validateForm()" method="post">
+              <input type="text" name="fname">
+              <button type="submit">Search</button>
+            </form>
+    </div><br>
+   <img src="https://qph.cf2.quoracdn.net/main-qimg-83d9bee1e911cef802b2a6f4d5d3c01e-lq" height="600" width="1520">
+        <br><br>
+<main>
+  <h2 id="home">Home</h2>
+  <p>Welcome to the Ultimate Guide to LPU Food Stalls! Discover the diverse and delicious food options available at Lovely Professional University. Whether you're looking for a quick bite between classes or a full meal, we've got you covered. At Lovely Professional University (LPU), food is an integral part of the student experience, reflecting the vibrant culture and diversity of our community. Our food stalls, scattered across the campus, serve not just meals but also a sense of belonging and connection among students, faculty, and visitors. This website is dedicated to showcasing the rich array of culinary delights available at LPU, inviting everyone to explore, enjoy, and indulge.</p>
+  <p><b>A Taste of Diversity</b></p>
+  <p>LPU's food stalls offer a remarkable variety of cuisines that cater to every palate. From traditional Indian dishes to global favorites, our stalls are a melting pot of flavors. Whether you’re in the mood for spicy street food, hearty meals, or refreshing beverages, you’ll find something to satisfy your cravings.</p>
+  <ul type="bold circle"></ul>
+  <li><b>Indian Delicacies:</b>&nbsp;Savor the taste of authentic regional dishes that celebrate India's rich culinary heritage, including biryanis, dosas, and regional snacks.</li>
+  <li><b>International Flavors:</b>&nbsp;Enjoy global cuisines from Thai to Italian, ensuring that there's something for every international palate.</li>
+  <li><b>Healthy Choices:</b>&nbsp;With an increasing focus on wellness, many stalls offer nutritious meals, including salads, whole grains, and organic options, making healthy eating accessible and enjoyable.</li>
+  <p><b>Affordable and Accessible</b></p>
+  We understand that as students, budgeting is essential. That's why LPU food stalls prioritize affordability without compromising on quality. Enjoy delicious meals and snacks at student-friendly prices, ensuring that everyone can relish the taste of good food without financial strain.
+  <p><b>A Social Hub</b></p>
+  Beyond just food, our stalls create a vibrant atmosphere that encourages social interaction and community building. The casual dining experience provides the perfect backdrop for students to connect, relax, and share moments with friends. Whether it’s a quick bite between classes or a leisurely meal after a long day, the food stalls are a popular gathering spot on campus.
+  <p><b>Seasonal Events and Festivals</b></p>
+  Throughout the academic year, LPU hosts various food festivals and themed events that showcase the creativity and diversity of our food offerings. These occasions allow students to explore new flavors, participate in cooking competitions, and enjoy live demonstrations from talented chefs. Keep an eye on our events calendar to join in the fun!
+  <h2 id="about">About</h2>
+  <p>This section contains information about the website.Welcome to your one-stop platform for all things delicious at LPU! This website aims to provide you with comprehensive details about the food stalls on campus, including their specialties, locations, and operating hours.</p>
+  <h2 id="foodstalls">Food Stalls</h2>
+  <p><b>Lovely Bake Studio</b></p>
+  <ul type="bold circle"></ul>
+    <li><b>Location:</b> Block 41</li>
+    <li><b>Specialties:</b> Badam Jamun, cookies, Irish frappes, and a variety of mocktails.</li>
+    <li><b>Description:</b> Your go-to spot for baked goods and sweet treats.</li>
+    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR6Z60khaAhIcdr5ACIfVWRGsLcX0FKSupCRA&s" height="300" width="200">
+    <p><b>Oven Express</b></p>
+    <li><b>Location:</b> Architecture Block 6</li>
+    <li><b>Specialties:</b> Rice Bowl with Nuggets, nutritious sandwiches, Nutella sandwiches.</li>
+    <li><b>Description:</b> Quality and quantity in every bite.</li>
+    <img src="https://th.bing.com/th/id/OIP.hWUIJomrTSQnES-rm2pPxwHaMB?w=115&h=180&c=7&r=0&o=5&dpr=1.3&pid=1.7" height="300" width="200">
+    <p><b>Lovely Sweets</b></p>
+    <li><b>Location:</b> 1st floor of Unimall Block 15</li>
+    <li><b>Specialties:</b> Laddus, Manchurian rolls.</li>
+    <li><b>Description:</b> High-quality sweets for a sweet campus life.</li>
+    <img src="https://th.bing.com/th/id/OIP.xEQj5JhCwRf-2PNdJq1YRgHaE8?w=298&h=199&c=7&r=0&o=5&dpr=1.3&pid=1.7" height="300" width="200">
+    <p><b>Kitchen Ette</b></p>
+    <li><b>Location:</b> Near apartment Block 41</li>
+    <li><b>Specialties:</b> Parathas, full meals, Panner curry.</li>
+    <li><b>Description:</b> A variety of hearty meals in a cozy setting.</li>
+    <img src="" height="300" width="200">
+    <p><b>Hangouts</b></p>
+    <li><b>Location:</b> Near BH-1&2</li>
+    <li><b>Specialties:</b> All varaities of DOSA and tiffins.</li>
+    <li><b>Description:</b> A variety of hearty tiffins.</li>
+
+    <p><b>Telugu Vantillu</b></p>
+    <li><b>Location:</b> Near BH-1&2</li>
+    <li><b>Specialties:</b> Andhra style Tiffins.</li>
+    <li><b>Description:</b> A variety of hearty tiffins.</li>
+    <h2 id="teapoint">Tea Points</h2>
+    <p><b>Nescafe</b></p>
+    <li><b>Location:</b> Near Uni-hospital</li>
+    <li><b>Specialties:</b> Hot coffee,cold coffee, chai.</li>
+    <li><b>Description:</b> A variety of hearty tiffins.</li>
+    <img src="https://th.bing.com/th/id/OIP.r53Jjs7bFbO2HuRNPS6xcAAAAA?w=115&h=182&c=7&r=0&o=5&dpr=1.3&pid=1.7" height="300" width="200">
+    <p><b>Apnaa chai walla</b></p>
+    <li><b>Location:</b> Near BH-1&2</li>
+    <li><b>Specialties:</b> Hot coffee,cold coffee, Milk Shakes, maggie.</li>
+    <li><b>Description:</b>Quality and quantity in every sip.</li>
+    <img src="" height="300" width="200">
+    <h2 id="rating">Rating</h2>
+  
+    <table>
+    <thead>
+    <tr>
+    <th>Food Stall/Tea Points</th>
+    <th>Location</th>
+    <th>Rating</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+    <td>Lovely Bake Studio</td>
+    <td>Beside Appartments</td>
+    <td>4.3</td>
+    </tr>
+    <tr>
+    <td>Oven Express</td>
+    <td>Near Uni Hospital</td>
+    <td>4.4</td>
+    </tr>
+    <tr>
+    <td>Lovely Sweets</td>
+    <td>unimall</td>
+    <td>4.2</td>
+    </tr>
+    <tr>
+    <td>Kitchen Ellite</td>
+    <td>Near Block 41</td>
+    <td>4.3</td>
+    </tr>
+    <tr>
+    <td>Hangouts</td>
+    <td>Near BH-1&2</td>
+    <td>4.5</td>
+    </tr>
+    <tr>
+    <td>Telugu Vantillu</td>
+    <td>Near BH-1&2</td>
+    <td>4.0</td>
+    </tr>
+    <tr>
+    <td>Nescafe</td>
+    <td>Near Uni-hospital</td>
+    <td>4.2</td>
+    </tr>
+    <tr>
+    <td>Apana chai walla</td>
+    <td>Near BH-1&2</td>
+    <td>4.3</td>
+    </tr>
+    </tbody>
+    </table>
+  <h2 id="contact">Contact</h2>
+  <p>Call us at: <a href="tel:+7989079035" class="phone-link">+91 7989079035</a></p>
+  <p>Email us at: <a href="mailto:komanapallimanibabu2006@gmail.com?subject=Inquiry&cc=cc@example.com&body=Hello, I have a question about...">komanapallimanibabu2006@gmail.com</a></p>
+  <L class="titlelayer"></L><iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d8378.783567098482!2d75.69865990735815!3d31.255468399639426!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x391a5fb3d3115dbf%3A0x435618b146461dca!2sDepartment%20of%20Education%2C%20LPU!5e1!3m2!1sen!2sin!4v1725123219843!5m2!1sen!2sin" width="1470" height="700" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></p>
+  <footer>
+    <p>&copy; 2024 LPU Food Stalls & Tea Points</p>
+</footer>
+</main>
+</body>
+</html>

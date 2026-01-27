@@ -1,0 +1,7 @@
+pymysql
+SQLAlchemy
+bcrypt
+twilio
+python-dotenv
+twilio==7.0.0
+mysql-connector-python

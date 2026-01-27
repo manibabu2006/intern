@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Forgot Password</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      color: #fff;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 30px 40px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 24px;
+      font-size: 24px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      font-size: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+    }
+
+    input::placeholder {
+      color: #ccc;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #00c6ff;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      margin-top: 20px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #0077b6;
+    }
+
+    form {
+      display: none;
+    }
+
+    form.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Forgot Password</h1>
+
+    <!-- Step 1: Send OTP Form -->
+    <form id="forgotPasswordForm" class="active">
+      <label for="username">Registration Number</label>
+      <input type="text" id="username" name="username" required placeholder="Enter your registration number"/>
+      <button type="submit">Send OTP</button>
+    </form>
+
+    <!-- Step 2: Verify OTP and Reset Password -->
+    <form id="resetPasswordForm">
+      <label for="otp">OTP:</label>
+      <input type="text" id="otp" name="otp" required placeholder="Enter OTP" />
+
+      <label for="newPassword">New Password:</label>
+      <input type="password" id="newPassword" name="newPassword" required placeholder="Enter new password" />
+
+      <button type="submit">Verify & Reset Password</button>
+    </form>
+  </div>
+
+  <script>
+    let globalUsername = '';
+
+    // Step 1: Send OTP
+    document.getElementById('forgotPasswordForm').onsubmit = function (e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      globalUsername = username;
+
+      fetch('/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username }),
+      })
+      .then(response => response.text())
+      .then(message => {
+        alert(message);
+        document.getElementById('forgotPasswordForm').classList.remove('active');
+        document.getElementById('resetPasswordForm').classList.add('active');
+      })
+      .catch(err => {
+        alert('Error sending OTP');
+        console.error(err);
+      });
+    };
+
+    // Step 2 & 3: Verify OTP and Reset Password
+    document.getElementById('resetPasswordForm').onsubmit = function (e) {
+      e.preventDefault();
+      const otp = document.getElementById('otp').value;
+      const newPassword = document.getElementById('newPassword').value;
+
+      fetch('/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: globalUsername, otp }),
+      })
+      .then(response => {
+        if (!response.ok) throw new Error('Invalid or expired OTP');
+        return response.text();
+      })
+      .then(() => {
+        return fetch('/reset-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: globalUsername, newPassword }),
+        });
+      })
+      .then(res => res.text())
+      .then(msg => {
+        alert(msg);
+        window.location.href = '/'; // Redirect to login
+      })
+      .catch(err => {
+        alert(err.message);
+        console.error(err);
+      });
+    };
+  </script>
+
+</body>
+</html>
