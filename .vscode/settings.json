@@ -15,5 +15,6 @@
             "database": "user_db",
             "username": "manibabu"
         }
-    ]
+    ],
+    "python.terminal.useEnvFile": true
 }
