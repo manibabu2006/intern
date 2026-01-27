@@ -119,7 +119,7 @@
       const username = document.getElementById('username').value;
       globalUsername = username;
 
-      fetch('/send-otp', {
+      fetch('/api/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username }),
@@ -142,7 +142,7 @@
       const otp = document.getElementById('otp').value;
       const newPassword = document.getElementById('newPassword').value;
 
-      fetch('/verify-otp', {
+      fetch('/api/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: globalUsername, otp }),
@@ -152,7 +152,7 @@
         return response.text();
       })
       .then(() => {
-        return fetch('/reset-password', {
+        return fetch('/api/reset-password', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: globalUsername, newPassword }),
