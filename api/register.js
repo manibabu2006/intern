@@ -1,7 +1,8 @@
-const pool = require("./_db");
-const bcrypt = require("bcryptjs");
+// api/register.js
+import pool from "./_db.js";
+import bcrypt from "bcryptjs";
 
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).send("Method not allowed");
 
   const { username, password, mobile } = req.body;
@@ -27,4 +28,4 @@ module.exports = async (req, res) => {
     console.error(err);
     res.status(500).send("Database error");
   }
-};
+}
