@@ -4,57 +4,65 @@
 <meta charset="UTF-8">
 <title>Customer Dashboard | RentHub</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
-body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(120deg, #0f2027, #203a43, #2c5364);
-  color: #fff;
+:root{
+  --glass: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.18);
+  --primary:#38bdf8;
+  --success:#22c55e;
+  --danger:#ef4444;
 }
-header {
-  padding: 20px;
-  font-size: 24px;
-  font-weight: bold;
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:'Poppins',sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a,#020617);
+  color:#fff;
 }
-.container { padding: 20px; }
+header{
+  padding:22px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  border-bottom:1px solid var(--border);
+}
+header h1{margin:0;font-size:24px;}
+.container{padding:25px; max-width:1200px; margin:auto;}
+/* Categories & Items */
+.categories, .items{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:15px;
+  margin-bottom:25px;
+}
+.card{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:15px;
+  padding:20px;
+  text-align:center;
+  cursor:pointer;
+  transition:.3s;
+}
+.card:hover{transform:scale(1.05);}
+button{
+  padding:10px 15px;
+  border:none;
+  border-radius:12px;
+  font-weight:600;
+  cursor:pointer;
+  transition:.3s;
+}
+button:disabled{background:gray;}
+.success{background:var(--success);}
+.danger{background:var(--danger);}
+.primary{background:var(--primary);}
 
-select {
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  border-radius: 8px;
-  border: none;
-}
-
-.categories, .items {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-}
-
-.card {
-  background: #1e293b;
-  padding: 20px;
-  border-radius: 15px;
-  cursor: pointer;
-  transition: 0.3s;
-  text-align: center;
-}
-.card:hover { transform: scale(1.05); background:#334155; }
-
-button {
-  padding: 10px 15px;
-  border: none;
-  border-radius: 8px;
-  background: #22c55e;
-  color: #000;
-  font-weight: bold;
-  cursor: pointer;
-}
-button:disabled { background: gray; }
-
-.modal {
+/* Modal */
+.modal{
   display:none;
   position:fixed;
   inset:0;
@@ -62,46 +70,43 @@ button:disabled { background: gray; }
   justify-content:center;
   align-items:center;
 }
-.modal-content {
-  background:#0f172a;
+.modal-content{
+  background:var(--glass);
   padding:25px;
   border-radius:15px;
   width:90%;
   max-width:400px;
 }
+.modal-content h3{margin-top:0;}
 </style>
 </head>
-
 <body>
 
-<header>🚀 RentHub – Customer Dashboard</header>
 <header>
-  <h2>Rentzy | Customer</h2>
+  <h1>🚀 RentHub – Customer Dashboard</h1>
+  <div>Welcome, <b id="customerName"></b></div>
   <button onclick="logout()">Logout</button>
 </header>
 
-
 <div class="container">
+  <h3>Select Location</h3>
+  <select id="location">
+    <option value="">Choose location</option>
+    <option value="Hyderabad">Hyderabad</option>
+    <option value="Bangalore">Bangalore</option>
+  </select>
 
-<h3>Select Location</h3>
-<select id="location">
-  <option value="">Choose location</option>
-  <option value="Hyderabad">Hyderabad</option>
-  <option value="Bangalore">Bangalore</option>
-</select>
+  <h3>Select Category</h3>
+  <div class="categories">
+    <div class="card" onclick="loadItems('Electronics')">💻 Electronics</div>
+    <div class="card" onclick="loadItems('Bike')">🏍 Bikes</div>
+    <div class="card" onclick="loadItems('Car')">🚗 Cars</div>
+    <div class="card" onclick="loadItems('Tent')">🏕 Tents</div>
+    <div class="card" onclick="loadItems('Appliance')">🏠 Appliances</div>
+  </div>
 
-<h3>Select Category</h3>
-<div class="categories">
-  <div class="card" onclick="loadItems('Electronics')">💻 Electronics</div>
-  <div class="card" onclick="loadItems('Bike')">🏍 Bikes</div>
-  <div class="card" onclick="loadItems('Car')">🚗 Cars</div>
-  <div class="card" onclick="loadItems('Tent')">🏕 Tents</div>
-  <div class="card" onclick="loadItems('Appliance')">🏠 Appliances</div>
-</div>
-
-<h3>Available Items</h3>
-<div class="items" id="items"></div>
-
+  <h3>Available Items</h3>
+  <div class="items" id="items"></div>
 </div>
 
 <!-- Booking Modal -->
@@ -111,12 +116,15 @@ button:disabled { background: gray; }
     <label>
       <input type="checkbox" id="terms"> I accept terms & conditions
     </label><br><br>
-    <button id="confirmBtn" disabled onclick="confirmBooking()">Book Now</button>
+    <button class="success" id="confirmBtn" disabled onclick="confirmBooking()">Book Now</button>
+    <button class="danger" onclick="closeBooking()" style="margin-top:10px;">Cancel</button>
   </div>
 </div>
 
 <script>
 const customerId = localStorage.getItem("user_id");
+document.getElementById("customerName").innerText = localStorage.getItem("name") || "Customer";
+
 let selectedItem = null;
 
 document.getElementById("terms").addEventListener("change", e=>{
@@ -132,13 +140,17 @@ function loadItems(category){
     .then(data=>{
       const box = document.getElementById("items");
       box.innerHTML='';
+      if(!data.length){
+        box.innerHTML = '<p>No items available in this category & location.</p>';
+        return;
+      }
       data.forEach(i=>{
         box.innerHTML+=`
         <div class="card">
           <h4>${i.item_name}</h4>
           <p>₹${i.price}/day</p>
-          <p>${i.shop_name}</p>
-          <button onclick="openBooking(${i.id})">Book Now</button>
+          <p>🏪 ${i.shop_name}</p>
+          <button class="primary" onclick="openBooking(${i.id})">Book Now</button>
         </div>`;
       });
     });
@@ -149,20 +161,30 @@ function openBooking(id){
   document.getElementById("bookingModal").style.display='flex';
 }
 
+function closeBooking(){
+  document.getElementById("bookingModal").style.display='none';
+  document.getElementById("terms").checked = false;
+  document.getElementById("confirmBtn").disabled = true;
+}
+
 function confirmBooking(){
+  if(!selectedItem) return;
   fetch('/api/create-request',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({ item_id:selectedItem, customer_id:customerId })
-  }).then(()=>alert("Booking request sent"));
+  })
+  .then(res=>res.json())
+  .then(data=>{
+    alert("Booking request sent successfully!");
+    closeBooking();
+  });
 }
 
 function logout() {
   localStorage.removeItem("user_id");
   localStorage.removeItem("role");
   localStorage.removeItem("name");
-
-  // Prevent back navigation
   window.location.replace("index.html");
 }
 </script>

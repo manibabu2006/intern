@@ -4,10 +4,30 @@
 <meta charset="UTF-8">
 <title>Owner Dashboard | RentHub</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
 <style>
+.categories{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(120px,1fr));
+  gap:15px;
+  margin-bottom:20px;
+}
+
+.categories .card{
+  padding:15px;
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+  border-radius:12px;
+  transition:0.3s;
+  text-align:center;
+  box-shadow:0 5px 15px rgba(0,0,0,0.3);
+}
+.categories .card:hover{
+  transform:scale(1.05);
+  box-shadow:0 8px 20px rgba(0,0,0,0.5);
+}
+
 :root{
   --glass: rgba(255,255,255,0.08);
   --border: rgba(255,255,255,0.18);
@@ -15,15 +35,13 @@
   --success:#22c55e;
   --danger:#ef4444;
 }
-*{box-sizing:border-box}
-
+*{box-sizing:border-box;}
 body{
   margin:0;
   font-family:'Poppins',sans-serif;
   background:linear-gradient(135deg,#020617,#0f172a,#020617);
-  color:#fff;
+  color:#fdfcfe;
 }
-
 header{
   padding:22px;
   display:flex;
@@ -33,17 +51,8 @@ header{
   backdrop-filter: blur(10px);
   border-bottom:1px solid var(--border);
 }
-
-header h1{
-  margin:0;
-  font-size:24px;
-}
-
-.container{
-  padding:25px;
-  max-width:1200px;
-  margin:auto;
-}
+header h1{margin:0;font-size:24px;}
+.container{padding:25px; max-width:1200px; margin:auto;}
 
 /* GRID */
 .grid{
@@ -51,10 +60,7 @@ header h1{
   grid-template-columns: 1fr 1.4fr;
   gap:25px;
 }
-
-@media(max-width:900px){
-  .grid{grid-template-columns:1fr;}
-}
+@media(max-width:900px){.grid{grid-template-columns:1fr;}}
 
 /* GLASS CARD */
 .card{
@@ -64,13 +70,7 @@ header h1{
   padding:25px;
   box-shadow:0 10px 30px rgba(0,0,0,.4);
 }
-
-.card h3{
-  margin-top:0;
-  margin-bottom:15px;
-}
-
-/* INPUTS */
+.card h3{margin-top:0;margin-bottom:15px;}
 input,select{
   width:100%;
   padding:12px 15px;
@@ -79,12 +79,9 @@ input,select{
   margin-bottom:12px;
   outline:none;
   background:rgba(255,255,255,0.12);
-  color:#fff;
+  color:#f9f9fa;
 }
-
-input::placeholder{color:#cbd5f5}
-
-/* BUTTONS */
+input::placeholder{color:#cbd5f5;}
 button{
   padding:12px 18px;
   border:none;
@@ -93,25 +90,18 @@ button{
   font-weight:600;
   transition:.3s;
 }
-
-.primary{background:var(--primary)}
-.success{background:var(--success)}
-.danger{background:var(--danger)}
-
-button:hover{transform:scale(1.05);opacity:.9}
-
-/* REQUEST CARD */
+.primary{background:var(--primary);}
+.success{background:var(--success);}
+.danger{background:var(--danger);}
+button:hover{transform:scale(1.05);opacity:.9;}
 .request{
   background:rgba(0,0,0,.35);
   padding:18px;
   border-radius:15px;
   margin-bottom:15px;
 }
-
-.request h4{margin:0 0 8px 0}
-.request small{opacity:.8}
-
-/* STATUS */
+.request h4{margin:0 0 8px 0;}
+.request small{opacity:.8;}
 .status{
   display:inline-block;
   padding:4px 10px;
@@ -119,52 +109,36 @@ button:hover{transform:scale(1.05);opacity:.9}
   font-size:12px;
   margin-top:5px;
 }
-.pending{background:#eab308;color:#000}
-.accepted{background:#22c55e}
-.rejected{background:#ef4444}
-
-.actions{
-  display:flex;
-  gap:10px;
-  margin-top:10px;
-}
+.pending{background:#eab308;color:#000;}
+.accepted{background:#22c55e;}
+.rejected{background:#ef4444;}
+.actions{display:flex;gap:10px;margin-top:10px;}
 </style>
 </head>
-
 <body>
 
 <header>
   <h1>🏪 Owner Dashboard</h1>
-  <div>Welcome, <b>Owner</b></div>
-</header>
-<aside>
-  <h2>Rentzy Owner</h2>
-  <p id="ownerName"></p>
+  <div>Welcome, <b id="ownerName"></b></div>
   <button onclick="logout()">Logout</button>
-</aside>
-
+</header>
 
 <div class="container">
-
 <div class="grid">
 
 <!-- ADD ITEM -->
 <div class="card">
-  <h3>➕ Add New Rental Item</h3>
-
-  <input id="name" placeholder="Item name">
-  <select id="category">
-    <option>Electronics</option>
-    <option>Bike</option>
-    <option>Car</option>
-    <option>Tent</option>
-    <option>Appliance</option>
-  </select>
-  <input id="price" placeholder="Price per day (₹)">
-  <input id="location" placeholder="Location">
-
-  <button class="primary" onclick="addItem()">Add Item</button>
+  <h3>Select Category</h3>
+  <div class="categories">
+  <div class="card category" data-category="Electronics" style="background:#3b82f6;">💻 Electronics</div>
+  <div class="card category" data-category="Bike" style="background:#f97316;">🏍 Bike</div>
+  <div class="card category" data-category="Car" style="background:#14b8a6;">🚗 Car</div>
+  <div class="card category" data-category="Tent" style="background:#facc15;">🏕 Tent</div>
+  <div class="card category" data-category="Home Appliance" style="background:#10b981;">🏠 Home Appliance</div>
 </div>
+<input id="price" placeholder="Price per day (₹)">
+  <input id="location" placeholder="Location">
+<button class="primary" onclick="addItem()">Add Item</button>
 
 <!-- REQUESTS -->
 <div class="card">
@@ -177,20 +151,34 @@ button:hover{transform:scale(1.05);opacity:.9}
 
 <script>
 const ownerId = localStorage.getItem("user_id");
-
+document.getElementById("ownerName").innerText = localStorage.getItem("name") || "Owner";
 
 function addItem(){
+  if(!name.value || !category.value || !price.value || !location.value){
+    alert("Please fill all fields");
+    return;
+  }
+
   fetch('/api/add-item',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({
-      owner_id:ownerId,
-      item_name:name.value,
-      category:category.value,
-      price:price.value,
-      location:location.value
+      owner_id: ownerId,
+      shop_name: location.value,   // match your DB column name
+      item_name: name.value,
+      category: category.value,
+      price_per_day: price.value
     })
-  }).then(()=>alert("Item added successfully"));
+  })
+  .then(res => res.json())
+  .then(data=>{
+    alert("Item added successfully!");
+    // reset form
+    name.value = "";
+    price.value = "";
+    location.value = "";
+    category.value = "";
+  });
 }
 
 function loadRequests(){
@@ -199,10 +187,7 @@ function loadRequests(){
     .then(data=>{
       const box=document.getElementById("requests");
       box.innerHTML='';
-      if(!data.length){
-        box.innerHTML='<p>No requests yet</p>';
-        return;
-      }
+      if(!data.length){box.innerHTML='<p>No requests yet</p>'; return;}
       data.forEach(r=>{
         box.innerHTML+=`
         <div class="request">
@@ -211,16 +196,31 @@ function loadRequests(){
           <small>📞 ${r.phone}</small><br>
           <small>🆔 ${r.aadhar}</small><br>
           <span class="status ${r.status.toLowerCase()}">${r.status}</span>
-
-          ${r.status==='Pending' ? `
+          ${r.status==='Pending'?`
           <div class="actions">
             <button class="success" onclick="update(${r.request_id},'Accepted')">Accept</button>
             <button class="danger" onclick="update(${r.request_id},'Rejected')">Reject</button>
-          </div>` : ``}
+          </div>`:''}
         </div>`;
       });
     });
 }
+
+let selectedCategory = "";
+
+document.querySelectorAll(".category").forEach(card=>{
+  card.addEventListener("click", ()=>{
+    // remove highlight from all
+    document.querySelectorAll(".category").forEach(c=>c.style.border="none");
+    
+    // highlight selected
+    card.style.border = "3px solid #fff";
+    card.style.transform = "scale(1.05)";
+    
+    selectedCategory = card.dataset.category;
+  });
+});
+
 
 function update(id,status){
   fetch('/api/update-request',{
@@ -234,8 +234,6 @@ function logout() {
   localStorage.removeItem("user_id");
   localStorage.removeItem("role");
   localStorage.removeItem("name");
-
-  // Prevent back navigation
   window.location.replace("index.html");
 }
 
