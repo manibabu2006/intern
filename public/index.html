@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Login Page</title>
+<title>Login | RentHub</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; margin:0; padding:0; }
+  * { box-sizing: border-box; margin:0; padding:0; font-family: 'Inter', sans-serif; }
   body {
-    font-family: 'Inter', sans-serif;
     background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
     height: 100vh;
     display: flex;
@@ -28,17 +27,37 @@
   }
   h1 { margin-bottom: 25px; font-size: 28px; color: #00c6ff; }
   .form-group { margin-bottom: 18px; text-align: left; }
-  label { font-size: 15px; margin-bottom: 6px; display: block; }
-  input { width: 100%; padding: 12px; border-radius: 10px; border: none; font-size: 15px; background: rgba(255,255,255,0.2); color: #fff; }
+  label { display:block; margin-bottom:6px; font-size: 15px; }
+  input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    font-size: 15px;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+  }
   input::placeholder { color: #ccc; }
-  button { width: 100%; padding: 12px; background-color: #00c6ff; border: none; border-radius: 10px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.3s ease; }
+  button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background-color: #00c6ff;
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
   button:hover { background-color: #0092cc; }
-  .register, .change-password, .forgot-password { margin-top: 12px; font-size: 14px; }
-  a { color: #00c6ff; text-decoration: none; font-weight: 600; }
-  a:hover { text-decoration: underline; }
+  .link-group { margin-top: 12px; font-size: 14px; text-align: center; }
+  .link-group a { color: #00c6ff; font-weight: 600; text-decoration: none; }
+  .link-group a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
+
 <div class="login-container">
   <h1>Login</h1>
   <form id="loginForm">
@@ -56,14 +75,10 @@
       <button type="submit">Login</button>
     </div>
 
-    <div class="register">
+    <div class="link-group">
       <p>Don't have an account? <a href="registation.html">Register here</a></p>
-    </div>
-    <div class="change-password">
-      <p>Want to change password? <a href="changepassword.html">Change Password</a></p>
-    </div>
-    <div class="forgot-password">
-      <p>Forgot password? <a href="forgotpass.html">Reset Here</a></p>
+      <p>Change password? <a href="changepassword.html">Click here</a></p>
+      <p>Forgot password? <a href="forgotpass.html">Reset here</a></p>
     </div>
   </form>
 </div>
@@ -75,7 +90,9 @@ document.getElementById("loginForm").onsubmit = async (e) => {
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
 
-  if(!username || !password) return alert("Please fill all fields");
+  if (!username || !password) {
+    return alert("Please fill all fields");
+  }
 
   try {
     const res = await fetch("/api/login", {
@@ -86,27 +103,28 @@ document.getElementById("loginForm").onsubmit = async (e) => {
 
     const data = await res.json();
 
-    if(!res.ok || !data.success) {
+    if (!res.ok || !data.success) {
       return alert(data.message || "Login failed");
     }
 
-    // ✅ Save user info to localStorage
-    if(data.role === "customer") {
-      localStorage.setItem("customer_id", data.customer_id); // matches backend
+    // Store user info in localStorage
+    if (data.role === "customer") {
+      localStorage.setItem("customer_id", data.id); // <-- match backend
     } else {
-      localStorage.setItem("owner_id", data.owner_id);
+      localStorage.setItem("owner_id", data.id); // <-- match backend
     }
     localStorage.setItem("name", data.name);
     localStorage.setItem("role", data.role);
 
-    // Redirect to dashboard
+    // Redirect based on role
     window.location.href = data.role === "customer" ? "/customerweb.html" : "/ownerweb.html";
 
-  } catch(err) {
+  } catch (err) {
     console.error(err);
     alert("Server error. Check console.");
   }
 };
 </script>
+
 </body>
 </html>

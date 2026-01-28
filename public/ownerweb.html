@@ -87,7 +87,9 @@ if (!ownerId) {
   alert("Please login again");
   window.location.replace("login.html");
 }
-document.getElementById("ownerName").innerText = localStorage.getItem("name") || "Owner";
+window.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("ownerName").innerText = localStorage.getItem("name") || "Owner";
+});
 </script>
 
 <header>
@@ -161,22 +163,22 @@ function addItem() {
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body:JSON.stringify({
-    action: "addItem",       // <-- action is required
-    shop_name,
-    item_name,
-    category,
-    price_per_day: price,
-    owner_id: ownerId,
-    location})
-  })
+    action: "addItem", ...data })       // <-- action is required
+    })
   .then(res=>res.json())
   .then(d=>{
     if(d.success){
       alert("✅ Item added successfully");
-      document.querySelectorAll("input").forEach(i=>i.value="");
-    }else alert(d.message);
+      document.getElementById("shop_name").value = "";
+        document.getElementById("item_name").value = "";
+        document.getElementById("price_per_day").value = "";
+        document.getElementById("location").value = "";
+    }else alert(d.message || "Failed to add item");
   })
-  .catch(()=>alert("Server error"));
+  .catch(err => {
+      console.error(err);
+  alert("Server error");
+});
 }
 
 /* ---------- LOAD REQUESTS ---------- */
