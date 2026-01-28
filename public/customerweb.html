@@ -118,9 +118,6 @@ button:disabled { background: gray; }
 <script>
 const customerId = localStorage.getItem("user_id");
 let selectedItem = null;
-if (!localStorage.getItem("user_id")) {
-  window.location.replace("index.html");
-}
 
 document.getElementById("terms").addEventListener("change", e=>{
   document.getElementById("confirmBtn").disabled = !e.target.checked;
