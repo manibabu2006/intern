@@ -10,6 +10,7 @@
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",
     "mysql2": "^3.16.2",
+    "nodemailer": "^7.0.13",
     "twilio": "^5.5.0"
   }
 }
