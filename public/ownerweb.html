@@ -2,183 +2,228 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>Owner Dashboard | RentHub</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rental Portal - Owner Dashboard</title>
 
-<!-- Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
-  body { background: linear-gradient(135deg,#020024,#090979,#00d4ff); color:#fff; min-height:100vh; }
+:root{
+  --glass: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.18);
+  --primary:#38bdf8;
+  --success:#22c55e;
+  --danger:#ef4444;
+}
+*{box-sizing:border-box}
 
-  /* Navbar */
-  .navbar { display:flex; justify-content:space-between; align-items:center; padding:20px 50px; background: rgba(255,255,255,0.08); backdrop-filter: blur(15px); border-bottom:1px solid rgba(255,255,255,0.2);}
-  .logo { font-size:28px; font-weight:700; color:#00eaff; letter-spacing:1px; text-transform:uppercase;}
-  .nav-links a { margin-left:25px; text-decoration:none; color:#fff; font-weight:500; transition:0.3s;}
-  .nav-links a:hover { color:#00eaff; }
+body{
+  margin:0;
+  font-family:'Poppins',sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a,#020617);
+  color:#fff;
+}
 
-  /* Hero Section */
-  .hero { display:flex; justify-content:space-between; align-items:center; padding:60px 50px; background: rgba(0,0,0,0.15); backdrop-filter: blur(20px); border-radius:20px; margin:30px auto; }
-  .hero-text { max-width:600px; }
-  .hero-text h1 { font-size:42px; margin-bottom:20px; line-height:1.2; color:#00eaff; }
-  .hero-text p { font-size:18px; opacity:0.9; margin-bottom:30px; }
-  .hero-text button { padding:14px 30px; font-size:16px; border-radius:30px; border:none; cursor:pointer; background: linear-gradient(135deg,#00eaff,#0077ff); color:#000; font-weight:600; transition:0.3s; }
-  .hero-text button:hover { transform:translateY(-3px); box-shadow:0 15px 40px rgba(0,234,255,0.4); }
+header{
+  padding:22px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:rgba(0,0,0,0.4);
+  backdrop-filter: blur(10px);
+  border-bottom:1px solid var(--border);
+}
 
-  .hero-image img { width:400px; border-radius:25px; box-shadow:0 30px 80px rgba(0,0,0,0.6); transition: transform 0.5s; }
-  .hero-image img:hover { transform:scale(1.05); }
+header h1{
+  margin:0;
+  font-size:24px;
+}
 
-  .container { width:90%; margin:30px auto; }
+.container{
+  padding:25px;
+  max-width:1200px;
+  margin:auto;
+}
 
-  /* Sections */
-  .section { margin-top:50px; text-align:center; }
-  .section h2 { font-size:28px; color:#00eaff; margin-bottom:25px; }
+/* GRID */
+.grid{
+  display:grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap:25px;
+}
 
-  /* Form */
-  .card { background: rgba(255,255,255,0.1); padding:20px; border-radius:15px; text-align:left; margin-bottom:20px; transition:0.3s; }
-  .card:hover { transform:translateY(-5px); box-shadow:0 15px 40px rgba(0,234,255,0.3); }
-  .card input, .card select, .card button { width:100%; padding:12px; margin:10px 0; border:none; border-radius:10px; font-size:16px; }
-  .card button { background: linear-gradient(135deg,#00eaff,#0077ff); color:#000; font-weight:600; cursor:pointer; transition:0.3s; }
-  .card button:hover { transform:translateY(-3px); box-shadow:0 10px 30px rgba(0,234,255,0.3); }
+@media(max-width:900px){
+  .grid{grid-template-columns:1fr;}
+}
 
-  /* Customer Requests Table */
-  .requests-table { width:100%; border-collapse:collapse; margin-top:20px; }
-  .requests-table th, .requests-table td { border:1px solid rgba(255,255,255,0.3); padding:12px; text-align:left; }
-  .requests-table th { background: rgba(0,234,255,0.1); }
-  .requests-table tr:nth-child(even) { background: rgba(255,255,255,0.05); }
-  .requests-table button { padding:6px 12px; border:none; border-radius:8px; cursor:pointer; font-weight:500; margin-right:5px; }
-  .accept { background: #00ff6a; color:#000; }
-  .reject { background: #ff3b3b; color:#fff; }
+/* GLASS CARD */
+.card{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding:25px;
+  box-shadow:0 10px 30px rgba(0,0,0,.4);
+}
 
-  /* Footer */
-  footer { text-align:center; padding:25px; background: rgba(0,0,0,0.3); font-size:14px; opacity:0.8; margin-top:50px; }
+.card h3{
+  margin-top:0;
+  margin-bottom:15px;
+}
 
-  @media(max-width:900px){ 
-    .hero { flex-direction:column; text-align:center; } 
-    .hero-image img { width:90%; margin-top:20px; } 
-  }
+/* INPUTS */
+input,select{
+  width:100%;
+  padding:12px 15px;
+  border-radius:12px;
+  border:none;
+  margin-bottom:12px;
+  outline:none;
+  background:rgba(255,255,255,0.12);
+  color:#fff;
+}
+
+input::placeholder{color:#cbd5f5}
+
+/* BUTTONS */
+button{
+  padding:12px 18px;
+  border:none;
+  border-radius:14px;
+  cursor:pointer;
+  font-weight:600;
+  transition:.3s;
+}
+
+.primary{background:var(--primary)}
+.success{background:var(--success)}
+.danger{background:var(--danger)}
+
+button:hover{transform:scale(1.05);opacity:.9}
+
+/* REQUEST CARD */
+.request{
+  background:rgba(0,0,0,.35);
+  padding:18px;
+  border-radius:15px;
+  margin-bottom:15px;
+}
+
+.request h4{margin:0 0 8px 0}
+.request small{opacity:.8}
+
+/* STATUS */
+.status{
+  display:inline-block;
+  padding:4px 10px;
+  border-radius:12px;
+  font-size:12px;
+  margin-top:5px;
+}
+.pending{background:#eab308;color:#000}
+.accepted{background:#22c55e}
+.rejected{background:#ef4444}
+
+.actions{
+  display:flex;
+  gap:10px;
+  margin-top:10px;
+}
 </style>
 </head>
+
 <body>
 
-<!-- Navbar -->
-<div class="navbar">
-  <div class="logo">Owner Dashboard</div>
-  <div class="nav-links">
-    <a href="#">Home</a>
-    <a href="#">My Items</a>
-    <a href="#">Requests</a>
-    <a href="#">Logout</a>
-  </div>
-</div>
-
-<!-- Hero -->
-<div class="hero container">
-  <div class="hero-text">
-    <h1>Welcome <span>Owner!</span></h1>
-    <p>Manage your rental items and handle customer requests seamlessly with our tech dashboard.</p>
-  </div>
-  <div class="hero-image">
-    <img src="https://images.unsplash.com/photo-1556742400-b5bc2f2c6c10" alt="Owner Dashboard">
-  </div>
-</div>
+<header>
+  <h1>🏪 Owner Dashboard</h1>
+  <div>Welcome, <b>Owner</b></div>
+</header>
 
 <div class="container">
 
-  <!-- Add Rental Item Section -->
-  <div class="section">
-    <h2>Add New Rental Item</h2>
-    <div class="card">
-      <form id="addItemForm">
-        <label>Shop Name<input type="text" name="shop_name" placeholder="Enter shop name" required></label>
-        <label>Item Name<input type="text" name="item_name" placeholder="Enter item name" required></label>
-        <label>Category
-          <select name="category" required>
-            <option value="">--Select Category--</option>
-            <option value="Electronics">Electronics</option>
-            <option value="Bikes">Bikes</option>
-            <option value="Cars">Cars</option>
-            <option value="Tents">Tents</option>
-            <option value="Home Appliances">Home Appliances</option>
-          </select>
-        </label>
-        <label>Price per Day<input type="number" name="price" placeholder="Enter price per day" min="1" required></label>
-        <button type="submit">Add Item</button>
-      </form>
-    </div>
-  </div>
+<div class="grid">
 
-  <!-- Customer Requests Section -->
-  <div class="section">
-    <h2>Customer Booking Requests</h2>
-    <table class="requests-table">
-      <thead>
-        <tr>
-          <th>Customer</th>
-          <th>Item</th>
-          <th>Shop</th>
-          <th>Duration</th>
-          <th>Date</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody id="requestsBody">
-        <!-- Requests dynamically populated -->
-      </tbody>
-    </table>
-  </div>
+<!-- ADD ITEM -->
+<div class="card">
+  <h3>➕ Add New Rental Item</h3>
 
+  <input id="name" placeholder="Item name">
+  <select id="category">
+    <option>Electronics</option>
+    <option>Bike</option>
+    <option>Car</option>
+    <option>Tent</option>
+    <option>Appliance</option>
+  </select>
+  <input id="price" placeholder="Price per day (₹)">
+  <input id="location" placeholder="Location">
+
+  <button class="primary" onclick="addItem()">Add Item</button>
 </div>
 
-<footer>
-  © 2026 Rental Portal | Owner Dashboard
-</footer>
+<!-- REQUESTS -->
+<div class="card">
+  <h3>📥 Booking Requests</h3>
+  <div id="requests"></div>
+</div>
+
+</div>
+</div>
 
 <script>
-  // Mock requests data
-  let requests = [
-    {customer:"Alice", item:"Projector", shop:"Tech World", duration:3, date:"2026-02-01"},
-    {customer:"Bob", item:"Bike Yamaha R15", shop:"City Bikes", duration:2, date:"2026-02-03"},
-  ];
+const ownerId = localStorage.getItem("user_id");
 
-  const requestsBody = document.getElementById('requestsBody');
+function addItem(){
+  fetch('/api/add-item',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      owner_id:ownerId,
+      item_name:name.value,
+      category:category.value,
+      price:price.value,
+      location:location.value
+    })
+  }).then(()=>alert("Item added successfully"));
+}
 
-  function renderRequests() {
-    requestsBody.innerHTML='';
-    requests.forEach((req, index)=>{
-      requestsBody.innerHTML += `<tr>
-        <td>${req.customer}</td>
-        <td>${req.item}</td>
-        <td>${req.shop}</td>
-        <td>${req.duration} day(s)</td>
-        <td>${req.date}</td>
-        <td>
-          <button class="accept" onclick="handleRequest(${index}, true)">Accept</button>
-          <button class="reject" onclick="handleRequest(${index}, false)">Reject</button>
-        </td>
-      </tr>`;
+function loadRequests(){
+  fetch(`/api/get-requests?owner_id=${ownerId}`)
+    .then(res=>res.json())
+    .then(data=>{
+      const box=document.getElementById("requests");
+      box.innerHTML='';
+      if(!data.length){
+        box.innerHTML='<p>No requests yet</p>';
+        return;
+      }
+      data.forEach(r=>{
+        box.innerHTML+=`
+        <div class="request">
+          <h4>${r.item_name}</h4>
+          <small>👤 ${r.customer_name}</small><br>
+          <small>📞 ${r.phone}</small><br>
+          <small>🆔 ${r.aadhar}</small><br>
+          <span class="status ${r.status.toLowerCase()}">${r.status}</span>
+
+          ${r.status==='Pending' ? `
+          <div class="actions">
+            <button class="success" onclick="update(${r.request_id},'Accepted')">Accept</button>
+            <button class="danger" onclick="update(${r.request_id},'Rejected')">Reject</button>
+          </div>` : ``}
+        </div>`;
+      });
     });
-  }
+}
 
-  function handleRequest(index, accepted){
-    const action = accepted ? 'accepted' : 'rejected';
-    alert(`Request for ${requests[index].item} by ${requests[index].customer} ${action}.`);
-    requests.splice(index,1); // remove from list
-    renderRequests();
-  }
+function update(id,status){
+  fetch('/api/update-request',{
+    method:'PUT',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({request_id:id,status})
+  }).then(loadRequests);
+}
 
-  // Initial render
-  renderRequests();
-
-  // Add item form
-  const addItemForm = document.getElementById('addItemForm');
-  addItemForm.addEventListener('submit', function(e){
-    e.preventDefault();
-    const formData = new FormData(addItemForm);
-    alert(`Item "${formData.get('item_name')}" added successfully to shop "${formData.get('shop_name')}"!`);
-    addItemForm.reset();
-  });
+loadRequests();
 </script>
 
 </body>
