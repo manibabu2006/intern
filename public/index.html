@@ -1,55 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login | RentHub</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
   * { box-sizing: border-box; margin:0; padding:0; font-family: 'Inter', sans-serif; }
-  body {
-    background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #fff;
-  }
-  .login-container {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(10px);
-    border-radius: 20px;
-    padding: 40px 35px;
-    width: 100%;
-    max-width: 400px;
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-    text-align: center;
-  }
+  body { background: linear-gradient(to right, #0f2027, #203a43, #2c5364); height: 100vh; display: flex; justify-content: center; align-items: center; color: #fff; }
+  .login-container { background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); border-radius: 20px; padding: 40px 35px; width: 100%; max-width: 400px; box-shadow: 0 12px 30px rgba(0,0,0,0.25); text-align: center; }
   h1 { margin-bottom: 25px; font-size: 28px; color: #00c6ff; }
   .form-group { margin-bottom: 18px; text-align: left; }
   label { display:block; margin-bottom:6px; font-size: 15px; }
-  input {
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    font-size: 15px;
-    background: rgba(255,255,255,0.2);
-    color: #fff;
-  }
+  input { width: 100%; padding: 12px; border-radius: 10px; border: none; font-size: 15px; background: rgba(255,255,255,0.2); color: #fff; }
   input::placeholder { color: #ccc; }
-  button {
-    width: 100%;
-    padding: 12px;
-    border-radius: 10px;
-    border: none;
-    background-color: #00c6ff;
-    color: #fff;
-    font-weight: 600;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.3s;
-  }
+  button { width: 100%; padding: 12px; border-radius: 10px; border: none; background-color: #00c6ff; color: #fff; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.3s; }
   button:hover { background-color: #0092cc; }
   .link-group { margin-top: 12px; font-size: 14px; text-align: center; }
   .link-group a { color: #00c6ff; font-weight: 600; text-decoration: none; }
@@ -62,23 +27,18 @@
   <h1>Login</h1>
   <form id="loginForm">
     <div class="form-group">
-      <label for="username">Registration Number</label>
-      <input type="text" id="username" placeholder="Enter your registration number" required>
+      <label for="username">Username</label>
+      <input type="text" id="username" placeholder="Enter your username" required>
     </div>
-
     <div class="form-group">
       <label for="password">Password</label>
       <input type="password" id="password" placeholder="Enter your password" required>
     </div>
-
     <div class="form-group">
       <button type="submit">Login</button>
     </div>
-
     <div class="link-group">
-      <p>Don't have an account? <a href="registation.html">Register here</a></p>
-      <p>Change password? <a href="changepassword.html">Click here</a></p>
-      <p>Forgot password? <a href="forgotpass.html">Reset here</a></p>
+      <p>Don't have an account? <a href="registration.html">Register here</a></p>
     </div>
   </form>
 </div>
@@ -86,13 +46,9 @@
 <script>
 document.getElementById("loginForm").onsubmit = async (e) => {
   e.preventDefault();
-
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
-
-  if (!username || !password) {
-    return alert("Please fill all fields");
-  }
+  if (!username || !password) return alert("Please fill all fields");
 
   try {
     const res = await fetch("/api/login", {
@@ -100,28 +56,17 @@ document.getElementById("loginForm").onsubmit = async (e) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, password })
     });
-
     const data = await res.json();
+    if (!data.success) return alert(data.message || "Login failed");
 
-    if (!res.ok || !data.success) {
-      return alert(data.message || "Login failed");
-    }
-
-    // Store user info in localStorage
-    if (data.role === "customer") {
-      localStorage.setItem("customer_id", data.id); // <-- match backend
-    } else {
-      localStorage.setItem("owner_id", data.id); // <-- match backend
-    }
+    if (data.role === "customer") localStorage.setItem("customer_id", data.user_id);
+    else localStorage.setItem("owner_id", data.user_id);
     localStorage.setItem("name", data.name);
     localStorage.setItem("role", data.role);
 
-    // Redirect based on role
-    window.location.href = data.role === "customer" ? "/customerweb.html" : "/ownerweb.html";
-
+    window.location.href = data.role === "customer" ? "customerweb.html" : "ownerweb.html";
   } catch (err) {
-    console.error(err);
-    alert("Server error. Check console.");
+    console.error(err); alert("Server error");
   }
 };
 </script>

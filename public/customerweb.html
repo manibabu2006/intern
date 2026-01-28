@@ -2,236 +2,97 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Customer Dashboard | RentHub</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<title>Customer Dashboard | RentHub</title>
 <style>
-:root{
-  --glass: rgba(255,255,255,0.08);
-  --border: rgba(255,255,255,0.18);
-  --primary:#38bdf8;
-  --success:#22c55e;
-  --danger:#ef4444;
-}
-*{box-sizing:border-box;}
-body{
-  margin:0;
-  font-family:'Poppins',sans-serif;
-  background:linear-gradient(135deg,#020617,#0f172a,#020617);
-  color:#fff;
-}
-header{
-  padding:22px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:rgba(0,0,0,0.4);
-  backdrop-filter: blur(10px);
-  border-bottom:1px solid var(--border);
-}
-header h1{margin:0;font-size:24px;}
+body{font-family:'Poppins',sans-serif;margin:0; background:linear-gradient(135deg,#020617,#0f172a); color:#fff;}
+header{padding:22px; display:flex; justify-content:space-between; background:rgba(0,0,0,0.4); backdrop-filter:blur(10px);}
 .container{padding:25px; max-width:1200px; margin:auto;}
-.location-select {
-  width:100%;
-  padding:12px 18px;
-  border-radius:14px;
-  border:none;
-  background:rgba(255,255,255,0.12);
-  color:#fff;
-  font-size:16px;
-  margin-bottom:20px;
-  outline:none;
-}
-.location-select option { color:#000; }
-.categories, .items{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-  gap:15px;
-  margin-bottom:25px;
-}
-.card{
-  background:var(--glass);
-  border:1px solid var(--border);
-  border-radius:15px;
-  padding:20px;
-  text-align:center;
-  cursor:pointer;
-  transition:.3s;
-}
-.card:hover{transform:scale(1.05);}
-button{
-  padding:10px 15px;
-  border:none;
-  border-radius:12px;
-  font-weight:600;
-  cursor:pointer;
-}
-button:disabled{background:gray;}
-.success{background:var(--success);}
-.danger{background:var(--danger);}
-.primary{background:var(--primary);}
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.7);
-  justify-content:center;
-  align-items:center;
-}
-.modal-content{
-  background:var(--glass);
-  padding:25px;
-  border-radius:15px;
-  width:90%;
-  max-width:400px;
-}
-.modal-content h3{margin-top:0;}
+select,input,button{padding:10px;margin-bottom:15px;border-radius:10px;border:none;}
+.items{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:15px;}
+.card{background:rgba(255,255,255,0.08); padding:15px; border-radius:15px; text-align:center;}
+.modal{display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); justify-content:center; align-items:center;}
+.modal-content{background:rgba(255,255,255,0.08); padding:20px; border-radius:15px; width:90%; max-width:400px;}
 </style>
 </head>
 <body>
 
-<script>
-/* ---------- AUTH CHECK ---------- */
-const customerId = localStorage.getItem("customer_id");
-if(!customerId){
-  alert("Please login again");
-  window.location.replace("login.html");
-}
-document.getElementById("customerName").innerText = localStorage.getItem("name") || "Customer";
-</script>
-
 <header>
-  <h1>🚀 RentHub – Customer Dashboard</h1>
-  <div>Welcome, <b id="customerName"></b></div>
-  <button onclick="logout()">Logout</button>
+<h1>Customer Dashboard</h1>
+<div>Welcome, <b id="customerName"></b></div>
+<button onclick="logout()">Logout</button>
 </header>
 
 <div class="container">
-  <h3>Select Location</h3>
-  <select id="location" class="location-select">
-    <option value="">Loading locations...</option>
-  </select>
+<h3>Select Location</h3>
+<select id="location"><option value="">Loading...</option></select>
 
-  <h3>Select Category</h3>
-  <div class="categories">
-    <div class="card" onclick="loadItems('Electronics')">💻 Electronics</div>
-    <div class="card" onclick="loadItems('Bike')">🏍 Bikes</div>
-    <div class="card" onclick="loadItems('Car')">🚗 Cars</div>
-    <div class="card" onclick="loadItems('Tent')">🏕 Tents</div>
-    <div class="card" onclick="loadItems('Appliance')">🏠 Appliances</div>
-  </div>
+<h3>Select Category</h3>
+<div class="items">
+  <div class="card" onclick="loadItems('Electronics')">💻 Electronics</div>
+  <div class="card" onclick="loadItems('Bike')">🏍 Bikes</div>
+  <div class="card" onclick="loadItems('Car')">🚗 Cars</div>
+  <div class="card" onclick="loadItems('Tent')">🏕 Tents</div>
+  <div class="card" onclick="loadItems('Appliance')">🏠 Appliances</div>
+</div>
 
-  <h3>Available Items</h3>
-  <div class="items" id="items"></div>
+<h3>Available Items</h3>
+<div class="items" id="items"></div>
 </div>
 
 <!-- Booking Modal -->
 <div class="modal" id="bookingModal">
   <div class="modal-content">
     <h3>Confirm Booking</h3>
-    <label>
-      <input type="checkbox" id="terms"> I accept terms & conditions
-    </label><br><br>
-    <input type="number" id="duration" placeholder="Rental duration (days)" min="1" style="width:100%;padding:10px;margin-bottom:15px;border-radius:10px;border:none;"><br>
-    <button class="success" id="confirmBtn" disabled onclick="confirmBooking()">Book Now</button>
-    <button class="danger" onclick="closeBooking()" style="margin-top:10px;">Cancel</button>
+    <label><input type="checkbox" id="terms"> Accept terms & conditions</label><br><br>
+    <input type="number" id="duration" placeholder="Duration (days)" min="1"><br>
+    <button id="confirmBtn" disabled onclick="confirmBooking()">Book Now</button>
+    <button onclick="closeBooking()">Cancel</button>
   </div>
 </div>
 
 <script>
+const customerId = localStorage.getItem("customer_id");
+if(!customerId){ alert("Please login"); window.location="index.html"; }
 document.getElementById("customerName").innerText = localStorage.getItem("name") || "Customer";
 
-let selectedItem = null;
+let selectedItem=null;
 
-// Enable book button on checkbox
-document.getElementById("terms").addEventListener("change", e=>{
-  const duration = document.getElementById("duration").value;
-  document.getElementById("confirmBtn").disabled = !e.target.checked || !duration;
-});
+function logout(){ localStorage.clear(); window.location="index.html"; }
 
-// Enable book button on duration input
-document.getElementById("duration").addEventListener("input", e=>{
-  const termsChecked = document.getElementById("terms").checked;
-  document.getElementById("confirmBtn").disabled = !termsChecked || !e.target.value;
-});
-
-// Load locations
 async function loadLocations(){
-  const res = await fetch('/api/get-locations');
+  const res = await fetch('/api/items');
   const data = await res.json();
-  const select = document.getElementById("location");
-  select.innerHTML = '<option value="">Select location</option>';
-  data.locations.forEach(loc=>{
-    select.innerHTML += `<option value="${loc}">${loc}</option>`;
-  });
+  const sel = document.getElementById("location");
+  sel.innerHTML='<option value="">Select location</option>';
+  data.locations.forEach(l=>sel.innerHTML+=`<option value="${l}">${l}</option>`);
 }
-
-// Load items by category & location
-function loadItems(category){
-  const location = document.getElementById("location").value;
+async function loadItems(category){
+  const location=document.getElementById("location").value;
   if(!location) return alert("Select location first");
-
-  fetch(`/api/items?category=${category}&location=${location}`)
-  .then(res=>res.json())
-  .then(data=>{
-    const box = document.getElementById("items");
-    box.innerHTML='';
-    if(!data.success || data.items.length===0){
-      box.innerHTML = '<p>No items available in this category & location.</p>';
-      return;
-    }
-    data.items.forEach(i=>{
-      box.innerHTML += `
-      <div class="card">
-        <h4>${i.item_name}</h4>
-        <p>₹${i.price_per_day}/day</p>
-        <p>🏪 ${i.shop_name}</p>
-        <button class="primary" onclick="openBooking(${i.item_id})">Book Now</button>
-      </div>`;
-    });
-  });
+  const res = await fetch("/api/items",{method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({action:"getItems",category,location})});
+  const data=await res.json();
+  const box=document.getElementById("items");
+  box.innerHTML="";
+  if(!data.success || data.items.length===0){ box.innerHTML="<p>No items available</p>"; return; }
+  data.items.forEach(i=>{ box.innerHTML+=`<div class="card"><h4>${i.item_name}</h4><p>₹${i.price_per_day}/day</p><p>${i.shop_name}</p><button onclick="openBooking(${i.item_id})">Book</button></div>`; });
 }
 
-// Booking modal
-function openBooking(id){
-  selectedItem = id;
-  document.getElementById("bookingModal").style.display='flex';
-  document.getElementById("terms").checked=false;
-  document.getElementById("confirmBtn").disabled=true;
-  document.getElementById("duration").value='';
-}
+// Booking Modal
+document.getElementById("terms").addEventListener("change", e=>document.getElementById("confirmBtn").disabled=!e.target.checked || !document.getElementById("duration").value);
+document.getElementById("duration").addEventListener("input", e=>document.getElementById("confirmBtn").disabled=!document.getElementById("terms").checked || !e.target.value);
 
-function closeBooking(){
-  document.getElementById("bookingModal").style.display='none';
-}
+function openBooking(id){ selectedItem=id; document.getElementById("bookingModal").style.display="flex"; document.getElementById("terms").checked=false; document.getElementById("confirmBtn").disabled=true; document.getElementById("duration").value="";}
+function closeBooking(){ document.getElementById("bookingModal").style.display="none"; }
 
 function confirmBooking(){
-  const rental_duration = parseInt(document.getElementById("duration").value);
+  const rental_duration=parseInt(document.getElementById("duration").value);
   if(!selectedItem || !rental_duration) return;
-
-  fetch('/api/create-request',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ item_id:selectedItem, customer_id:customerId, rental_duration })
-  })
-  .then(res=>res.json())
-  .then(data=>{
-    if(data.success){
-      alert("✅ Booking request sent successfully!");
-      closeBooking();
-    } else {
-      alert(data.message || "Error sending request");
-    }
-  }).catch(()=>alert("Server error"));
-}
-
-function logout(){
-  localStorage.clear();
-  window.location.replace("index.html");
+  fetch("/api/create-request",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({item_id:selectedItem,customer_id:customerId,rental_duration})})
+  .then(r=>r.json()).then(d=>{ if(d.success){ alert("Booking sent"); closeBooking(); } else alert(d.message); }).catch(()=>alert("Server error"));
 }
 
 loadLocations();
 </script>
-
 </body>
 </html>

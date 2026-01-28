@@ -2,228 +2,74 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Owner Dashboard | RentHub</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
+<title>Owner Dashboard | RentHub</title>
 <style>
-.category-electronics { background-color:#38bdf8; color:#fff; }
-.category-bike        { background-color:#facc15; color:#000; }
-.category-car         { background-color:#10b981; color:#fff; }
-.category-tent        { background-color:#f97316; color:#fff; }
-.category-appliance   { background-color:#8b5cf6; color:#fff; }
-
-:root{
-  --glass: rgba(255,255,255,0.08);
-  --border: rgba(255,255,255,0.18);
-  --primary:#38bdf8;
-  --success:#22c55e;
-  --danger:#ef4444;
-}
-*{box-sizing:border-box;}
-body{
-  margin:0;
-  font-family:'Poppins',sans-serif;
-  background:linear-gradient(135deg,#020617,#0f172a,#020617);
-  color:#fff;
-}
-header{
-  padding:22px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:rgba(0,0,0,0.4);
-  backdrop-filter: blur(10px);
-  border-bottom:1px solid var(--border);
-}
+body{font-family:'Poppins',sans-serif;margin:0; background:linear-gradient(135deg,#020617,#0f172a); color:#fff;}
+header{padding:22px; display:flex; justify-content:space-between; background:rgba(0,0,0,0.4); backdrop-filter:blur(10px);}
 .container{padding:25px; max-width:1200px; margin:auto;}
-.grid{display:grid; grid-template-columns:1fr 1.4fr; gap:25px;}
-@media(max-width:900px){.grid{grid-template-columns:1fr;}}
-.card{
-  background:var(--glass);
-  border:1px solid var(--border);
-  border-radius:20px;
-  padding:25px;
-}
-input,select{
-  width:100%;
-  padding:12px;
-  border-radius:12px;
-  border:none;
-  margin-bottom:12px;
-  background:rgba(255,255,255,0.12);
-  color:#fff;
-}
-button{
-  padding:12px 18px;
-  border:none;
-  border-radius:14px;
-  cursor:pointer;
-  font-weight:600;
-}
-.primary{background:var(--primary);}
-.success{background:var(--success);}
-.danger{background:var(--danger);}
-.request{
-  background:rgba(0,0,0,.35);
-  padding:18px;
-  border-radius:15px;
-  margin-bottom:15px;
-}
-.status{padding:4px 10px;border-radius:12px;font-size:12px;}
-.pending{background:#eab308;color:#000;}
-.accepted{background:#22c55e;}
-.rejected{background:#ef4444;}
-.actions{display:flex;gap:10px;margin-top:10px;}
+input,select,button{padding:10px;margin-bottom:10px;border-radius:10px;border:none;}
+.items, #requests{margin-top:15px;}
+.card{background:rgba(255,255,255,0.08); padding:15px; border-radius:15px;}
+.request{background:rgba(0,0,0,0.35); padding:15px;border-radius:15px;margin-bottom:10px;}
 </style>
 </head>
-
 <body>
 
-<script>
-/* ---------- AUTH CHECK ---------- */
-const ownerId = localStorage.getItem("owner_id");
-if (!ownerId) {
-  alert("Please login again");
-  window.location.replace("login.html");
-}
-window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("ownerName").innerText = localStorage.getItem("name") || "Owner";
-});
-</script>
-
 <header>
-  <h1>🏪 Owner Dashboard</h1>
-  <div>Welcome, <b id="ownerName"></b></div>
-  <button onclick="logout()">Logout</button>
+<h1>Owner Dashboard</h1>
+<div>Welcome, <b id="ownerName"></b></div>
+<button onclick="logout()">Logout</button>
 </header>
 
 <div class="container">
-<div class="grid">
+<h3>Add Rental Item</h3>
+<input id="shop_name" placeholder="Shop Name">
+<input id="item_name" placeholder="Item Name">
+<select id="category"><option>Electronics</option><option>Bike</option><option>Car</option><option>Tent</option><option>Appliance</option></select>
+<input id="price_per_day" placeholder="Price per day">
+<input id="location" placeholder="Location">
+<button onclick="addItem()">Add Item</button>
 
-<!-- ADD ITEM -->
-<div class="card">
-  <h3>➕ Add New Rental Item</h3>
-  <input id="shop_name" placeholder="Shop Name">
-  <input id="item_name" placeholder="Item Name">
-
-  <select id="category">
-    <option>Electronics</option>
-    <option>Bike</option>
-    <option>Car</option>
-    <option>Tent</option>
-    <option>Appliance</option>
-  </select>
-
-  <input id="price_per_day" placeholder="Price per day (₹)">
-  <input id="location" placeholder="Location">
-  <button class="primary" onclick="addItem()">Add Item</button>
-</div>
-
-<!-- REQUESTS -->
-<div class="card">
-  <h3>📥 Booking Requests</h3>
-  <div id="requests"></div>
-</div>
-
-</div>
+<h3>Booking Requests</h3>
+<div id="requests"></div>
 </div>
 
 <script>
-document.getElementById("ownerName").innerText =
-  localStorage.getItem("name") || "Owner";
+const ownerId = localStorage.getItem("owner_id");
+if(!ownerId){ alert("Login first"); window.location="index.html"; }
+document.getElementById("ownerName").innerText=localStorage.getItem("name")||"Owner";
 
-/* ---------- CATEGORY COLOR ---------- */
-const categorySelect = document.getElementById("category");
-categorySelect.addEventListener("change", () => {
-  categorySelect.className = "";
-  categorySelect.classList.add(
-    `category-${categorySelect.value.toLowerCase()}`
-  );
-});
-categorySelect.dispatchEvent(new Event("change"));
+function logout(){localStorage.clear(); window.location="index.html";}
 
-/* ---------- ADD ITEM ---------- */
-function addItem() {
-  const data = {
-    shop_name: document.getElementById("shop_name").value.trim(),
-    item_name: document.getElementById("item_name").value.trim(),
-    category: document.getElementById("category").value,
-    price_per_day: document.getElementById("price_per_day").value,
-    location: document.getElementById("location").value.trim(),
-    owner_id: ownerId
+function addItem(){
+  const data={
+    shop_name:document.getElementById("shop_name").value.trim(),
+    item_name:document.getElementById("item_name").value.trim(),
+    category:document.getElementById("category").value,
+    price_per_day:document.getElementById("price_per_day").value,
+    location:document.getElementById("location").value.trim(),
+    owner_id:ownerId
   };
-
-  if (Object.values(data).some(v => !v)) {
-    alert("Please fill all fields");
-    return;
-  }
-
-  fetch("/api/items", {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({
-    action: "addItem", ...data })       // <-- action is required
-    })
-  .then(res=>res.json())
-  .then(d=>{
-    if(d.success){
-      alert("✅ Item added successfully");
-      document.getElementById("shop_name").value = "";
-        document.getElementById("item_name").value = "";
-        document.getElementById("price_per_day").value = "";
-        document.getElementById("location").value = "";
-    }else alert(d.message || "Failed to add item");
-  })
-  .catch(err => {
-      console.error(err);
-  alert("Server error");
-});
+  if(Object.values(data).some(v=>!v)) return alert("Fill all fields");
+  fetch("/api/items",{method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({...data, action:"addItem"})})
+  .then(r=>r.json()).then(d=>{ if(d.success){ alert("Item added"); loadRequests(); } else alert(d.message); }).catch(()=>alert("Server error"));
 }
 
-/* ---------- LOAD REQUESTS ---------- */
 function loadRequests(){
-  fetch(`/api/get-requests?owner_id=${ownerId}`)
-  .then(res=>res.json())
-  .then(d=>{
-    const box=document.getElementById("requests");
-    box.innerHTML="";
-    if(!d.success||d.requests.length===0){
-      box.innerHTML="<p>No requests yet</p>";
-      return;
-    }
-    d.requests.forEach(r=>{
-      box.innerHTML+=`
-      <div class="request">
-        <h4>${r.item_name}</h4>
-        <small>👤 ${r.customer_name}</small><br>
-        <small>📞 ${r.phone}</small><br>
-        <small>🆔 ${r.aadhaar}</small><br>
-        <small>📅 ${r.rental_duration} days</small><br>
-        <span class="status ${r.status.toLowerCase()}">${r.status}</span>
-        ${r.status==="Pending"?`
-        <div class="actions">
-          <button class="success" onclick="update(${r.request_id},'Accepted')">Accept</button>
-          <button class="danger" onclick="update(${r.request_id},'Rejected')">Reject</button>
-        </div>`:""}
-      </div>`;
+  fetch("/api/requests",{method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({owner_id:ownerId})})
+  .then(r=>r.json()).then(d=>{
+    const box=document.getElementById("requests"); box.innerHTML="";
+    if(!d.success || d.requests.length===0){ box.innerHTML="<p>No requests yet</p>"; return; }
+    d.requests.forEach(rq=>{
+      box.innerHTML+=`<div class="request"><b>${rq.customer_name}</b> wants <b>${rq.item_name}</b> for ${rq.rental_duration} days <button onclick="respond(${rq.request_id},'accepted')">Accept</button> <button onclick="respond(${rq.request_id},'rejected')">Reject</button></div>`;
     });
   });
 }
 
-/* ---------- UPDATE REQUEST ---------- */
-function update(id,status){
-  fetch("/api/update-request",{
-    method:"PUT",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({ request_id:id, status })
-  }).then(loadRequests);
-}
-
-/* ---------- LOGOUT ---------- */
-function logout(){
-  localStorage.clear();
-  window.location.replace("index.html");
+function respond(request_id,status){
+  fetch("/api/respond-request",{method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({request_id,status})})
+  .then(r=>r.json()).then(d=>{ if(d.success){ loadRequests(); } else alert(d.message); });
 }
 
 loadRequests();
