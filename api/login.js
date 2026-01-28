@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 
   try {
     const [rows] = await pool.query(
-      "SELECT * FROM users WHERE username = ?",
+      "SELECT id, username, password, role FROM users WHERE username = ?",
       [username]
     );
 
@@ -28,13 +28,18 @@ export default async function handler(req, res) {
     }
 
     const user = rows[0];
-    const ok = bcrypt.compareSync(password, user.password);
+    const ok = await bcrypt.compare(password, user.password);
 
     if (!ok) {
       return res.status(401).send("Wrong password");
     }
 
-    res.status(200).send("Login successful");
+    // 🔥 Send role to frontend
+    res.status(200).json({
+      message: "Login successful",
+      role: user.role
+    });
+
   } catch (err) {
     console.error(err);
     res.status(500).send("Database error");

@@ -127,33 +127,34 @@
 </form>
 
 <script>
-document.getElementById("loginForm").addEventListener("submit", async function (e) {
+document.getElementById("loginForm").onsubmit = async (e) => {
   e.preventDefault();
 
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
 
-  try {
-    const response = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password })
-    });
+  const res = await fetch("/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
 
-    const message = await response.text();
+  const data = await res.json();
 
-    if (response.ok) {
-      alert(message);
-      window.location.href = "/website.html"; // ✅ redirect after login
-    } else {
-      alert(message);
-    }
-  } catch (err) {
-    alert("Login failed");
-    console.error(err);
+  if (!res.ok) {
+    alert(data.message || "Login failed");
+    return;
   }
-});
+
+  // 🔥 Redirect based on role
+  if (data.role === "owner") {
+    window.location.href = "/ownerweb.html";
+  } else {
+    window.location.href = "/website.html";
+  }
+};
 </script>
+
 
   </div>
 

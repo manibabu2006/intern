@@ -1,100 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Registration</title>
-</head>
-<style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Registration</title>
+
+  <style>
     body {
-        font-family: 'Arial', sans-serif;
-        background-color: #cee5d5;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1d3557, #457b9d);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      background: #fff;
+      padding: 25px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
     }
 
     h1 {
-        text-align: center;
-        color: #333;
-        margin-bottom: 20px;
-    }
-
-    form {
-        background-color: #ffffff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        width: 100%;
-        max-width: 400px;
+      text-align: center;
+      color: #1d3557;
+      margin-bottom: 20px;
     }
 
     label {
-        font-size: 14px;
-        color: #555;
-        margin-bottom: 5px;
-        display: inline-block;
+      font-size: 14px;
+      color: #333;
+      margin-top: 10px;
+      display: block;
     }
 
-    input {
-        width: 100%;
-        padding: 10px;
-        margin: 8px 0;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 14px;
-        background-color: #f9f9f9;
-        color: #333;
-        box-sizing: border-box;
-        transition: border-color 0.3s ease;
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
     }
 
-    input:focus {
-        border-color: #0066cc;
-        outline: none;
+    input:focus, select:focus {
+      outline: none;
+      border-color: #1d3557;
     }
 
     button {
-        width: 100%;
-        padding: 12px;
-        background-color: #0066cc;
-        color: white;
-        font-size: 16px;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
+      margin-top: 18px;
+      width: 100%;
+      padding: 12px;
+      background: #1d3557;
+      color: #fff;
+      font-size: 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
     }
 
     button:hover {
-        background-color: #5e99d3;
+      background: #457b9d;
     }
 
-    .error {
-        color: red;
-        font-size: 12px;
-        text-align: center;
+    .login-link {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 14px;
     }
-</style>
+
+    .login-link a {
+      color: #1d3557;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
 <body>
-    <div class="login-container">
+  <div class="container">
     <h1>Register</h1>
+
     <form action="/api/register" method="POST">
-        <label for="registationnumber">Registation Number:</label>
-        <input type="text" id="username" name="username" required>
-        <br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        <br>
-        <label for="mobile">Mobile Number:</label>
-        <input type="number" id="mobile" name="mobile" required>
-        <br>
-        <button type="submit">Register</button>
-        <div class="login">
-            <p>Already registered? <a href="loginpage.html">Login here </a></p></div>
+      
+      <label for="username">Registration ID</label>
+      <input type="text" id="username" name="username" required>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required>
+
+      <label for="mobile">Mobile Number</label>
+      <input type="text" id="mobile" name="mobile" required>
+
+      <!-- 🔥 NEW: Role Selection -->
+      <label for="role">Register As</label>
+      <select id="role" name="role" required>
+        <option value="">-- Select Role --</option>
+        <option value="owner">Owner</option>
+        <option value="customer">Customer</option>
+      </select>
+
+      <button type="submit">Create Account</button>
     </form>
+
+    <div class="login-link">
+      Already registered? <a href="loginpage.html">Login here</a>
     </div>
+  </div>
 </body>
 </html>
