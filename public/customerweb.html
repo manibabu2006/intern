@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rental Portal - Customer Dashboard</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins', sans-serif; }
+  body { background: linear-gradient(135deg,#020024,#090979,#00d4ff); color:#fff; min-height:100vh; }
+
+  /* Navbar */
+  .navbar { display:flex; justify-content:space-between; align-items:center; padding:20px 50px; background: rgba(255,255,255,0.08); backdrop-filter: blur(15px); border-bottom:1px solid rgba(255,255,255,0.2);}
+  .logo { font-size:28px; font-weight:700; color:#00eaff; letter-spacing:1px; text-transform:uppercase;}
+  .nav-links a { margin-left:25px; text-decoration:none; color:#fff; font-weight:500; transition:0.3s;}
+  .nav-links a:hover { color:#00eaff; }
+
+  /* Hero Section */
+  .hero { display:flex; justify-content:space-between; align-items:center; padding:60px 50px; background: rgba(0,0,0,0.15); backdrop-filter: blur(20px); border-radius:20px; margin:30px auto; }
+  .hero-text { max-width:600px; }
+  .hero-text h1 { font-size:42px; margin-bottom:20px; line-height:1.2; color:#00eaff; }
+  .hero-text p { font-size:18px; opacity:0.9; margin-bottom:30px; }
+  .hero-text button { padding:14px 30px; font-size:16px; border-radius:30px; border:none; cursor:pointer; background: linear-gradient(135deg,#00eaff,#0077ff); color:#000; font-weight:600; transition:0.3s; }
+  .hero-text button:hover { transform:translateY(-3px); box-shadow:0 15px 40px rgba(0,234,255,0.4); }
+
+  .hero-image img { width:400px; border-radius:25px; box-shadow:0 30px 80px rgba(0,0,0,0.6); transition: transform 0.5s; }
+  .hero-image img:hover { transform:scale(1.05); }
+
+  /* Section Headers */
+  .section { margin-top:50px; text-align:center; }
+  .section h2 { font-size:28px; color:#00eaff; margin-bottom:25px; }
+
+  /* Dropdown */
+  select { width:250px; padding:12px; border-radius:12px; margin:10px 0; border:none; font-size:16px; }
+
+  /* Category Cards */
+  .card-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:20px; margin-top:20px; }
+  .card { background: rgba(255,255,255,0.1); padding:20px; border-radius:15px; text-align:center; cursor:pointer; transition:0.3s; }
+  .card:hover { transform:translateY(-8px); box-shadow:0 15px 40px rgba(0,234,255,0.3); }
+  .card img { width:60px; margin-bottom:15px; }
+
+  /* Shop Table */
+  .shop-table { width:100%; border-collapse:collapse; margin-top:20px; }
+  .shop-table th, .shop-table td { border:1px solid rgba(255,255,255,0.3); padding:12px; text-align:left; }
+  .shop-table th { background: rgba(0,234,255,0.1); }
+  .shop-table tr:nth-child(even) { background: rgba(255,255,255,0.05); }
+  .shop-table button { padding:6px 12px; border:none; border-radius:8px; cursor:pointer; font-weight:500; background: linear-gradient(135deg,#00eaff,#0077ff); color:#000; transition:0.3s; }
+  .shop-table button:hover { transform:translateY(-3px); box-shadow:0 10px 30px rgba(0,234,255,0.3); }
+
+  /* Booking Form */
+  .booking-form { margin-top:30px; background: rgba(255,255,255,0.1); padding:25px; border-radius:20px; display:none; max-width:500px; margin-left:auto; margin-right:auto; }
+  .booking-form input, .booking-form button { width:100%; padding:12px; margin:10px 0; border:none; border-radius:10px; font-size:16px; }
+  .booking-form button { background: linear-gradient(135deg,#00eaff,#0077ff); color:#000; font-weight:600; cursor:pointer; transition:0.3s; }
+  .booking-form button:hover { transform:translateY(-3px); box-shadow:0 10px 30px rgba(0,234,255,0.3); }
+  label { display:flex; align-items:center; gap:10px; font-size:14px; }
+  input[type="checkbox"] { width:auto; }
+
+  /* Footer */
+  footer { text-align:center; padding:25px; background: rgba(0,0,0,0.3); font-size:14px; opacity:0.8; margin-top:50px; }
+
+  @media(max-width:900px){ 
+    .hero { flex-direction:column; text-align:center; } 
+    .hero-image img { width:90%; margin-top:20px; } 
+  }
+</style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <div class="navbar">
+    <div class="logo">Rental Portal</div>
+    <div class="nav-links">
+      <a href="#">Home</a>
+      <a href="#">My Bookings</a>
+      <a href="#">Profile</a>
+      <a href="#">Logout</a>
+    </div>
+  </div>
+
+  <!-- Hero Dashboard -->
+  <div class="hero container">
+    <div class="hero-text">
+      <h1>Welcome to <span>Tech Rental Dashboard</span></h1>
+      <p>Select your location and browse categories to find the best rental shops near you.</p>
+    </div>
+    <div class="hero-image">
+      <img src="https://images.unsplash.com/photo-1591696331113-593ba5c4aa2f" alt="Tech Dashboard">
+    </div>
+  </div>
+
+  <!-- Location Selection -->
+  <div class="section">
+    <h2>Select Your Location</h2>
+    <select id="locationSelect">
+      <option value="">-- Select Location --</option>
+      <option value="Downtown">Vijayawada</option>
+      <option value="Uptown">Hyderabad</option>
+      <option value="Suburb">Srikakulam</option>
+    </select>
+  </div>
+
+  <!-- Category Selection -->
+  <div class="section" id="categorySection" style="display:none;">
+    <h2>Select Item Category</h2>
+    <div class="card-grid">
+      <div class="card" onclick="selectCategory('Electronics')"><img src="https://img.icons8.com/fluency/96/electronics.png"/><h3>Electronics</h3></div>
+      <div class="card" onclick="selectCategory('Bikes')"><img src="https://img.icons8.com/fluency/96/motorcycle.png"/><h3>Bikes</h3></div>
+      <div class="card" onclick="selectCategory('Cars')"><img src="https://img.icons8.com/fluency/96/car.png"/><h3>Cars</h3></div>
+      <div class="card" onclick="selectCategory('Tents')"><img src="https://img.icons8.com/fluency/96/tent.png"/><h3>Tents</h3></div>
+      <div class="card" onclick="selectCategory('Home Appliances')"><img src="https://img.icons8.com/fluency/96/home.png"/><h3>Home Appliances</h3></div>
+    </div>
+  </div>
+
+  <!-- Shop List -->
+  <div class="section" id="shopSection" style="display:none;">
+    <h2>Available Rental Shops</h2>
+    <table class="shop-table">
+      <thead>
+        <tr>
+          <th>Shop Name</th>
+          <th>Location</th>
+          <th>Available Item</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="shopTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- Booking Form -->
+  <div class="booking-form" id="bookingForm">
+    <h2>Book Item: <span id="selectedItem"></span></h2>
+    <form action="customer_booking_backend.php" method="POST">
+      <input type="hidden" name="item_name" id="itemInput">
+      <input type="hidden" name="shop_name" id="shopInput">
+      <label>Rental Duration (days)<input type="number" name="rental_duration" min="1" required></label>
+      <label>Booking Date<input type="date" name="booking_date" required></label>
+      <label><input type="checkbox" name="terms" required> I accept the terms & conditions</label>
+      <button type="submit">Confirm Booking</button>
+    </form>
+  </div>
+
+  <footer>
+    © 2026 Rental Portal | Designed with ❤️ & Tech Vibes
+  </footer>
+
+<script>
+const locationSelect = document.getElementById('locationSelect');
+const categorySection = document.getElementById('categorySection');
+const shopSection = document.getElementById('shopSection');
+const shopTableBody = document.getElementById('shopTableBody');
+const bookingForm = document.getElementById('bookingForm');
+const selectedItemSpan = document.getElementById('selectedItem');
+const itemInput = document.getElementById('itemInput');
+const shopInput = document.getElementById('shopInput');
+
+// Mock data for shops per location & category
+const shopsData = {
+  "Downtown": {
+    "Electronics":[{shop:"Tech World", items:["Projector","Camera"]},{shop:"Gadget Hub", items:["Laptop","VR Headset"]}],
+    "Bikes":[{shop:"City Bikes", items:["Yamaha R15","Honda CB500"]}],
+    "Cars":[{shop:"AutoRent", items:["Sedan","SUV"]}],
+    "Tents":[{shop:"CampStore", items:["2-person tent","4-person tent"]}],
+    "Home Appliances":[{shop:"Home Essentials", items:["Microwave","Refrigerator"]}]
+  },
+  "Uptown": {
+    "Electronics":[{shop:"Gizmo Store", items:["Tablet","Camera"]}],
+    "Bikes":[{shop:"Uptown Bikes", items:["Suzuki Gixxer","KTM Duke"]}],
+    "Cars":[{shop:"Rent-a-Car", items:["Hatchback","Sedan"]}],
+    "Tents":[{shop:"Tent World", items:["3-person tent"]}],
+    "Home Appliances":[{shop:"Appliance Hub", items:["Washing Machine","Blender"]}]
+  }
+};
+
+locationSelect.addEventListener('change', ()=>{
+  if(locationSelect.value){
+    categorySection.style.display='block';
+    shopSection.style.display='none';
+    bookingForm.style.display='none';
+  } else {
+    categorySection.style.display='none';
+    shopSection.style.display='none';
+    bookingForm.style.display='none';
+  }
+});
+
+function selectCategory(category){
+  const location = locationSelect.value;
+  const shops = shopsData[location][category] || [];
+  shopTableBody.innerHTML='';
+  shops.forEach(shop=>{
+    shop.items.forEach(item=>{
+      shopTableBody.innerHTML += `<tr>
+        <td>${shop.shop}</td>
+        <td>${location}</td>
+        <td>${item}</td>
+        <td><button onclick="selectItem('${item}','${shop.shop}')">Book Now</button></td>
+      </tr>`;
+    });
+  });
+  shopSection.style.display='block';
+  bookingForm.style.display='none';
+}
+
+function selectItem(item, shop){
+  bookingForm.style.display='block';
+  selectedItemSpan.innerText=item;
+  itemInput.value=item;
+  shopInput.value=shop;
+  window.scrollTo({top:bookingForm.offsetTop, behavior:'smooth'});
+}
+</script>
+
+</body>
+</html>
