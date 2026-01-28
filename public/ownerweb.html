@@ -152,9 +152,9 @@ categorySelect.dispatchEvent(new Event("change"));
 
 function addItem() {
   const shopName = document.getElementById("shop_name").value;
-  const itemName = document.getElementById("name").value;
+  const itemName = document.getElementById("item_name").value;
   const category = document.getElementById("category").value;
-  const price = document.getElementById("price").value;
+  const price = document.getElementById("price_per_day").value;
   const location = document.getElementById("location").value;
 
   if (!shopName || !itemName || !category || !price || !location) {
@@ -178,27 +178,22 @@ function addItem() {
   .then(res => res.json())
   .then(data => {
     if (data.success) {
-      alert("Item added successfully");
+      alert("✅ Item added successfully");
 
-      // Reset form fields
       document.getElementById("shop_name").value = "";
-      document.getElementById("name").value = "";
-      document.getElementById("price").value = "";
+      document.getElementById("item_name").value = "";
+      document.getElementById("price_per_day").value = "";
       document.getElementById("location").value = "";
       document.getElementById("category").value = "Electronics";
-
-      // Reload requests
-      loadRequests();
     } else {
-      alert("Error: " + data.message);
+      alert("❌ Error: " + data.message);
     }
   })
   .catch(err => {
     console.error(err);
-    alert("Something went wrong. Check console for details.");
+    alert("Server error. Check console.");
   });
 }
-
 
 function loadRequests(){
   fetch(`/api/get-requests?owner_id=${ownerId}`)
