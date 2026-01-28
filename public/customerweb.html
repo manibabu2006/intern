@@ -31,8 +31,6 @@ header{
 }
 header h1{margin:0;font-size:24px;}
 .container{padding:25px; max-width:1200px; margin:auto;}
-
-/* Location Select */
 .location-select {
   width:100%;
   padding:12px 18px;
@@ -43,17 +41,8 @@ header h1{margin:0;font-size:24px;}
   font-size:16px;
   margin-bottom:20px;
   outline:none;
-  transition:.3s;
 }
-.location-select option {
-  color:#000;
-}
-.location-select:focus {
-  background:rgba(56,189,248,0.2);
-  color:#fff;
-}
-
-/* Categories & Items */
+.location-select option { color:#000; }
 .categories, .items{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
@@ -76,14 +65,11 @@ button{
   border-radius:12px;
   font-weight:600;
   cursor:pointer;
-  transition:.3s;
 }
 button:disabled{background:gray;}
 .success{background:var(--success);}
 .danger{background:var(--danger);}
 .primary{background:var(--primary);}
-
-/* Modal */
 .modal{
   display:none;
   position:fixed;
@@ -103,6 +89,15 @@ button:disabled{background:gray;}
 </style>
 </head>
 <body>
+
+<script>
+/* ---------- AUTH CHECK ---------- */
+const customerId = localStorage.getItem("id");
+if(!customerId){
+  alert("Please login again");
+  window.location.replace("login.html");
+}
+</script>
 
 <header>
   <h1>🚀 RentHub – Customer Dashboard</h1>
@@ -136,93 +131,104 @@ button:disabled{background:gray;}
     <label>
       <input type="checkbox" id="terms"> I accept terms & conditions
     </label><br><br>
+    <input type="number" id="duration" placeholder="Rental duration (days)" min="1" style="width:100%;padding:10px;margin-bottom:15px;border-radius:10px;border:none;"><br>
     <button class="success" id="confirmBtn" disabled onclick="confirmBooking()">Book Now</button>
     <button class="danger" onclick="closeBooking()" style="margin-top:10px;">Cancel</button>
   </div>
 </div>
 
 <script>
-const customerId = localStorage.getItem("user_id");
 document.getElementById("customerName").innerText = localStorage.getItem("name") || "Customer";
 
 let selectedItem = null;
 
 // Enable book button on checkbox
 document.getElementById("terms").addEventListener("change", e=>{
-  document.getElementById("confirmBtn").disabled = !e.target.checked;
+  const duration = document.getElementById("duration").value;
+  document.getElementById("confirmBtn").disabled = !e.target.checked || !duration;
 });
 
-// Dynamically load locations from backend
+// Enable book button on duration input
+document.getElementById("duration").addEventListener("input", e=>{
+  const termsChecked = document.getElementById("terms").checked;
+  document.getElementById("confirmBtn").disabled = !termsChecked || !e.target.value;
+});
+
+// Load locations
 async function loadLocations(){
   const res = await fetch('/api/get-locations');
-  const locations = await res.json(); // array of strings
+  const data = await res.json();
   const select = document.getElementById("location");
-  select.innerHTML = `<option value="">Select location</option>`;
-  locations.forEach(loc => {
+  select.innerHTML = '<option value="">Select location</option>';
+  data.locations.forEach(loc=>{
     select.innerHTML += `<option value="${loc}">${loc}</option>`;
   });
 }
 
-// Load items by category & selected location
+// Load items by category & location
 function loadItems(category){
   const location = document.getElementById("location").value;
   if(!location) return alert("Select location first");
 
-  fetch(`/api/get-items?category=${category}&location=${location}`)
-    .then(res=>res.json())
-    .then(data=>{
-      const box = document.getElementById("items");
-      box.innerHTML='';
-      if(!data.length){
-        box.innerHTML = '<p>No items available in this category & location.</p>';
-        return;
-      }
-      data.forEach(i=>{
-        box.innerHTML+=`
-        <div class="card">
-          <h4>${i.item_name}</h4>
-          <p>₹${i.price_per_day}/day</p>
-          <p>🏪 ${i.shop_name}</p>
-          <button class="primary" onclick="openBooking(${i.item_id})">Book Now</button>
-        </div>`;
-      });
+  fetch(`/api/items?category=${category}&location=${location}`)
+  .then(res=>res.json())
+  .then(data=>{
+    const box = document.getElementById("items");
+    box.innerHTML='';
+    if(!data.success || data.items.length===0){
+      box.innerHTML = '<p>No items available in this category & location.</p>';
+      return;
+    }
+    data.items.forEach(i=>{
+      box.innerHTML += `
+      <div class="card">
+        <h4>${i.item_name}</h4>
+        <p>₹${i.price_per_day}/day</p>
+        <p>🏪 ${i.shop_name}</p>
+        <button class="primary" onclick="openBooking(${i.item_id})">Book Now</button>
+      </div>`;
     });
+  });
 }
 
 // Booking modal
 function openBooking(id){
   selectedItem = id;
   document.getElementById("bookingModal").style.display='flex';
+  document.getElementById("terms").checked=false;
+  document.getElementById("confirmBtn").disabled=true;
+  document.getElementById("duration").value='';
 }
 
 function closeBooking(){
   document.getElementById("bookingModal").style.display='none';
-  document.getElementById("terms").checked = false;
-  document.getElementById("confirmBtn").disabled = true;
 }
 
 function confirmBooking(){
-  if(!selectedItem) return;
+  const rental_duration = parseInt(document.getElementById("duration").value);
+  if(!selectedItem || !rental_duration) return;
+
   fetch('/api/create-request',{
     method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({ item_id:selectedItem, customer_id:customerId })
+    body:JSON.stringify({ item_id:selectedItem, customer_id:customerId, rental_duration })
   })
   .then(res=>res.json())
   .then(data=>{
-    alert("Booking request sent successfully!");
-    closeBooking();
-  });
+    if(data.success){
+      alert("✅ Booking request sent successfully!");
+      closeBooking();
+    } else {
+      alert(data.message || "Error sending request");
+    }
+  }).catch(()=>alert("Server error"));
 }
 
-function logout() {
-  localStorage.removeItem("user_id");
-  localStorage.removeItem("role");
-  localStorage.removeItem("name");
+function logout(){
+  localStorage.clear();
   window.location.replace("index.html");
 }
 
-// Load locations on page load
 loadLocations();
 </script>
 
