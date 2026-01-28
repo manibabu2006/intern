@@ -31,6 +31,28 @@ header{
 }
 header h1{margin:0;font-size:24px;}
 .container{padding:25px; max-width:1200px; margin:auto;}
+
+/* Location Select */
+.location-select {
+  width:100%;
+  padding:12px 18px;
+  border-radius:14px;
+  border:none;
+  background:rgba(255,255,255,0.12);
+  color:#fff;
+  font-size:16px;
+  margin-bottom:20px;
+  outline:none;
+  transition:.3s;
+}
+.location-select option {
+  color:#000;
+}
+.location-select:focus {
+  background:rgba(56,189,248,0.2);
+  color:#fff;
+}
+
 /* Categories & Items */
 .categories, .items{
   display:grid;
@@ -90,10 +112,8 @@ button:disabled{background:gray;}
 
 <div class="container">
   <h3>Select Location</h3>
-  <select id="location">
-    <option value="">Choose location</option>
-    <option value="Hyderabad">Hyderabad</option>
-    <option value="Bangalore">Bangalore</option>
+  <select id="location" class="location-select">
+    <option value="">Loading locations...</option>
   </select>
 
   <h3>Select Category</h3>
@@ -127,10 +147,23 @@ document.getElementById("customerName").innerText = localStorage.getItem("name")
 
 let selectedItem = null;
 
+// Enable book button on checkbox
 document.getElementById("terms").addEventListener("change", e=>{
   document.getElementById("confirmBtn").disabled = !e.target.checked;
 });
 
+// Dynamically load locations from backend
+async function loadLocations(){
+  const res = await fetch('/api/get-locations');
+  const locations = await res.json(); // array of strings
+  const select = document.getElementById("location");
+  select.innerHTML = `<option value="">Select location</option>`;
+  locations.forEach(loc => {
+    select.innerHTML += `<option value="${loc}">${loc}</option>`;
+  });
+}
+
+// Load items by category & selected location
 function loadItems(category){
   const location = document.getElementById("location").value;
   if(!location) return alert("Select location first");
@@ -148,14 +181,15 @@ function loadItems(category){
         box.innerHTML+=`
         <div class="card">
           <h4>${i.item_name}</h4>
-          <p>₹${i.price}/day</p>
+          <p>₹${i.price_per_day}/day</p>
           <p>🏪 ${i.shop_name}</p>
-          <button class="primary" onclick="openBooking(${i.id})">Book Now</button>
+          <button class="primary" onclick="openBooking(${i.item_id})">Book Now</button>
         </div>`;
       });
     });
 }
 
+// Booking modal
 function openBooking(id){
   selectedItem = id;
   document.getElementById("bookingModal").style.display='flex';
@@ -187,6 +221,9 @@ function logout() {
   localStorage.removeItem("name");
   window.location.replace("index.html");
 }
+
+// Load locations on page load
+loadLocations();
 </script>
 
 </body>

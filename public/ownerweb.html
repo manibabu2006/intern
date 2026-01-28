@@ -150,41 +150,55 @@ categorySelect.addEventListener("change", () => {
 // Trigger change once on load to apply initial color
 categorySelect.dispatchEvent(new Event("change"));
 
-function addItem(){
+function addItem() {
   const shopName = document.getElementById("shop_name").value;
-  const itemName = document.getElementById("item_name").value;
+  const itemName = document.getElementById("name").value;
   const category = document.getElementById("category").value;
-  const price = document.getElementById("price_per_day").value;
+  const price = document.getElementById("price").value;
   const location = document.getElementById("location").value;
 
-  if(!shopName || !itemName || !category || !price || !location){
+  if (!shopName || !itemName || !category || !price || !location) {
     alert("Please fill all fields");
     return;
   }
 
-  fetch('/api/add-item',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      owner_id:ownerId,
-      shop_name:shopName,
-      item_name:itemName,
-      category:category,
-      price_per_day:price,
-      location:location
+  fetch('/api/items', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: "addItem",
+      shop_name: shopName,
+      item_name: itemName,
+      category: category,
+      price_per_day: price,
+      owner_id: ownerId,
+      location: location
     })
   })
-  .then(res=>res.json())
-  .then(data=>{
-    alert("Item added successfully");
-    document.getElementById("shop_name").value = "";
-    document.getElementById("item_name").value = "";
-    document.getElementById("price_per_day").value = "";
-    document.getElementById("location").value = "";
-    document.getElementById("category").value = "Electronics";
-    loadRequests();
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      alert("Item added successfully");
+
+      // Reset form fields
+      document.getElementById("shop_name").value = "";
+      document.getElementById("name").value = "";
+      document.getElementById("price").value = "";
+      document.getElementById("location").value = "";
+      document.getElementById("category").value = "Electronics";
+
+      // Reload requests
+      loadRequests();
+    } else {
+      alert("Error: " + data.message);
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Something went wrong. Check console for details.");
   });
 }
+
 
 function loadRequests(){
   fetch(`/api/get-requests?owner_id=${ownerId}`)
