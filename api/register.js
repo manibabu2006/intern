@@ -41,13 +41,22 @@ export default async function handler(req, res) {
     const hashedPassword = bcrypt.hashSync(password, 10);
 
     // Insert user
-    await pool.query(
+    const [result] = await pool.query(
       `INSERT INTO ${table} (name, username, password, aadhaar, phone)
        VALUES (?, ?, ?, ?, ?)`,
       [name, username, hashedPassword, aadhaar, phone]
     );
 
-    return res.status(200).json({ success: true, message: "Registration successful" });
+    // result.insertId contains the new user id
+    const userId = result.insertId;
+
+    return res.status(200).json({ 
+      success: true, 
+      message: "Registration successful", 
+      user_id: userId,   // 👈 send this to frontend
+      role,
+      name
+    });
 
   } catch (err) {
     console.error("Register error:", err);

@@ -92,11 +92,12 @@ button:disabled{background:gray;}
 
 <script>
 /* ---------- AUTH CHECK ---------- */
-const customerId = localStorage.getItem("id");
+const customerId = localStorage.getItem("customer_id");
 if(!customerId){
   alert("Please login again");
   window.location.replace("login.html");
 }
+document.getElementById("customerName").innerText = localStorage.getItem("name") || "Customer";
 </script>
 
 <header>

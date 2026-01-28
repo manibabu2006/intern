@@ -1,162 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Login Page</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #fff;
-    }
-
-    .login-container {
-      background: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(10px);
-      border-radius: 20px;
-      padding: 40px 35px;
-      width: 100%;
-      max-width: 400px;
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
-      text-align: center;
-    }
-
-    h1 {
-      margin-bottom: 25px;
-      font-size: 28px;
-      color: #00c6ff;
-    }
-
-    .form-group {
-      margin-bottom: 18px;
-      text-align: left;
-    }
-
-    label {
-      font-size: 15px;
-      margin-bottom: 6px;
-      display: block;
-    }
-
-    input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: none;
-      font-size: 15px;
-      background: rgba(255, 255, 255, 0.2);
-      color: #fff;
-    }
-
-    input::placeholder {
-      color: #ccc;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      background-color: #00c6ff;
-      border: none;
-      border-radius: 10px;
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    button:hover {
-      background-color: #0092cc;
-    }
-
-    .register, .change-password, .forgot-password {
-      margin-top: 12px;
-      font-size: 14px;
-    }
-
-    a {
-      color: #00c6ff;
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Login Page</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+  }
+  .login-container {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 40px 35px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+    text-align: center;
+  }
+  h1 { margin-bottom: 25px; font-size: 28px; color: #00c6ff; }
+  .form-group { margin-bottom: 18px; text-align: left; }
+  label { font-size: 15px; margin-bottom: 6px; display: block; }
+  input { width: 100%; padding: 12px; border-radius: 10px; border: none; font-size: 15px; background: rgba(255,255,255,0.2); color: #fff; }
+  input::placeholder { color: #ccc; }
+  button { width: 100%; padding: 12px; background-color: #00c6ff; border: none; border-radius: 10px; color: white; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.3s ease; }
+  button:hover { background-color: #0092cc; }
+  .register, .change-password, .forgot-password { margin-top: 12px; font-size: 14px; }
+  a { color: #00c6ff; text-decoration: none; font-weight: 600; }
+  a:hover { text-decoration: underline; }
+</style>
 </head>
 <body>
-  <div class="login-container">
-    <h1>Login</h1>
-    <form id="loginForm">
-  <div class="form-group">
-    <label for="username">Registration Number</label>
-    <input type="text" id="username" placeholder="Enter your registration number" required>
-  </div>
+<div class="login-container">
+  <h1>Login</h1>
+  <form id="loginForm">
+    <div class="form-group">
+      <label for="username">Registration Number</label>
+      <input type="text" id="username" placeholder="Enter your registration number" required>
+    </div>
 
-  <div class="form-group">
-    <label for="password">Password</label>
-    <input type="password" id="password" placeholder="Enter your password" required>
-  </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Enter your password" required>
+    </div>
 
-  <div class="form-group">
-    <button type="submit">Login</button>
-  </div>
+    <div class="form-group">
+      <button type="submit">Login</button>
+    </div>
 
-  <div class="register">
-    <p>Don't have an account? <a href="registation.html">Register here</a></p>
-  </div>
-  <div class="change-password">
-    <p>Want to change password? <a href="changepassword.html">Change Password</a></p>
-  </div>
-  <div class="forgot-password">
-    <p>Forgot password? <a href="forgotpass.html">Reset Here</a></p>
-  </div>
-</form>
+    <div class="register">
+      <p>Don't have an account? <a href="registation.html">Register here</a></p>
+    </div>
+    <div class="change-password">
+      <p>Want to change password? <a href="changepassword.html">Change Password</a></p>
+    </div>
+    <div class="forgot-password">
+      <p>Forgot password? <a href="forgotpass.html">Reset Here</a></p>
+    </div>
+  </form>
+</div>
 
 <script>
 document.getElementById("loginForm").onsubmit = async (e) => {
   e.preventDefault();
 
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
 
-  const res = await fetch("/api/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password })
-  });
+  if(!username || !password) return alert("Please fill all fields");
 
-  const data = await res.json();
+  try {
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
 
-  if (!res.ok) {
-    alert(data.message || "Login failed");
-    return;
-  }
+    const data = await res.json();
 
-  // 🔥 Redirect based on role
-  if (data.role === "owner") {
-    window.location.href = "/ownerweb.html";
-  } else {
-    window.location.href = "/customerweb.html";
+    if(!res.ok || !data.success) {
+      return alert(data.message || "Login failed");
+    }
+
+    // ✅ Save user info to localStorage
+    if(data.role === "customer") {
+      localStorage.setItem("customer_id", data.customer_id); // matches backend
+    } else {
+      localStorage.setItem("owner_id", data.owner_id);
+    }
+    localStorage.setItem("name", data.name);
+    localStorage.setItem("role", data.role);
+
+    // Redirect to dashboard
+    window.location.href = data.role === "customer" ? "/customerweb.html" : "/ownerweb.html";
+
+  } catch(err) {
+    console.error(err);
+    alert("Server error. Check console.");
   }
 };
 </script>
-
-
-  </div>
-
 </body>
 </html>

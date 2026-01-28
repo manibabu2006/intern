@@ -82,11 +82,12 @@ button{
 
 <script>
 /* ---------- AUTH CHECK ---------- */
-const ownerId = localStorage.getItem("id");
+const ownerId = localStorage.getItem("owner_id");
 if (!ownerId) {
   alert("Please login again");
   window.location.replace("login.html");
 }
+document.getElementById("ownerName").innerText = localStorage.getItem("name") || "Owner";
 </script>
 
 <header>

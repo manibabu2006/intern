@@ -209,6 +209,24 @@ document.getElementById("registerForm").addEventListener("submit", async functio
   }
 });
 
+if (result.success) {
+  // Save user info locally so dashboards know the user is logged in
+  if (data.role === "customer") {
+    localStorage.setItem("customer_id", result.user_id); // must match backend
+  } else {
+    localStorage.setItem("owner_id", result.user_id);
+  }
+  localStorage.setItem("name", data.name);
+  localStorage.setItem("role", data.role);
+
+  // Redirect to dashboard instead of login
+  if(data.role === "customer") {
+    window.location.href = "customerweb.html";
+  } else {
+    window.location.href = "ownerweb.html";
+  }
+}
+
 
     // Optional: change category color dynamically (if role select needed color effect)
     const roleSelect = document.getElementById("role");
