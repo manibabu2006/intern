@@ -14,24 +14,26 @@ const pool = mysql.createPool({
 /* ---------- REGISTER HANDLER ---------- */
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).send("Method not allowed");
+    return res.status(405).json({ success: false, message: "Method not allowed" });
   }
 
-  const { username, password, mobile, role } = req.body;
+  const { name, email, aadhaar, phone, password, role } = req.body;
 
-  if (!username || !password || !mobile || !role) {
-    return res.status(400).send("All fields are required");
+  if (!name || !email || !aadhaar || !phone || !password || !role) {
+    return res.status(400).json({ success: false, message: "All fields are required" });
   }
 
   try {
     /* Check if user already exists */
+    const table = role === "owner" ? "owners" : "customers";
+
     const [existing] = await pool.query(
-      "SELECT id FROM users WHERE username = ?",
-      [username]
+      `SELECT ${role === "owner" ? "owner_id" : "customer_id"} AS id FROM ${table} WHERE email = ? OR aadhaar = ?`,
+      [email, aadhaar]
     );
 
     if (existing.length > 0) {
-      return res.status(409).send("User already exists");
+      return res.status(409).json({ success: false, message: "User already exists" });
     }
 
     /* Hash password */
@@ -39,14 +41,14 @@ export default async function handler(req, res) {
 
     /* Insert user */
     await pool.query(
-      "INSERT INTO users (username, password, mobile, role) VALUES (?, ?, ?, ?)",
-      [username, hashedPassword, mobile, role]
+      `INSERT INTO ${table} (name, email, password, aadhaar, phone) VALUES (?, ?, ?, ?, ?)`,
+      [name, email, hashedPassword, aadhaar, phone]
     );
 
-    return res.status(200).send("Registration successful");
+    return res.status(200).json({ success: true, message: "Registration successful" });
 
   } catch (err) {
     console.error("Register error:", err);
-    return res.status(500).send("Database error");
+    return res.status(500).json({ success: false, message: "Database error" });
   }
 }
