@@ -21,10 +21,13 @@ export default async function handler(req, res) {
 
     const [rows] = await db.query(
       `
-      SELECT r.id AS request_id, r.status,
-             i.item_name,
-             u.name AS customer_name,
-             u.phone, u.aadhar
+      SELECT 
+        r.id AS request_id,
+        r.status,
+        i.name AS item_name,
+        u.name AS customer_name,
+        u.phone,
+        u.aadhar
       FROM requests r
       JOIN items i ON r.item_id = i.id
       JOIN users u ON r.customer_id = u.id
@@ -40,8 +43,9 @@ export default async function handler(req, res) {
   if (req.method === 'PUT') {
     const { request_id, status } = req.body;
 
-    if (!['Accepted', 'Rejected'].includes(status))
+    if (!['Approved', 'Rejected'].includes(status)) {
       return res.status(400).json({ message: 'Invalid status' });
+    }
 
     await db.query(
       'UPDATE requests SET status = ? WHERE id = ?',
