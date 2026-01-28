@@ -1,32 +1,45 @@
-import db from './db.js';
+import mysql from "mysql2/promise";
+
+// Use the same pool as other APIs
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+});
 
 export default async function handler(req, res) {
   try {
-    /* ---------- CREATE BOOKING REQUEST (CUSTOMER) ---------- */
-    if (req.method === 'POST') {
+    // ---------- CREATE BOOKING REQUEST (CUSTOMER) ----------
+    if (req.method === "POST") {
       const { item_id, customer_id, rental_duration } = req.body;
 
       if (!item_id || !customer_id || !rental_duration) {
-        return res.status(400).json({ success: false, message: 'Missing fields' });
+        return res.status(400).json({ success: false, message: "Missing fields" });
       }
 
-      const booking_date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      const booking_date = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
-      await db.query(
+      await db.execute(
         `INSERT INTO bookings (item_id, customer_id, rental_duration, booking_date, status)
          VALUES (?, ?, ?, ?, 'Pending')`,
-        [item_id, customer_id, rental_duration, booking_date]
+        [Number(item_id), Number(customer_id), Number(rental_duration), booking_date]
       );
 
-      return res.json({ success: true, message: 'Booking request created' });
+      return res.json({ success: true, message: "Booking request created" });
     }
 
-    /* ---------- GET REQUESTS FOR OWNER ---------- */
-    if (req.method === 'GET') {
+    // ---------- GET REQUESTS FOR OWNER ----------
+    if (req.method === "GET") {
       const owner_id = req.query.owner_id;
-      if (!owner_id) return res.status(400).json({ success: false, message: 'Missing owner_id' });
+      if (!owner_id)
+        return res.status(400).json({ success: false, message: "Missing owner_id" });
 
-      const [rows] = await db.query(
+      const [rows] = await db.execute(
         `
         SELECT 
           b.booking_id AS request_id,
@@ -42,31 +55,31 @@ export default async function handler(req, res) {
         JOIN customers c ON b.customer_id = c.customer_id
         WHERE i.owner_id = ?
         `,
-        [owner_id]
+        [Number(owner_id)]
       );
 
       return res.json({ success: true, requests: rows });
     }
 
-    /* ---------- ACCEPT / REJECT ---------- */
-    if (req.method === 'PUT') {
+    // ---------- ACCEPT / REJECT ----------
+    if (req.method === "PUT") {
       const { request_id, status } = req.body;
 
-      if (!['Accepted', 'Rejected'].includes(status)) {
-        return res.status(400).json({ success: false, message: 'Invalid status' });
+      if (!["Accepted", "Rejected"].includes(status)) {
+        return res.status(400).json({ success: false, message: "Invalid status" });
       }
 
-      await db.query(
-        'UPDATE bookings SET status = ? WHERE booking_id = ?',
-        [status, request_id]
-      );
+      await db.execute("UPDATE bookings SET status = ? WHERE booking_id = ?", [
+        status,
+        Number(request_id),
+      ]);
 
       return res.json({ success: true, message: `Booking ${status.toLowerCase()}` });
     }
 
-    res.status(405).json({ success: false, message: 'Method not allowed' });
+    res.status(405).json({ success: false, message: "Method not allowed" });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: 'Database error' });
+    console.error("REQUEST API ERROR:", err);
+    res.status(500).json({ success: false, message: "Server/database error" });
   }
 }
