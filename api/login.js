@@ -15,25 +15,32 @@ export default async function handler(req, res) {
     return res.status(405).json({ success: false, message: "Method not allowed" });
   }
 
-  const { username, password, role } = req.body;
+  const { username, password } = req.body;
 
-  if (!username || !password || !role) {
+  if (!username || !password) {
     return res.status(400).json({ success: false, message: "All fields are required" });
   }
 
   try {
-    // Determine table and ID column based on role
-    const table = role === "owner" ? "owners" : "customers";
-    const idCol = role === "owner" ? "owner_id" : "customer_id";
-
-    // Fetch user by username
-    const [rows] = await pool.query(
-      `SELECT ${idCol} AS id, username, password, name FROM ${table} WHERE username = ?`,
+    // 1️⃣ Check OWNER
+    let [rows] = await pool.query(
+      "SELECT owner_id AS id, username, password, name FROM owners WHERE username = ?",
       [username]
     );
 
+    let role = "owner";
+
+    // 2️⃣ If not owner → check CUSTOMER
     if (rows.length === 0) {
-      return res.status(401).json({ success: false, message: "Invalid username or role" });
+      [rows] = await pool.query(
+        "SELECT customer_id AS id, username, password, name FROM customers WHERE username = ?",
+        [username]
+      );
+      role = "customer";
+    }
+
+    if (rows.length === 0) {
+      return res.status(401).json({ success: false, message: "Invalid username" });
     }
 
     const user = rows[0];
@@ -43,7 +50,6 @@ export default async function handler(req, res) {
       return res.status(401).json({ success: false, message: "Incorrect password" });
     }
 
-    // Success: return user info
     return res.status(200).json({
       success: true,
       message: "Login successful",

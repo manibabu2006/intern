@@ -129,7 +129,7 @@
 <body>
   <div class="container">
     <h1>Register</h1>
-    <form action="/api/register" method="POST">
+    <form id="registerForm">
       
       <div class="form-group">
         <input type="text" id="name" name="name" placeholder=" " required>
@@ -169,11 +169,47 @@
     </form>
 
     <div class="login-link">
-      Already registered? <a href="loginpage.html">Login here</a>
+      Already registered? <a href="./loginpage.html">Login here</a>
     </div>
   </div>
 
   <script>
+document.getElementById("registerForm").addEventListener("submit", async function (e) {
+  e.preventDefault(); // 🚫 stop default submit
+
+  const data = {
+    name: document.getElementById("name").value,
+    username: document.getElementById("username")?.value,
+    aadhaar: document.getElementById("aadhaar").value,
+    phone: document.getElementById("phone").value,
+    password: document.getElementById("password").value,
+    role: document.getElementById("role").value
+  };
+
+  try {
+    const res = await fetch("/api/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      alert("✅ Registration completed successfully!");
+      window.location.href = "loginpage.html";
+    } 
+    else {
+      alert("⚠️ " + result.message);
+    }
+
+  } catch (err) {
+    alert("❌ Server error. Please try again.");
+    console.error(err);
+  }
+});
+
+
     // Optional: change category color dynamically (if role select needed color effect)
     const roleSelect = document.getElementById("role");
     roleSelect.addEventListener("change", () => {
