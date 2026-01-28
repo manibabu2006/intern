@@ -4,33 +4,182 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Register | RentHub</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
-  :root { --primary:#38bdf8; --secondary:#0f172a; --glass:rgba(255,255,255,0.1); --border: rgba(255,255,255,0.2);}
-  *{box-sizing:border-box;margin:0;padding:0;font-family:'Poppins',sans-serif;}
-  body{background: linear-gradient(135deg,#020617,#0f172a); display:flex; justify-content:center; align-items:center; min-height:100vh; color:#fff;}
-  .container{background:var(--glass); padding:30px 25px; border-radius:20px; max-width:450px; width:100%; box-shadow:0 15px 35px rgba(0,0,0,0.4); backdrop-filter:blur(10px); border:1px solid var(--border);}
-  h1{text-align:center; margin-bottom:25px; font-weight:600; font-size:28px; color:var(--primary);}
-  .form-group{position:relative;margin-bottom:20px;}
-  input,select{width:100%; padding:14px 15px; border-radius:12px; border:none; outline:none; background: rgba(255,255,255,0.12); color:#fff; font-size:15px;}
-  input::placeholder{color:#cbd5f5; opacity:0.8;}
-  label{position:absolute; top:14px; left:15px; pointer-events:none; color:#cbd5f5; font-size:14px; transition:0.3s;}
-  input:focus + label, input:not(:placeholder-shown)+label, select:focus+label, select:not([value=""])+label{top:-10px; left:10px; font-size:12px; color:var(--primary); background:var(--secondary); padding:0 4px; border-radius:4px;}
-  button{width:100%; padding:14px; border:none; border-radius:14px; background:var(--primary); color:#0f172a; font-weight:600; font-size:16px; cursor:pointer; transition:0.3s;}
-  button:hover{background:#22c55e; color:#fff; transform:translateY(-2px);}
-  .login-link{text-align:center; margin-top:15px; font-size:14px; color:#cbd5f5;}
-  .login-link a{color:var(--primary); font-weight:600; text-decoration:none;}
+:root{
+  --primary:#38bdf8;
+  --secondary:#0f172a;
+  --glass:rgba(255,255,255,0.1);
+  --border:rgba(255,255,255,0.2);
+}
+
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:'Poppins',sans-serif;
+}
+
+body{
+  background:linear-gradient(135deg,#020617,#0f172a);
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  color:#fff;
+}
+
+.container{
+  background:var(--glass);
+  padding:30px 25px;
+  border-radius:20px;
+  max-width:450px;
+  width:100%;
+  box-shadow:0 15px 35px rgba(0,0,0,0.4);
+  backdrop-filter:blur(10px);
+  border:1px solid var(--border);
+}
+
+h1{
+  text-align:center;
+  margin-bottom:25px;
+  font-weight:600;
+  font-size:28px;
+  color:var(--primary);
+}
+
+.form-group{
+  position:relative;
+  margin-bottom:20px;
+}
+
+/* INPUT + SELECT */
+input,
+select{
+  width:100%;
+  padding:14px 15px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  outline:none;
+  background:rgba(15,23,42,0.8); /* 🔥 DARK BACKGROUND */
+  color:#fff;
+  font-size:15px;
+  appearance:none;
+}
+
+/* REMOVE WHITE AUTOFILL */
+input:-webkit-autofill{
+  -webkit-box-shadow:0 0 0 1000px rgba(15,23,42,0.8) inset;
+  -webkit-text-fill-color:#fff;
+}
+
+/* PLACEHOLDER */
+input::placeholder{
+  color:#cbd5f5;
+  opacity:0.8;
+}
+
+/* LABEL */
+label{
+  position:absolute;
+  top:14px;
+  left:15px;
+  pointer-events:none;
+  color:#cbd5f5;
+  font-size:14px;
+  transition:0.3s;
+  background:transparent;
+}
+
+/* FLOATING LABEL */
+input:focus + label,
+input:not(:placeholder-shown) + label,
+select:focus + label,
+select:not([value=""]) + label{
+  top:-10px;
+  left:10px;
+  font-size:12px;
+  color:var(--primary);
+  background:var(--secondary);
+  padding:0 6px;
+  border-radius:6px;
+}
+
+/* 🔽 SELECT DROPDOWN OPTIONS */
+select option{
+  background:#020617;   /* 🔥 NO WHITE */
+  color:#fff;
+}
+
+/* BUTTON */
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:var(--primary);
+  color:#0f172a;
+  font-weight:600;
+  font-size:16px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+button:hover{
+  background:#22c55e;
+  color:#fff;
+  transform:translateY(-2px);
+}
+
+/* LOGIN LINK */
+.login-link{
+  text-align:center;
+  margin-top:15px;
+  font-size:14px;
+  color:#cbd5f5;
+}
+
+.login-link a{
+  color:var(--primary);
+  font-weight:600;
+  text-decoration:none;
+}
 </style>
 </head>
+
 <body>
 <div class="container">
   <h1>Register</h1>
+
   <form id="registerForm">
-    <div class="form-group"><input type="text" id="name" placeholder=" " required><label>Full Name</label></div>
-    <div class="form-group"><input type="text" id="username" placeholder=" " required><label>Username</label></div>
-    <div class="form-group"><input type="password" id="password" placeholder=" " required><label>Password</label></div>
-    <div class="form-group"><input type="text" id="aadhaar" placeholder=" " maxlength="12" required><label>Aadhaar Number</label></div>
-    <div class="form-group"><input type="text" id="phone" placeholder=" " maxlength="15" required><label>Phone Number</label></div>
+
+    <div class="form-group">
+      <input type="text" id="name" placeholder=" " required>
+      <label>Full Name</label>
+    </div>
+
+    <div class="form-group">
+      <input type="text" id="username" placeholder=" " required>
+      <label>Username</label>
+    </div>
+
+    <div class="form-group">
+      <input type="password" id="password" placeholder=" " required>
+      <label>Password</label>
+    </div>
+
+    <div class="form-group">
+      <input type="text" id="aadhaar" placeholder=" " maxlength="12" required>
+      <label>Aadhaar Number</label>
+    </div>
+
+    <div class="form-group">
+      <input type="text" id="phone" placeholder=" " maxlength="15" required>
+      <label>Phone Number</label>
+    </div>
+
     <div class="form-group">
       <select id="role" required>
         <option value="">-- Select Role --</option>
@@ -39,39 +188,59 @@
       </select>
       <label>Register As</label>
     </div>
+
     <button type="submit">Create Account</button>
   </form>
-  <div class="login-link">Already registered? <a href="index.html">Login here</a></div>
+
+  <div class="login-link">
+    Already registered? <a href="index.html">Login here</a>
+  </div>
 </div>
 
 <script>
 document.getElementById("registerForm").addEventListener("submit", async (e)=>{
   e.preventDefault();
+
   const data = {
-    name: document.getElementById("name").value,
-    username: document.getElementById("username").value,
-    password: document.getElementById("password").value,
-    aadhaar: document.getElementById("aadhaar").value,
-    phone: document.getElementById("phone").value,
-    role: document.getElementById("role").value
+    name: name.value,
+    username: username.value,
+    password: password.value,
+    aadhaar: aadhaar.value,
+    phone: phone.value,
+    role: role.value
   };
 
-  try {
-    const res = await fetch("/api/register", {
+  try{
+    const res = await fetch("/api/register",{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
+      headers:{ "Content-Type":"application/json" },
       body: JSON.stringify(data)
     });
+
     const result = await res.json();
+
     if(result.success){
       alert("✅ Registration successful");
-      if(data.role==="customer") localStorage.setItem("customer_id", result.user_id);
-      else localStorage.setItem("owner_id", result.user_id);
+
+      if(data.role === "customer")
+        localStorage.setItem("customer_id", result.user_id);
+      else
+        localStorage.setItem("owner_id", result.user_id);
+
       localStorage.setItem("name", data.name);
       localStorage.setItem("role", data.role);
-      window.location.href = data.role==="customer"?"customerweb.html":"ownerweb.html";
-    } else alert("⚠️ "+result.message);
-  } catch(err){ console.error(err); alert("Server error"); }
+
+      window.location.href =
+        data.role === "customer" ? "customerweb.html" : "ownerweb.html";
+    }
+    else{
+      alert("⚠️ " + result.message);
+    }
+
+  }catch(err){
+    console.error(err);
+    alert("❌ Server error");
+  }
 });
 </script>
 </body>

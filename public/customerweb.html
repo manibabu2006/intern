@@ -6,98 +6,99 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
-:root {
-  --glass: rgba(255,255,255,0.08);
-  --border: rgba(255,255,255,0.18);
-  --primary: #38bdf8;
-  --success: #22c55e;
-  --danger: #ef4444;
+:root{
+  --glass:rgba(255,255,255,0.08);
+  --border:rgba(255,255,255,0.18);
+  --primary:#38bdf8;
+  --success:#22c55e;
+  --danger:#ef4444;
+  --pending:#facc15;
 }
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg,#020617,#0f172a,#020617);
-  color: #fff;
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Poppins,sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a,#020617);
+  color:#fff;
 }
-header {
-  padding: 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
+header{
+  padding:20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:rgba(0,0,0,0.4);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
 }
-header h1 { margin: 0; font-size: 24px; }
-.container { padding: 20px; max-width: 1200px; margin: auto; }
-.location-select {
-  width: 100%;
-  padding: 12px 18px;
-  border-radius: 14px;
-  border: none;
-  background: rgba(255,255,255,0.12);
-  color: #fff;
-  font-size: 16px;
-  margin-bottom: 20px;
-  outline: none;
+.container{padding:20px;max-width:1200px;margin:auto}
+.location-select{
+  width:100%;
+  padding:12px 18px;
+  border-radius:14px;
+  border:none;
+  background:rgba(255,255,255,0.12);
+  color:#fff;
+  font-size:16px;
+  margin-bottom:20px;
 }
-.location-select option { color: #000; }
-.categories, .items {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-  margin-bottom: 25px;
+.location-select option{color:#000}
+.categories,.items,.history{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:15px;
+  margin-bottom:25px;
 }
-.card {
-  background: var(--glass);
-  border: 1px solid var(--border);
-  border-radius: 15px;
-  padding: 15px;
-  text-align: center;
-  cursor: pointer;
-  transition: 0.3s;
+.card{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:15px;
+  padding:15px;
+  text-align:center;
+  transition:.3s;
 }
-.card:hover { transform: scale(1.05); }
-button {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  cursor: pointer;
+.card:hover{transform:scale(1.04)}
+button{
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
 }
-button:disabled { background: gray; cursor: not-allowed; }
-.primary { background: var(--primary); color: #fff; }
-.success { background: var(--success); color: #fff; }
-.danger { background: var(--danger); color: #fff; }
+button:disabled{background:gray;cursor:not-allowed}
+.primary{background:var(--primary);color:#fff}
+.success{background:var(--success)}
+.danger{background:var(--danger)}
+.status{font-weight:600}
+.Pending{color:var(--pending)}
+.Accepted{color:var(--success)}
+.Rejected{color:var(--danger)}
 
-/* Booking Modal */
-.modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  justify-content: center;
-  align-items: center;
+/* Modal */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  justify-content:center;
+  align-items:center;
 }
-.modal-content {
-  background: var(--glass);
-  padding: 25px;
-  border-radius: 15px;
-  width: 90%;
-  max-width: 400px;
-  text-align: center;
+.modal-content{
+  background:var(--glass);
+  padding:25px;
+  border-radius:15px;
+  width:90%;
+  max-width:400px;
 }
-.modal-content input[type="number"] {
-  width: 100%;
-  padding: 10px;
-  margin: 12px 0;
-  border-radius: 10px;
-  border: none;
-  outline: none;
+.modal-content input{
+  width:100%;
+  padding:10px;
+  margin:12px 0;
+  border-radius:10px;
+  border:none;
 }
 </style>
 </head>
+
 <body>
 
 <header>
@@ -107,138 +108,138 @@ button:disabled { background: gray; cursor: not-allowed; }
 </header>
 
 <div class="container">
-  <h3>Select Location</h3>
-  <select id="location" class="location-select"></select>
 
-  <h3>Select Category</h3>
-  <div class="categories">
-    <div class="card" onclick="loadItems('Electronics')">💻 Electronics</div>
-    <div class="card" onclick="loadItems('Bike')">🏍 Bikes</div>
-    <div class="card" onclick="loadItems('Car')">🚗 Cars</div>
-    <div class="card" onclick="loadItems('Tent')">🏕 Tents</div>
-    <div class="card" onclick="loadItems('Appliance')">🏠 Appliances</div>
-  </div>
+<h3>Select Location</h3>
+<select id="location" class="location-select"></select>
 
-  <h3>Available Items</h3>
-  <div class="items" id="items"></div>
+<h3>Select Category</h3>
+<div class="categories">
+  <div class="card" onclick="loadItems('Electronics')">💻 Electronics</div>
+  <div class="card" onclick="loadItems('Bike')">🏍 Bikes</div>
+  <div class="card" onclick="loadItems('Car')">🚗 Cars</div>
+  <div class="card" onclick="loadItems('Tent')">🏕 Tents</div>
+  <div class="card" onclick="loadItems('Appliance')">🏠 Appliances</div>
 </div>
 
-<!-- Booking Modal -->
+<h3>Available Items</h3>
+<div class="items" id="items"></div>
+
+<h3>Your Booking History</h3>
+<div class="history" id="history"></div>
+
+</div>
+
+<!-- BOOKING MODAL -->
 <div class="modal" id="bookingModal">
   <div class="modal-content">
     <h3>Confirm Booking</h3>
-    <label><input type="checkbox" id="terms"> Accept terms & conditions</label><br><br>
-    <input type="number" id="duration" placeholder="Duration (days)" min="1"><br>
-    <button id="confirmBtn" disabled>Book Now</button>
+    <label><input type="checkbox" id="terms"> Accept terms & conditions</label>
+    <input type="number" id="duration" placeholder="Duration (days)" min="1">
+    <button id="confirmBtn" disabled class="primary">Book Now</button>
     <button class="danger" onclick="closeBooking()">Cancel</button>
   </div>
 </div>
 
 <script>
-/* ---------- AUTH ---------- */
-const customerId = localStorage.getItem("customer_id");
-if(!customerId){ alert("Please login"); window.location.href="index.html"; }
-document.getElementById("customerName").innerText = localStorage.getItem("name") || "Customer";
+/* AUTH */
+const customerId=localStorage.getItem("customer_id");
+if(!customerId){alert("Please login");location="index.html";}
+customerName.innerText=localStorage.getItem("name")||"Customer";
 
-/* ---------- LOGOUT ---------- */
-function logout() { localStorage.clear(); window.location.href="index.html"; }
+/* LOGOUT */
+function logout(){localStorage.clear();location="index.html";}
 
-/* ---------- BOOKING MODAL ---------- */
-let selectedItem = null;
-const termsCheckbox = document.getElementById("terms");
-const durationInput = document.getElementById("duration");
-const confirmBtn = document.getElementById("confirmBtn");
+/* BOOKING MODAL */
+let selectedItem=null;
+const terms=document.getElementById("terms");
+const duration=document.getElementById("duration");
+const confirmBtn=document.getElementById("confirmBtn");
 
-function updateBookBtn(){
-  confirmBtn.disabled = !termsCheckbox.checked || !durationInput.value || parseInt(durationInput.value)<=0;
+function updateBtn(){
+  confirmBtn.disabled=!terms.checked||!duration.value||duration.value<=0;
 }
+terms.onchange=updateBtn;
+duration.oninput=updateBtn;
 
-termsCheckbox.addEventListener("change", updateBookBtn);
-durationInput.addEventListener("input", updateBookBtn);
-
-function openBooking(itemId){
-  selectedItem = itemId;
-  document.getElementById("bookingModal").style.display="flex";
-  termsCheckbox.checked = false;
-  durationInput.value = "";
-  updateBookBtn();
+function openBooking(id){
+  selectedItem=id;
+  bookingModal.style.display="flex";
+  terms.checked=false;
+  duration.value="";
+  updateBtn();
 }
-function closeBooking(){ document.getElementById("bookingModal").style.display="none"; }
+function closeBooking(){bookingModal.style.display="none";}
 
 async function confirmBooking(){
-  const rental_duration = parseInt(durationInput.value);
-  if(!selectedItem || !rental_duration) return alert("Invalid booking");
-
-  try {
-    const res = await fetch("/api/create-request", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ item_id: selectedItem, customer_id: customerId, rental_duration })
+  try{
+    const res=await fetch("/api/create-request",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({item_id:selectedItem,customer_id:customerId,rental_duration:duration.value})
     });
-    const data = await res.json();
-    if(data.success){
-      alert("✅ Booking request sent successfully!");
+    const d=await res.json();
+    if(d.success){
+      alert("✅ Booking sent");
       closeBooking();
-    } else {
-      alert("⚠️ " + (data.message || "Booking failed"));
-    }
-  } catch(err){
-    console.error(err);
-    alert("❌ Server/database error");
-  }
+      loadHistory();
+    }else alert(d.message);
+  }catch{alert("❌ Server error");}
 }
-confirmBtn.addEventListener("click", confirmBooking);
+confirmBtn.onclick=confirmBooking;
 
-/* ---------- LOAD LOCATIONS ---------- */
+/* LOAD LOCATIONS */
 async function loadLocations(){
-  try {
-    const res = await fetch("/api/items");
-    const data = await res.json();
-    const sel = document.getElementById("location");
-    sel.innerHTML = '<option value="">Select location</option>';
-    if(data.locations && data.locations.length>0){
-      data.locations.forEach(l => sel.innerHTML += `<option value="${l}">${l}</option>`);
-    }
-  } catch(err){
-    console.error(err);
-    alert("Failed to load locations");
-  }
+  const res=await fetch("/api/items");
+  const d=await res.json();
+  location.innerHTML='<option value="">Select location</option>';
+  d.locations?.forEach(l=>location.innerHTML+=`<option>${l}</option>`);
 }
 
-/* ---------- LOAD ITEMS ---------- */
+/* LOAD ITEMS */
 async function loadItems(category){
-  const location = document.getElementById("location").value;
-  if(!location) return alert("Select location first");
-
-  try {
-    const res = await fetch("/api/items", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action:"getItems", category, location })
-    });
-    const data = await res.json();
-    const box = document.getElementById("items");
-    box.innerHTML = "";
-    if(!data.success || !data.items.length){
-      box.innerHTML = "<p>No items available</p>";
-      return;
-    }
-    data.items.forEach(i=>{
-      box.innerHTML += `<div class="card">
-        <h4>${i.item_name}</h4>
-        <p>₹${i.price_per_day}/day</p>
-        <p>${i.shop_name}</p>
-        <button class="primary" onclick="openBooking(${i.item_id})">Book</button>
-      </div>`;
-    });
-  } catch(err){
-    console.error(err);
-    alert("Failed to load items");
-  }
+  if(!location.value) return alert("Select location first");
+  const res=await fetch("/api/items",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({action:"getItems",category,location:location.value})
+  });
+  const d=await res.json();
+  items.innerHTML="";
+  if(!d.success||!d.items.length){items.innerHTML="<p>No items</p>";return;}
+  d.items.forEach(i=>{
+    items.innerHTML+=`
+    <div class="card">
+      <h4>${i.item_name}</h4>
+      <p>₹${i.price_per_day}/day</p>
+      <p>${i.shop_name}</p>
+      <button class="primary" onclick="openBooking(${i.item_id})">Book</button>
+    </div>`;
+  });
 }
 
-/* ---------- INITIALIZE ---------- */
+/* LOAD HISTORY */
+async function loadHistory(){
+  const res=await fetch(`/api/create-request?customer_id=${customerId}`);
+  const d=await res.json();
+  history.innerHTML="";
+  if(!d.success||!d.history.length){
+    history.innerHTML="<p>No bookings yet</p>";
+    return;
+  }
+  d.history.forEach(b=>{
+    history.innerHTML+=`
+    <div class="card">
+      <b>${b.item_name}</b><br>
+      ${b.shop_name}<br>
+      Days: ${b.rental_duration}<br>
+      Status: <span class="status ${b.status}">${b.status}</span>
+    </div>`;
+  });
+}
+
+/* INIT */
 loadLocations();
+loadHistory();
 </script>
 
 </body>

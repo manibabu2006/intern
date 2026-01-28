@@ -45,6 +45,9 @@ button:hover{ background:#0ea5e9; }
 }
 .accept{ background:#22c55e; }
 .reject{ background:#ef4444; margin-left:8px; }
+.status-Pending{ color:#facc15; }
+.status-Accepted{ color:#22c55e; }
+.status-Rejected{ color:#ef4444; }
 </style>
 </head>
 
@@ -58,26 +61,31 @@ button:hover{ background:#0ea5e9; }
 
 <div class="container">
 
-  <h3>Add Rental Item</h3>
-  <input id="shop_name" placeholder="Shop Name">
-  <input id="item_name" placeholder="Item Name">
+<h3>Add Rental Item</h3>
+<input id="shop_name" placeholder="Shop Name">
+<input id="item_name" placeholder="Item Name">
 
-  <select id="category">
-    <option value="">Select Category</option>
-    <option>Electronics</option>
-    <option>Bike</option>
-    <option>Car</option>
-    <option>Tent</option>
-    <option>Appliance</option>
-  </select>
+<select id="category">
+  <option value="">Select Category</option>
+  <option>Electronics</option>
+  <option>Bike</option>
+  <option>Car</option>
+  <option>Tent</option>
+  <option>Appliance</option>
+</select>
 
-  <input id="price_per_day" type="number" placeholder="Price per day">
-  <input id="location" placeholder="Location">
+<input id="price_per_day" type="number" placeholder="Price per day">
+<input id="location" placeholder="Location">
 
-  <button onclick="addItem()">Add Item</button>
+<button onclick="addItem()">Add Item</button>
 
-  <h3>Booking Requests</h3>
-  <div id="requests"></div>
+<hr>
+
+<h3>Pending Booking Requests</h3>
+<div id="requests"></div>
+
+<h3>Booking History</h3>
+<div id="history"></div>
 
 </div>
 
@@ -88,8 +96,7 @@ if(!ownerId){
   alert("Please login first");
   window.location.href="index.html";
 }
-document.getElementById("ownerName").innerText =
-  localStorage.getItem("name") || "Owner";
+ownerName.innerText = localStorage.getItem("name") || "Owner";
 
 function logout(){
   localStorage.clear();
@@ -122,51 +129,62 @@ async function addItem(){
     const d = await res.json();
     if(d.success){
       alert("✅ Item added");
-      loadRequests();
     }else{
       alert(d.message || "Failed");
     }
-  }catch(err){
+  }catch{
     alert("Server error");
   }
 }
 
-/* ---------- LOAD BOOKING REQUESTS ---------- */
-async function loadRequests(){
+/* ---------- LOAD REQUESTS & HISTORY ---------- */
+async function loadAll(){
   try{
     const res = await fetch(`/api/create-request?owner_id=${ownerId}`);
     const d = await res.json();
 
-    const box = document.getElementById("requests");
-    box.innerHTML="";
+    const reqBox = document.getElementById("requests");
+    const histBox = document.getElementById("history");
+    reqBox.innerHTML="";
+    histBox.innerHTML="";
 
     if(!d.success || d.requests.length===0){
-      box.innerHTML="<p>No booking requests</p>";
+      reqBox.innerHTML="<p>No booking requests</p>";
+      histBox.innerHTML="<p>No history yet</p>";
       return;
     }
 
-    d.requests.forEach(r=>{
-      box.innerHTML += `
-        <div class="request">
-          <b>${r.customer_name}</b> wants <b>${r.item_name}</b><br>
-          Days: ${r.rental_duration}<br>
-          Phone: ${r.phone}<br>
-          Aadhaar: ${r.aadhaar}<br>
-          Status: <b>${r.status}</b><br><br>
+    let hasPending=false, hasHistory=false;
 
-          ${
-            r.status==="Pending" ? `
-              <button class="accept"
-                onclick="respond(${r.request_id},'Accepted')">Accept</button>
-              <button class="reject"
-                onclick="respond(${r.request_id},'Rejected')">Reject</button>
-            ` : ""
-          }
-        </div>`;
+    d.requests.forEach(r=>{
+      if(r.status==="Pending"){
+        hasPending=true;
+        reqBox.innerHTML+=`
+          <div class="request">
+            <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
+            Days: ${r.rental_duration}<br>
+            Phone: ${r.phone}<br>
+            Aadhaar: ${r.aadhaar}<br><br>
+            <button class="accept" onclick="respond(${r.request_id},'Accepted')">Accept</button>
+            <button class="reject" onclick="respond(${r.request_id},'Rejected')">Reject</button>
+          </div>`;
+      }else{
+        hasHistory=true;
+        histBox.innerHTML+=`
+          <div class="card">
+            <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
+            Days: ${r.rental_duration}<br>
+            Status:
+            <span class="status-${r.status}"><b>${r.status}</b></span>
+          </div>`;
+      }
     });
 
-  }catch(err){
-    alert("Failed to load requests");
+    if(!hasPending) reqBox.innerHTML="<p>No pending requests</p>";
+    if(!hasHistory) histBox.innerHTML="<p>No booking history</p>";
+
+  }catch{
+    alert("Failed to load data");
   }
 }
 
@@ -180,16 +198,16 @@ async function respond(request_id,status){
     });
     const d = await res.json();
     if(d.success){
-      loadRequests();
+      loadAll();
     }else{
       alert(d.message || "Action failed");
     }
-  }catch(err){
+  }catch{
     alert("Server error");
   }
 }
 
-loadRequests();
+loadAll();
 </script>
 
 </body>
