@@ -15,23 +15,22 @@ const db = mysql.createPool({
 export default async function handler(req, res) {
   try {
     // ---------- CREATE BOOKING REQUEST (CUSTOMER) ----------
-    if (req.method === "POST") {
-      const { item_id, customer_id, rental_duration } = req.body;
+    if (req.method === 'POST') {
+  const { item_id, customer_id, rental_duration } = req.body;
 
-      if (!item_id || !customer_id || !rental_duration) {
-        return res.status(400).json({ success: false, message: "Missing fields" });
-      }
+  if (!item_id || !customer_id || !rental_duration) {
+    return res.status(400).json({ success: false, message: 'Missing fields' });
+  }
 
-      const booking_date = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  // Remove booking_date
+  await db.query(
+    `INSERT INTO bookings (item_id, customer_id, rental_duration, status)
+     VALUES (?, ?, ?, 'Pending')`,
+    [item_id, customer_id, rental_duration]
+  );
 
-      await db.execute(
-        `INSERT INTO bookings (item_id, customer_id, rental_duration, booking_date, status)
-         VALUES (?, ?, ?, ?, 'Pending')`,
-        [Number(item_id), Number(customer_id), Number(rental_duration), booking_date]
-      );
-
-      return res.json({ success: true, message: "Booking request created" });
-    }
+  return res.json({ success: true, message: 'Booking request created' });
+}
 
     // ---------- GET REQUESTS FOR OWNER ----------
     if (req.method === "GET") {
