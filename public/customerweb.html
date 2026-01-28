@@ -5,6 +5,7 @@
 <title>Customer Dashboard | RentHub</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
 :root{
   --glass:rgba(255,255,255,0.08);
@@ -36,12 +37,13 @@ header{
   padding:12px 18px;
   border-radius:14px;
   border:none;
-  background:rgba(255,255,255,0.12);
+  background:rgba(15,23,42,0.9);
   color:#fff;
   font-size:16px;
   margin-bottom:20px;
 }
-.location-select option{color:#000}
+.location-select option{background:#020617;color:#fff}
+
 .categories,.items,.history{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
@@ -64,16 +66,14 @@ button{
   font-weight:600;
   cursor:pointer;
 }
-button:disabled{background:gray;cursor:not-allowed}
 .primary{background:var(--primary);color:#fff}
-.success{background:var(--success)}
-.danger{background:var(--danger)}
+.danger{background:var(--danger);color:#fff}
+
 .status{font-weight:600}
 .Pending{color:var(--pending)}
 .Accepted{color:var(--success)}
 .Rejected{color:var(--danger)}
 
-/* Modal */
 .modal{
   display:none;
   position:fixed;
@@ -89,20 +89,14 @@ button:disabled{background:gray;cursor:not-allowed}
   width:90%;
   max-width:400px;
 }
-.modal-content input{
-  width:100%;
-  padding:10px;
-  margin:12px 0;
-  border-radius:10px;
-  border:none;
-}
+.modal-content input{width:100%;padding:10px;margin:12px 0;border-radius:10px;border:none}
 </style>
 </head>
 
 <body>
 
 <header>
-  <h1>🚀 RentHub – Customer Dashboard</h1>
+  <h2>🚀 RentHub – Customer</h2>
   <div>Welcome, <b id="customerName"></b></div>
   <button onclick="logout()">Logout</button>
 </header>
@@ -110,7 +104,9 @@ button:disabled{background:gray;cursor:not-allowed}
 <div class="container">
 
 <h3>Select Location</h3>
-<select id="location" class="location-select"></select>
+<select id="location" class="location-select">
+  <option value="">Loading...</option>
+</select>
 
 <h3>Select Category</h3>
 <div class="categories">
@@ -129,111 +125,119 @@ button:disabled{background:gray;cursor:not-allowed}
 
 </div>
 
-<!-- BOOKING MODAL -->
+<!-- MODAL -->
 <div class="modal" id="bookingModal">
   <div class="modal-content">
     <h3>Confirm Booking</h3>
-    <label><input type="checkbox" id="terms"> Accept terms & conditions</label>
-    <input type="number" id="duration" placeholder="Duration (days)" min="1">
-    <button id="confirmBtn" disabled class="primary">Book Now</button>
+    <label><input type="checkbox" id="terms"> Accept terms</label>
+    <input type="number" id="duration" placeholder="Days" min="1">
+    <button id="confirmBtn" class="primary" disabled>Book</button>
     <button class="danger" onclick="closeBooking()">Cancel</button>
   </div>
 </div>
 
 <script>
-/* AUTH */
 const customerId=localStorage.getItem("customer_id");
-if(!customerId){alert("Please login");location="index.html";}
+if(!customerId){alert("Login required");location="index.html";}
 customerName.innerText=localStorage.getItem("name")||"Customer";
 
-/* LOGOUT */
 function logout(){localStorage.clear();location="index.html";}
 
-/* BOOKING MODAL */
 let selectedItem=null;
-const terms=document.getElementById("terms");
-const duration=document.getElementById("duration");
+const bookingModal=document.getElementById("bookingModal");
 const confirmBtn=document.getElementById("confirmBtn");
 
-function updateBtn(){
-  confirmBtn.disabled=!terms.checked||!duration.value||duration.value<=0;
-}
-terms.onchange=updateBtn;
-duration.oninput=updateBtn;
+terms.onchange=duration.oninput=()=>{
+  confirmBtn.disabled=!terms.checked||!duration.value;
+};
 
 function openBooking(id){
   selectedItem=id;
   bookingModal.style.display="flex";
   terms.checked=false;
   duration.value="";
-  updateBtn();
+  confirmBtn.disabled=true;
 }
 function closeBooking(){bookingModal.style.display="none";}
 
-async function confirmBooking(){
-  try{
-    const res=await fetch("/api/create-request",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({item_id:selectedItem,customer_id:customerId,rental_duration:duration.value})
-    });
-    const d=await res.json();
-    if(d.success){
-      alert("✅ Booking sent");
-      closeBooking();
-      loadHistory();
-    }else alert(d.message);
-  }catch{alert("❌ Server error");}
-}
-confirmBtn.onclick=confirmBooking;
+/* CREATE BOOKING */
+confirmBtn.onclick=async ()=>{
+  const res=await fetch("/api/create-request",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      item_id:selectedItem,
+      customer_id:customerId,
+      rental_duration:duration.value
+    })
+  });
+  const d=await res.json();
+  if(d.success){
+    alert("✅ Booking sent");
+    closeBooking();
+    loadHistory();
+  }else alert(d.message);
+};
 
-/* LOAD LOCATIONS */
+/* LOAD LOCATIONS (FROM ITEMS) */
 async function loadLocations(){
   const res=await fetch("/api/items");
   const d=await res.json();
+
+  const set=new Set();
+  d.items?.forEach(i=>set.add(i.location));
+
   location.innerHTML='<option value="">Select location</option>';
-  d.locations?.forEach(l=>location.innerHTML+=`<option>${l}</option>`);
+  set.forEach(l=>location.innerHTML+=`<option>${l}</option>`);
 }
 
 /* LOAD ITEMS */
 async function loadItems(category){
   if(!location.value) return alert("Select location first");
+
   const res=await fetch("/api/items",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({action:"getItems",category,location:location.value})
+    body:JSON.stringify({category,location:location.value})
   });
   const d=await res.json();
+
   items.innerHTML="";
-  if(!d.success||!d.items.length){items.innerHTML="<p>No items</p>";return;}
+  if(!d.success||!d.items.length){
+    items.innerHTML="<p>No items found</p>";
+    return;
+  }
+
   d.items.forEach(i=>{
     items.innerHTML+=`
-    <div class="card">
-      <h4>${i.item_name}</h4>
-      <p>₹${i.price_per_day}/day</p>
-      <p>${i.shop_name}</p>
-      <button class="primary" onclick="openBooking(${i.item_id})">Book</button>
-    </div>`;
+      <div class="card">
+        <h4>${i.item_name}</h4>
+        <p>₹${i.price_per_day}/day</p>
+        <p>${i.shop_name}</p>
+        <button class="primary" onclick="openBooking(${i.item_id})">Book</button>
+      </div>`;
   });
 }
 
 /* LOAD HISTORY */
 async function loadHistory(){
-  const res=await fetch(`/api/create-request?customer_id=${customerId}`);
+  const res=await fetch(`/api/customer-history/${customerId}`);
   const d=await res.json();
+
   history.innerHTML="";
   if(!d.success||!d.history.length){
     history.innerHTML="<p>No bookings yet</p>";
     return;
   }
+
   d.history.forEach(b=>{
     history.innerHTML+=`
-    <div class="card">
-      <b>${b.item_name}</b><br>
-      ${b.shop_name}<br>
-      Days: ${b.rental_duration}<br>
-      Status: <span class="status ${b.status}">${b.status}</span>
-    </div>`;
+      <div class="card">
+        <b>${b.item_name}</b><br>
+        ${b.shop_name}<br>
+        Days: ${b.rental_duration}<br>
+        Status: <span class="status ${b.status}">${b.status}</span>
+      </div>`;
   });
 }
 
