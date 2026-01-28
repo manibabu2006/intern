@@ -17,32 +17,34 @@ export default async function handler(req, res) {
     return res.status(405).json({ success: false, message: "Method not allowed" });
   }
 
-  const { name, email, aadhaar, phone, password, role } = req.body;
+  const { name, username, aadhaar, phone, password, role } = req.body;
 
-  if (!name || !email || !aadhaar || !phone || !password || !role) {
+  if (!name || !username || !aadhaar || !phone || !password || !role) {
     return res.status(400).json({ success: false, message: "All fields are required" });
   }
 
   try {
-    /* Check if user already exists */
     const table = role === "owner" ? "owners" : "customers";
+    const idCol = role === "owner" ? "owner_id" : "customer_id";
 
+    // Check if username or aadhaar already exists
     const [existing] = await pool.query(
-      `SELECT ${role === "owner" ? "owner_id" : "customer_id"} AS id FROM ${table} WHERE email = ? OR aadhaar = ?`,
-      [email, aadhaar]
+      `SELECT ${idCol} AS id FROM ${table} WHERE username = ? OR aadhaar = ?`,
+      [username, aadhaar]
     );
 
     if (existing.length > 0) {
-      return res.status(409).json({ success: false, message: "User already exists" });
+      return res.status(409).json({ success: false, message: "Username or Aadhaar already exists" });
     }
 
-    /* Hash password */
+    // Hash password
     const hashedPassword = bcrypt.hashSync(password, 10);
 
-    /* Insert user */
+    // Insert user
     await pool.query(
-      `INSERT INTO ${table} (name, email, password, aadhaar, phone) VALUES (?, ?, ?, ?, ?)`,
-      [name, email, hashedPassword, aadhaar, phone]
+      `INSERT INTO ${table} (name, username, password, aadhaar, phone)
+       VALUES (?, ?, ?, ?, ?)`,
+      [name, username, hashedPassword, aadhaar, phone]
     );
 
     return res.status(200).json({ success: true, message: "Registration successful" });
