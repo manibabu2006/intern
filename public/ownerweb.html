@@ -137,6 +137,12 @@ button:hover{transform:scale(1.05);opacity:.9}
   <h1>🏪 Owner Dashboard</h1>
   <div>Welcome, <b>Owner</b></div>
 </header>
+<aside>
+  <h2>Rentzy Owner</h2>
+  <p id="ownerName"></p>
+  <button onclick="logout()">Logout</button>
+</aside>
+
 
 <div class="container">
 
@@ -171,6 +177,9 @@ button:hover{transform:scale(1.05);opacity:.9}
 
 <script>
 const ownerId = localStorage.getItem("user_id");
+if (!localStorage.getItem("user_id")) {
+  window.location.replace("index.html");
+}
 
 function addItem(){
   fetch('/api/add-item',{
@@ -221,6 +230,15 @@ function update(id,status){
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({request_id:id,status})
   }).then(loadRequests);
+}
+
+function logout() {
+  localStorage.removeItem("user_id");
+  localStorage.removeItem("role");
+  localStorage.removeItem("name");
+
+  // Prevent back navigation
+  window.location.replace("index.html");
 }
 
 loadRequests();

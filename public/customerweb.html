@@ -75,6 +75,11 @@ button:disabled { background: gray; }
 <body>
 
 <header>🚀 RentHub – Customer Dashboard</header>
+<header>
+  <h2>Rentzy | Customer</h2>
+  <button onclick="logout()">Logout</button>
+</header>
+
 
 <div class="container">
 
@@ -113,6 +118,9 @@ button:disabled { background: gray; }
 <script>
 const customerId = localStorage.getItem("user_id");
 let selectedItem = null;
+if (!localStorage.getItem("user_id")) {
+  window.location.replace("index.html");
+}
 
 document.getElementById("terms").addEventListener("change", e=>{
   document.getElementById("confirmBtn").disabled = !e.target.checked;
@@ -150,6 +158,15 @@ function confirmBooking(){
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify({ item_id:selectedItem, customer_id:customerId })
   }).then(()=>alert("Booking request sent"));
+}
+
+function logout() {
+  localStorage.removeItem("user_id");
+  localStorage.removeItem("role");
+  localStorage.removeItem("name");
+
+  // Prevent back navigation
+  window.location.replace("index.html");
 }
 </script>
 
