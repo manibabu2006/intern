@@ -2,12 +2,14 @@ import db from "./_db.js";
 
 export default async function handler(req, res) {
   try {
+
     /* ================= CREATE BOOKING ================= */
     if (req.method === "POST") {
       const { action } = req.body;
 
       if (action === "createBooking") {
         const { item_id, customer_id, rental_duration } = req.body;
+
         if (!item_id || !customer_id || !rental_duration) {
           return res.status(400).json({ success: false, message: "Missing booking fields" });
         }
@@ -55,15 +57,25 @@ export default async function handler(req, res) {
     /* ================= ACCEPT / REJECT ================= */
     if (req.method === "PUT") {
       const { booking_id, status } = req.body;
+
       if (!booking_id || !["Accepted", "Rejected"].includes(status)) {
         return res.status(400).json({ success: false, message: "Invalid data" });
       }
 
-      await db.execute(`UPDATE bookings SET status=? WHERE booking_id=?`, [status, Number(booking_id)]);
+      const [result] = await db.execute(
+        `UPDATE bookings SET status=? WHERE booking_id=?`,
+        [status, Number(booking_id)]
+      );
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: "Booking not found" });
+      }
+
       return res.json({ success: true });
     }
 
-    return res.status(405).json({ success: false, message: "Method not allowed" });
+    res.status(405).json({ success: false, message: "Method not allowed" });
+
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: "Server error" });

@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   try {
 
     /* ================= GET ALL LOCATIONS ================= */
-    // GET /api/items  → returns all unique active locations
+    // GET /api/items → returns all unique active locations
     if (req.method === "GET" && !req.query.owner_id) {
       const [rows] = await db.execute(
         `SELECT DISTINCT location FROM items WHERE is_active=1 ORDER BY location`
@@ -22,8 +22,7 @@ export default async function handler(req, res) {
       const [items] = await db.execute(
         `SELECT item_id, shop_name, item_name, category, price_per_day, location, is_active, image_url
          FROM items
-         WHERE owner_id = ?
-         ORDER BY item_id DESC`,
+         WHERE owner_id = ? ORDER BY item_id DESC`,
         [owner_id]
       );
 
@@ -52,16 +51,7 @@ export default async function handler(req, res) {
 
     /* ================= ADD NEW ITEM ================= */
     if (req.method === "POST" && !req.body.action) {
-      const {
-        owner_id,
-        shop_name,
-        item_name,
-        category,
-        price_per_day,
-        location,
-        image_url,
-        is_active
-      } = req.body;
+      const { owner_id, shop_name, item_name, category, price_per_day, location, image_url, is_active } = req.body;
 
       if (!owner_id || !shop_name || !item_name || !category || !price_per_day || !location) {
         return res.status(400).json({ success: false, message: "All fields required" });
@@ -72,14 +62,14 @@ export default async function handler(req, res) {
          (owner_id, shop_name, item_name, category, price_per_day, location, image_url, is_active)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          owner_id,
+          Number(owner_id),
           shop_name.trim(),
           item_name.trim(),
           category,
-          price_per_day,
+          Number(price_per_day),
           location.trim(),
           image_url || null,
-          is_active ? 1 : 0
+          Number(is_active) === 1 ? 1 : 0
         ]
       );
 
@@ -90,23 +80,32 @@ export default async function handler(req, res) {
     if (req.method === "PUT") {
       const { item_id, owner_id, item_name, price_per_day, is_active, image_url } = req.body;
 
-      if (!item_id || !owner_id) {
-        return res.status(400).json({ success: false, message: "Missing fields" });
+      if (!item_id || !owner_id || !item_name || !price_per_day) {
+        return res.status(400).json({ success: false, message: "Missing required fields" });
       }
 
-      await db.execute(
+      const itemIdNum = Number(item_id);
+      const ownerIdNum = Number(owner_id);
+      const priceNum = Number(price_per_day);
+      const activeFlag = Number(is_active) === 1 ? 1 : 0;
+
+      const [result] = await db.execute(
         `UPDATE items
          SET item_name=?, price_per_day=?, is_active=?, image_url=?
          WHERE item_id=? AND owner_id=?`,
         [
-          item_name,
-          price_per_day,
-          is_active ? 1 : 0,
-          image_url || null,
-          item_id,
-          owner_id
+          item_name.trim(),
+          priceNum,
+          activeFlag,
+          image_url?.trim() || null,
+          itemIdNum,
+          ownerIdNum
         ]
       );
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ success: false, message: "Item not found or owner mismatch" });
+      }
 
       return res.json({ success: true });
     }
@@ -115,6 +114,6 @@ export default async function handler(req, res) {
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 }
