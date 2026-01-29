@@ -92,22 +92,22 @@ button:hover{ background:#0ea5e9; }
 <script>
 /* ================= AUTH ================= */
 const ownerId = localStorage.getItem("owner_id");
-if(!ownerId){
+if (!ownerId) {
   alert("Please login first");
-  location.href="index.html";
+  location.href = "index.html";
 }
+
 document.getElementById("ownerName").innerText =
   localStorage.getItem("name") || "Owner";
 
-function logout(){
+function logout() {
   localStorage.clear();
-  location.href="index.html";
+  location.href = "index.html";
 }
 
 /* ================= ADD ITEM ================= */
-async function addItem(){
+async function addItem() {
   const data = {
-    action:"addItem",
     owner_id: ownerId,
     shop_name: shop_name.value.trim(),
     item_name: item_name.value.trim(),
@@ -116,92 +116,102 @@ async function addItem(){
     location: location.value.trim()
   };
 
-  if(Object.values(data).some(v=>!v)){
+  if (Object.values(data).some(v => !v)) {
     alert("Fill all fields");
     return;
   }
 
-  try{
-    const res = await fetch("/api/items",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify(data)
+  try {
+    const res = await fetch("/api/items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
     });
+
     const d = await res.json();
-    if(d.success){
+    if (d.success) {
       alert("✅ Item added");
-      shop_name.value=item_name.value=price_per_day.value=location.value="";
-      category.value="";
-    }else alert(d.message || "Failed");
-  }catch{
+      shop_name.value = "";
+      item_name.value = "";
+      price_per_day.value = "";
+      location.value = "";
+      category.value = "";
+    } else {
+      alert(d.message || "Failed");
+    }
+  } catch {
     alert("Server error");
   }
 }
 
 /* ================= LOAD REQUESTS + HISTORY ================= */
-async function loadAll(){
-  try{
+async function loadAll() {
+  try {
     const res = await fetch(`/api/create-request?owner_id=${ownerId}`);
     const d = await res.json();
 
     const reqBox = document.getElementById("requests");
     const histBox = document.getElementById("history");
 
-    reqBox.innerHTML="";
-    histBox.innerHTML="";
+    reqBox.innerHTML = "";
+    histBox.innerHTML = "";
 
-    if(!d.success || !d.requests || d.requests.length===0){
-      reqBox.innerHTML="<p>No booking requests</p>";
-      histBox.innerHTML="<p>No booking history</p>";
+    if (!d.success || !d.requests || d.requests.length === 0) {
+      reqBox.innerHTML = "<p>No booking requests</p>";
+      histBox.innerHTML = "<p>No booking history</p>";
       return;
     }
 
-    let hasPending=false, hasHistory=false;
+    let hasPending = false;
+    let hasHistory = false;
 
-    d.requests.forEach(r=>{
-      if(r.status==="Pending"){
-        hasPending=true;
-        reqBox.innerHTML+=`
+    d.requests.forEach(r => {
+      if (r.status === "Pending") {
+        hasPending = true;
+        reqBox.innerHTML += `
           <div class="request">
             <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
             Days: ${r.rental_duration}<br>
             Phone: ${r.phone}<br><br>
             <button class="accept" onclick="respond(${r.booking_id},'Accepted')">Accept</button>
             <button class="reject" onclick="respond(${r.booking_id},'Rejected')">Reject</button>
-          </div>`;
-      }else{
-        hasHistory=true;
-        histBox.innerHTML+=`
+          </div>
+        `;
+      } else {
+        hasHistory = true;
+        histBox.innerHTML += `
           <div class="card">
             <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
             Days: ${r.rental_duration}<br>
             Status:
             <span class="status-${r.status}"><b>${r.status}</b></span>
-          </div>`;
+          </div>
+        `;
       }
     });
 
-    if(!hasPending) reqBox.innerHTML="<p>No pending requests</p>";
-    if(!hasHistory) histBox.innerHTML="<p>No booking history</p>";
+    if (!hasPending) reqBox.innerHTML = "<p>No pending requests</p>";
+    if (!hasHistory) histBox.innerHTML = "<p>No booking history</p>";
 
-  }catch(err){
+  } catch (err) {
     console.error(err);
     alert("Failed to load data");
   }
 }
 
 /* ================= ACCEPT / REJECT ================= */
-async function respond(booking_id,status){
-  try{
-    const res = await fetch("/api/create-request",{
-      method:"PUT",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ booking_id, status })
+async function respond(booking_id, status) {
+  try {
+    const res = await fetch("/api/create-request", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ booking_id, status })
     });
+
     const d = await res.json();
-    if(d.success) loadAll();
+    if (d.success) loadAll();
     else alert(d.message || "Action failed");
-  }catch{
+  } catch {
     alert("Server error");
   }
 }

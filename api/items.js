@@ -2,7 +2,8 @@ import db from "./db.js";
 
 export default async function handler(req, res) {
   try {
-    /* ================= ADD ITEM ================= */
+
+    /* ========== ADD ITEM ========== */
     if (req.method === "POST") {
       const {
         owner_id,
@@ -26,13 +27,12 @@ export default async function handler(req, res) {
           .json({ success: false, message: "All fields required" });
       }
 
-      // ✅ normalize location
       const cleanLocation = location.trim().toLowerCase();
 
       await db.execute(
-        `INSERT INTO items 
-        (owner_id, shop_name, item_name, category, price_per_day, location)
-        VALUES (?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO items
+         (owner_id, shop_name, item_name, category, price_per_day, location)
+         VALUES (?, ?, ?, ?, ?, ?)`,
         [
           Number(owner_id),
           shop_name.trim(),
@@ -46,39 +46,41 @@ export default async function handler(req, res) {
       return res.json({ success: true });
     }
 
-    /* ================= GET LOCATIONS ================= */
+    /* ========== GET LOCATIONS ========== */
     if (req.method === "GET" && req.query.type === "locations") {
       const [rows] = await db.execute(`
-        SELECT DISTINCT TRIM(location) AS location
+        SELECT DISTINCT location
         FROM items
-        WHERE location IS NOT NULL
-          AND TRIM(location) <> ''
+        WHERE location IS NOT NULL AND location <> ''
         ORDER BY location
       `);
 
       return res.json({
         success: true,
-        locations: rows.map((r) => r.location),
+        locations: rows.map(r => r.location),
       });
     }
 
-    /* ================= GET ITEMS BY LOCATION ================= */
+    /* ========== GET ITEMS BY CATEGORY + LOCATION ========== */
     if (req.method === "GET") {
-      const { location } = req.query;
+      const { category, location } = req.query;
 
-      let sql = `SELECT * FROM items`;
-      let params = [];
-
-      if (location) {
-        sql += ` WHERE location = ?`;
-        params.push(location.trim().toLowerCase());
+      if (!category || !location) {
+        return res.json({ success: true, items: [] });
       }
 
-      const [items] = await db.execute(sql, params);
-      return res.json({ success: true, items });
+      const [rows] = await db.execute(
+        `SELECT item_id, item_name, shop_name, price_per_day
+         FROM items
+         WHERE category=? AND location=?`,
+        [category, location.trim().toLowerCase()]
+      );
+
+      return res.json({ success: true, items: rows });
     }
 
-    res.status(405).json({ success: false, message: "Method not allowed" });
+    res.status(405).json({ success: false });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, message: "Server error" });

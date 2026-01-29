@@ -67,7 +67,6 @@ button{
 }
 .primary{background:var(--primary);color:#fff}
 .danger{background:var(--danger);color:#fff}
-.status{font-weight:600}
 .Pending{color:var(--pending)}
 .Accepted{color:var(--success)}
 .Rejected{color:var(--danger)}
@@ -127,7 +126,6 @@ button{
 <div class="history" id="history"></div>
 </div>
 
-<!-- BOOKING MODAL -->
 <div class="modal" id="bookingModal">
   <div class="modal-content">
     <h3>Confirm Booking</h3>
@@ -139,20 +137,24 @@ button{
 </div>
 
 <script>
-/* ========== AUTH ========== */
 const customerId = localStorage.getItem("customer_id");
 if(!customerId){
   alert("Login required");
-  location="index.html";
+  location.href="index.html";
 }
+
+const customerName=document.getElementById("customerName");
+const locationSelect=document.getElementById("location");
+const items=document.getElementById("items");
+const history=document.getElementById("history");
+
 customerName.innerText = localStorage.getItem("name") || "Customer";
 
 function logout(){
   localStorage.clear();
-  location="index.html";
+  location.href="index.html";
 }
 
-/* ========== BOOKING MODAL ========== */
 let selectedItem=null;
 const bookingModal=document.getElementById("bookingModal");
 const confirmBtn=document.getElementById("confirmBtn");
@@ -170,10 +172,12 @@ function openBooking(id){
   duration.value="";
   confirmBtn.disabled=true;
 }
-function closeBooking(){ bookingModal.style.display="none"; }
+function closeBooking(){
+  bookingModal.style.display="none";
+}
 
-/* ========== CREATE BOOKING ========== */
 confirmBtn.onclick = async ()=>{
+  if(!selectedItem || !duration.value || duration.value<=0) return;
   try{
     const res = await fetch("/api/create-request",{
       method:"POST",
@@ -181,7 +185,7 @@ confirmBtn.onclick = async ()=>{
       body:JSON.stringify({
         item_id:selectedItem,
         customer_id:customerId,
-        rental_duration:duration.value
+        rental_duration:Number(duration.value)
       })
     });
     const d = await res.json();
@@ -190,19 +194,17 @@ confirmBtn.onclick = async ()=>{
       closeBooking();
       loadHistory();
     }else alert(d.message || "Failed");
-  }catch{ alert("Server error"); }
+  }catch{
+    alert("Server error");
+  }
 };
-
-/* ========== LOAD LOCATIONS ========== */
-const locationSelect=document.getElementById("location");
 
 async function loadLocations(){
   try{
     const res=await fetch("/api/items");
     const d=await res.json();
-
     locationSelect.innerHTML=`<option value="">Select location</option>`;
-    if(!d.success || !d.locations?.length){
+    if(!d.success || !Array.isArray(d.locations) || d.locations.length===0){
       locationSelect.innerHTML+=`<option>No locations found</option>`;
       return;
     }
@@ -214,7 +216,6 @@ async function loadLocations(){
   }
 }
 
-/* ========== LOAD ITEMS ========== */
 async function loadItems(category){
   if(!locationSelect.value){
     alert("Select location first");
@@ -232,7 +233,7 @@ async function loadItems(category){
     });
     const d=await res.json();
     items.innerHTML="";
-    if(!d.success || !d.items.length){
+    if(!d.success || !Array.isArray(d.items) || d.items.length===0){
       items.innerHTML="<p>No items found</p>";
       return;
     }
@@ -250,13 +251,12 @@ async function loadItems(category){
   }
 }
 
-/* ========== LOAD HISTORY ========== */
 async function loadHistory(){
   try{
     const res=await fetch(`/api/create-request?customer_id=${customerId}`);
     const d=await res.json();
     history.innerHTML="";
-    if(!d.success || !d.history.length){
+    if(!d.success || !Array.isArray(d.history) || d.history.length===0){
       history.innerHTML="<p>No bookings yet</p>";
       return;
     }
@@ -274,11 +274,11 @@ async function loadHistory(){
   }
 }
 
-/* ========== INIT ========== */
 window.onload=()=>{
   loadLocations();
   loadHistory();
 };
 </script>
+
 </body>
 </html>
