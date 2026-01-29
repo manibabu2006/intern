@@ -48,7 +48,7 @@
       font-weight: 600;
     }
 
-    input {
+    input, select {
       width: 100%;
       padding: 10px 14px;
       margin-top: 6px;
@@ -104,6 +104,13 @@
   <form id="sendOtpForm" class="active">
     <label>Registration Number</label>
     <input type="text" id="username" placeholder="Enter registration number" required>
+
+    <label>Role</label>
+    <select id="role">
+      <option value="customer">Customer</option>
+      <option value="owner">Owner</option>
+    </select>
+
     <button id="sendOtpBtn">Send OTP</button>
     <div class="message" id="sendOtpMsg"></div>
   </form>
@@ -123,6 +130,7 @@
 
 <script>
   let usernameGlobal = "";
+  let roleGlobal = "";
 
   const sendOtpForm = document.getElementById("sendOtpForm");
   const resetForm = document.getElementById("resetForm");
@@ -132,6 +140,7 @@
     e.preventDefault();
 
     const username = document.getElementById("username").value.trim();
+    const role = document.getElementById("role").value;
     const msg = document.getElementById("sendOtpMsg");
     const btn = document.getElementById("sendOtpBtn");
 
@@ -143,15 +152,16 @@
       const res = await fetch("/api/send-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username })
+        body: JSON.stringify({ username, role })
       });
 
-      const text = await res.text();
+      const data = await res.json();
 
-      if (!res.ok) throw new Error(text);
+      if (!res.ok) throw new Error(data.message || "Failed to send OTP");
 
       usernameGlobal = username;
-      msg.textContent = text;
+      roleGlobal = role;
+      msg.textContent = data.message;
       msg.classList.add("success");
 
       sendOtpForm.classList.remove("active");
@@ -185,23 +195,27 @@
     msg.className = "message";
 
     try {
+      // Verify OTP
       const verify = await fetch("/api/verify-otp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: usernameGlobal, otp })
+        body: JSON.stringify({ username: usernameGlobal, otp, role: roleGlobal })
       });
 
-      if (!verify.ok) throw new Error(await verify.text());
+      const verifyData = await verify.json();
+      if (!verify.ok) throw new Error(verifyData.message || "OTP verification failed");
 
+      // Reset password
       const reset = await fetch("/api/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: usernameGlobal, newPassword })
+        body: JSON.stringify({ username: usernameGlobal, otp, newPassword, role: roleGlobal })
       });
 
-      if (!reset.ok) throw new Error(await reset.text());
+      const resetData = await reset.json();
+      if (!reset.ok) throw new Error(resetData.message || "Password reset failed");
 
-      msg.textContent = "Password reset successful! Redirecting...";
+      msg.textContent = resetData.message;
       msg.classList.add("success");
 
       setTimeout(() => window.location.href = "/", 1500);

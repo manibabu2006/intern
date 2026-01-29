@@ -1,4 +1,5 @@
-import pool from "./_db.js";
+// send-otp.js
+import db from "./_db.js";
 import { saveOTP } from "./_otpstore.js";
 import { sendOTP } from "./_twilio.js";
 
@@ -7,31 +8,23 @@ export default async function handler(req, res) {
 
   const { username, role } = req.body;
 
-  if (!username || !role) {
-    return res.status(400).json({ success: false, message: "Username and role are required" });
-  }
+  if (!username || !role) return res.status(400).json({ success: false, message: "Username and role are required" });
 
   try {
-    // Select correct table
     const table = role === "owner" ? "owners" : "customers";
 
-    const [rows] = await pool.query(`SELECT phone FROM ${table} WHERE username = ?`, [username]);
+    const [rows] = await db.query(`SELECT phone FROM ${table} WHERE username = ?`, [username]);
 
-    if (rows.length === 0) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
+    if (rows.length === 0) return res.status(404).json({ success: false, message: "User not found" });
 
     const mobile = rows[0].phone;
     if (!mobile) return res.status(400).json({ success: false, message: "No mobile linked with this user" });
 
-    // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 min
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-    // Save OTP
     await saveOTP(username, otp, expiresAt, role);
 
-    // Send OTP via Twilio
     await sendOTP(mobile, otp);
 
     res.status(200).json({ success: true, message: "OTP sent successfully" });

@@ -1,3 +1,4 @@
+// verify-otp.js
 import { verifyOTP } from "./_otpstore.js";
 
 export default async function handler(req, res) {
@@ -5,9 +6,7 @@ export default async function handler(req, res) {
 
   const { username, otp, role } = req.body;
 
-  if (!username || !otp || !role) {
-    return res.status(400).json({ success: false, message: "All fields are required" });
-  }
+  if (!username || !otp || !role) return res.status(400).json({ success: false, message: "All fields are required" });
 
   try {
     const valid = await verifyOTP(username, otp, role);
