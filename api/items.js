@@ -8,8 +8,10 @@ export default async function handler(req, res) {
       const [rows] = await db.execute(
         `SELECT DISTINCT location FROM items ORDER BY location`
       );
-      const locations = rows.map(r => r.location);
-      return res.json({ success: true, locations });
+      return res.json({
+        success: true,
+        locations: rows.map(r => r.location)
+      });
     }
 
     /* ================= GET ITEMS BY OWNER ================= */
@@ -17,9 +19,8 @@ export default async function handler(req, res) {
       const owner_id = Number(req.query.owner_id);
 
       const [items] = await db.execute(
-        `SELECT 
-           item_id, shop_name, item_name, category, price_per_day,
-           location, is_active, image_url
+        `SELECT item_id, shop_name, item_name, category,
+                price_per_day, location, is_active, image_url
          FROM items
          WHERE owner_id=?
          ORDER BY item_id DESC`,
@@ -29,36 +30,29 @@ export default async function handler(req, res) {
       return res.json({ success: true, items });
     }
 
-    /* ================= GET ITEMS BY CATEGORY & LOCATION ================= */
-if (req.method === "POST" && req.body.action === "getItems") {
-  const { category, location } = req.body;
+    /* ================= GET ITEMS (CUSTOMER) ================= */
+    if (req.method === "POST" && req.body.action === "getItems") {
+      const { category, location } = req.body;
 
-  if (!category || !location) {
-    return res.status(400).json({
-      success: false,
-      message: "Category and location required"
-    });
-  }
+      if (!category || !location) {
+        return res.status(400).json({
+          success: false,
+          message: "Category and location required"
+        });
+      }
 
-  const [items] = await db.execute(
-    `SELECT 
-        item_id,
-        shop_name,
-        item_name,
-        category,
-        price_per_day,
-        location,
-        is_active,
-        image_url
-      FROM items
-      WHERE LOWER(TRIM(category)) = LOWER(TRIM(?))
-      AND LOWER(TRIM(location)) = LOWER(TRIM(?))
-      ORDER BY item_id DESC`,
-      [category, location]
-    );
+      // ✅ NO is_active filter (inactive items included)
+      const [items] = await db.execute(
+        `SELECT item_id, shop_name, item_name, category,
+                price_per_day, location, is_active, image_url
+         FROM items
+         WHERE category=? AND location=?
+         ORDER BY item_id DESC`,
+        [category, location]
+      );
 
-  return res.json({ success: true, items });
-}
+      return res.json({ success: true, items });
+    }
 
     /* ================= ADD NEW ITEM ================= */
     if (req.method === "POST" && !req.body.action) {
@@ -82,7 +76,8 @@ if (req.method === "POST" && req.body.action === "getItems") {
 
       await db.execute(
         `INSERT INTO items
-         (owner_id, shop_name, item_name, category, price_per_day, location, image_url, is_active)
+         (owner_id, shop_name, item_name, category,
+          price_per_day, location, image_url, is_active)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           Number(owner_id),
@@ -101,7 +96,14 @@ if (req.method === "POST" && req.body.action === "getItems") {
 
     /* ================= UPDATE ITEM ================= */
     if (req.method === "PUT") {
-      const { item_id, owner_id, item_name, price_per_day, is_active, image_url } = req.body;
+      const {
+        item_id,
+        owner_id,
+        item_name,
+        price_per_day,
+        is_active,
+        image_url
+      } = req.body;
 
       if (!item_id || !owner_id || !item_name || !price_per_day) {
         return res.status(400).json({
@@ -134,10 +136,17 @@ if (req.method === "POST" && req.body.action === "getItems") {
       return res.json({ success: true });
     }
 
-    res.status(405).json({ success: false, message: "Method not allowed" });
+    /* ================= FALLBACK ================= */
+    return res.status(405).json({
+      success: false,
+      message: "Method not allowed"
+    });
 
   } catch (err) {
     console.error("ITEM API ERROR:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
   }
 }

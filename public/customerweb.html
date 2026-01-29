@@ -38,10 +38,6 @@ aside{
   flex-direction:column;
   gap:18px;
 }
-
-aside h2{margin:0}
-aside p{opacity:.85}
-
 aside button{
   margin-top:auto;
   padding:10px;
@@ -54,42 +50,35 @@ aside button{
 }
 
 /* ===== MAIN ===== */
-main{
-  flex:1;
-  padding:25px;
-}
-
+main{flex:1;padding:25px}
 .section{margin-bottom:30px}
-.section h3{margin-bottom:14px}
 
-/* ===== SELECT ===== */
 .location-select{
   width:100%;
-  padding:12px 16px;
+  padding:12px;
   border-radius:14px;
   border:none;
   background:#020617;
   color:#fff;
-  font-size:15px;
 }
 
-/* ===== GRIDS ===== */
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
   gap:15px;
 }
 
-/* ===== CARDS ===== */
 .card{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:16px;
   padding:16px;
   text-align:center;
-  transition:.25s;
 }
-.card:hover{transform:translateY(-4px)}
+
+.card.inactive{
+  opacity:0.55;
+}
 
 button{
   padding:8px 14px;
@@ -100,292 +89,145 @@ button{
 }
 
 .primary{background:var(--primary);color:#000}
-.danger{background:var(--danger);color:#fff}
-
-.Pending{color:var(--pending)}
-.Accepted{color:var(--success)}
-.Rejected{color:var(--danger)}
+button:disabled{background:#777;cursor:not-allowed}
 
 /* ===== MODAL ===== */
 .modal{
   display:none;
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.75);
+  background:rgba(0,0,0,.7);
   justify-content:center;
   align-items:center;
-  z-index:1000;
 }
-
 .modal-content{
   background:var(--panel);
   padding:25px;
   border-radius:18px;
   width:90%;
   max-width:420px;
-  border:1px solid var(--border);
 }
-
-.modal-content h3{
-  text-align:center;
-  margin-top:0;
-}
-
 .modal-content input,
 .modal-content textarea{
   width:100%;
   padding:10px;
-  margin:10px 0;
+  margin:8px 0;
   border-radius:10px;
   border:none;
   background:#020617;
   color:#fff;
-}
-
-.modal-content textarea{resize:none}
-
-.modal-content label{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  cursor:pointer;
-  margin:8px 0;
-  font-size:14px;
-}
-
-.modal-content ul{
-  padding-left:18px;
-  font-size:13px;
-  opacity:.85;
-}
-
-.modal-content input[type="checkbox"]{
-  appearance:none;
-  width:18px;
-  height:18px;
-  border-radius:5px;
-  border:2px solid var(--primary);
-}
-
-.modal-content input[type="checkbox"]:checked{
-  background:var(--primary);
-}
-.modal-content input[type="checkbox"]:checked::after{
-  content:"✔";
-  color:#000;
-  font-size:12px;
-  position:relative;
-  left:3px;
-  top:-1px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ===== SIDEBAR ===== -->
 <aside>
   <h2>🚀 RentHub</h2>
   <p>Customer Panel</p>
-  <p><b id="customerName"></b></p>
+  <b id="customerName"></b>
   <button onclick="logout()">Logout</button>
 </aside>
 
-<!-- ===== MAIN ===== -->
 <main>
 
-  <div class="section">
-    <h3>Select Location</h3>
-    <select id="location" class="location-select">
-      <option>Loading...</option>
-    </select>
-  </div>
+<div class="section">
+  <h3>Select Location</h3>
+  <select id="location" class="location-select"></select>
+</div>
 
-  <div class="section">
-    <h3>Select Category</h3>
-    <div class="grid">
-      <div class="card" onclick="loadItems('Electronics')">💻 Electronics</div>
-      <div class="card" onclick="loadItems('Bike')">🏍 Bikes</div>
-      <div class="card" onclick="loadItems('Car')">🚗 Cars</div>
-      <div class="card" onclick="loadItems('Tent')">🏕 Tents</div>
-      <div class="card" onclick="loadItems('Appliance')">🏠 Appliances</div>
-    </div>
+<div class="section">
+  <h3>Select Category</h3>
+  <div class="grid">
+    <div class="card" onclick="loadItems('Electronics')">💻 Electronics</div>
+    <div class="card" onclick="loadItems('Bike')">🏍 Bikes</div>
+    <div class="card" onclick="loadItems('Car')">🚗 Cars</div>
+    <div class="card" onclick="loadItems('Tent')">🏕 Tents</div>
+    <div class="card" onclick="loadItems('Appliance')">🏠 Appliances</div>
   </div>
+</div>
 
-  <div class="section">
-    <h3>Available Items</h3>
-    <div class="grid" id="items"></div>
-  </div>
-
-  <div class="section">
-    <h3>Your Booking History</h3>
-    <div class="grid" id="history"></div>
-  </div>
+<div class="section">
+  <h3>Available Items</h3>
+  <div class="grid" id="items"></div>
+</div>
 
 </main>
 
-<!-- ===== BOOKING MODAL ===== -->
+<!-- BOOKING MODAL -->
 <div class="modal" id="bookingModal">
   <div class="modal-content">
-    <h3>📝 Complete Booking</h3>
-
-    <input type="text" id="custName" placeholder="Full Name">
-    <input type="tel" id="custPhone" placeholder="Phone Number">
-    <input type="text" id="custAadhaar" placeholder="Aadhaar Number (12 digits)" maxlength="12">
-    <textarea id="custAddress" rows="2" placeholder="Pickup Address"></textarea>
-    <input type="number" id="duration" placeholder="Rental Days" min="1">
-
-    <div style="margin:10px 0;padding:10px;border:1px dashed var(--border);border-radius:10px">
-      <b>Payment Method</b><br>
-      <span style="opacity:.85">💵 Cash on Delivery (COD)</span>
-    </div>
-
-    <label style="font-size:14px">
-      <input type="checkbox" id="terms">
-      I agree to the 
-      <span style="color:var(--primary)">Terms & Conditions</span>
-    </label>
-
-    <ul style="font-size:12px;opacity:.75;margin-top:6px">
-        <li>Valid ID proof is mandatory</li>
-        <li>Late returns may incur extra charges</li>
-        <li>Damage costs must be paid by customer</li>
-        <li>Owner can cancel if item unavailable</li>
-      </ul>
-
-    <div style="display:flex;gap:10px;margin-top:15px">
-      <button id="confirmBtn" class="primary" disabled style="flex:1">Confirm Booking</button>
-      <button class="danger" onclick="closeBooking()" style="flex:1">Cancel</button>
-    </div>
+    <h3>Complete Booking</h3>
+    <input id="custName" placeholder="Full Name">
+    <input id="custPhone" placeholder="Phone">
+    <input id="custAadhaar" placeholder="Aadhaar (12 digits)" maxlength="12">
+    <textarea id="custAddress" placeholder="Pickup Address"></textarea>
+    <input id="duration" type="number" placeholder="Days">
+    <button id="confirmBtn" class="primary" disabled>Confirm</button>
+    <button onclick="closeBooking()">Cancel</button>
   </div>
 </div>
 
 <script>
 const customerId = localStorage.getItem("customer_id");
-if(!customerId){
-  alert("Login required");
-  location.href="index.html";
-}
+if(!customerId) location.href="index.html";
 
-document.getElementById("customerName").innerText =
-  localStorage.getItem("name") || "Customer";
+customerName.innerText = localStorage.getItem("name") || "Customer";
 
 function logout(){
   localStorage.clear();
   location.href="index.html";
 }
 
+const itemsDiv = document.getElementById("items");
 const locationSelect = document.getElementById("location");
-const items = document.getElementById("items");
-const history = document.getElementById("history");
-
 let selectedItem = null;
-const bookingModal = document.getElementById("bookingModal");
-const confirmBtn = document.getElementById("confirmBtn");
 
-const custName = document.getElementById("custName");
-const custPhone = document.getElementById("custPhone");
-const custAadhaar = document.getElementById("custAadhaar");
-const custAddress = document.getElementById("custAddress");
-const duration = document.getElementById("duration");
-const terms = document.getElementById("terms");
-
-[custName,custPhone,custAadhaar,custAddress,duration,terms].forEach(el=>{
-  el.oninput = validateForm;
-});
-
-function validateForm(){
-  const aadhaarValid = /^\d{12}$/.test(custAadhaar.value.trim());
-  confirmBtn.disabled = !(
-    custName.value.trim() &&
-    custPhone.value.trim().length >= 10 &&
-    custAddress.value.trim() &&
-    duration.value > 0 &&
-    aadhaarValid &&
-    terms.checked
-  );
-}
-
-function openBooking(id){
-  selectedItem = id;
-  bookingModal.style.display="flex";
-  custName.value="";
-  custPhone.value="";
-  custAadhaar.value="";
-  custAddress.value="";
-  duration.value="";
-  terms.checked=false;
-  confirmBtn.disabled=true;
-}
-
-function closeBooking(){
-  bookingModal.style.display="none";
-}
-
-confirmBtn.onclick = async ()=>{
-  try{
-    const res = await fetch("/api/create-request",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        action:"createBooking",
-        item_id:selectedItem,
-        customer_id:customerId,
-        name:custName.value.trim(),
-        phone:custPhone.value.trim(),
-        address:custAddress.value.trim(),
-        aadhaar:custAadhaar.value.trim(),
-        rental_duration:duration.value,
-        payment_method:"COD"
-      })
-    });
-    const d = await res.json();
-    if(d.success){
-      alert("✅ Booking placed successfully");
-      closeBooking();
-      loadHistory();
-    } else alert(d.message || "Failed");
-  } catch {
-    alert("Server error");
-  }
-};
-
+/* ===== LOAD LOCATIONS ===== */
 async function loadLocations(){
   const res = await fetch("/api/items");
   const d = await res.json();
-  locationSelect.innerHTML=`<option value="">Select location</option>`;
+  locationSelect.innerHTML = `<option value="">Select location</option>`;
   d.locations.forEach(l=>{
-  locationSelect.innerHTML+=`<option value="${l.trim()}">${l}</option>`;
-});
+    locationSelect.innerHTML += `<option value="${l}">${l}</option>`;
+  });
 }
 
+/* ===== LOAD ITEMS ===== */
 async function loadItems(category){
   if(!locationSelect.value){ alert("Select location"); return; }
-  items.innerHTML="Loading...";
+
+  itemsDiv.innerHTML = "Loading...";
   const res = await fetch("/api/items",{
     method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({action:"getItems",category,location:locationSelect.value})
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      action:"getItems",
+      category,
+      location:locationSelect.value
+    })
   });
-  const d = await res.json();
-  items.innerHTML="";
 
-  if(!d.items || d.items.length===0){
-    items.innerHTML="<p>No items found in this category and location.</p>";
+  const d = await res.json();
+  itemsDiv.innerHTML = "";
+
+  if(!d.items || d.items.length === 0){
+    itemsDiv.innerHTML = `<p>No items found</p>`;
     return;
   }
 
   d.items.forEach(i=>{
-    const isInactive = i.is_active == 0;
-    items.innerHTML+=`
-      <div class="card" style="position:relative;">
+    const inactive = i.is_active == 0;
+
+    itemsDiv.innerHTML += `
+      <div class="card ${inactive?'inactive':''}">
         <h4>${i.item_name}</h4>
         <p>₹${i.price_per_day}/day</p>
         <p>${i.shop_name}</p>
-        ${isInactive ? '<span style="color:#ef4444; font-weight:bold;">Unavailable</span>' : ''}
-        <button class="primary" 
-          onclick="${isInactive ? 'alert(\'Item unavailable\')' : `openBooking(${i.item_id})`}"
-          ${isInactive ? 'disabled style="opacity:0.6; cursor:not-allowed;"' : ''}>
+        ${inactive ? '<b style="color:red">Unavailable</b>' : ''}
+        <button class="primary"
+          ${inactive?'disabled':''}
+          onclick="${inactive?'':'openBooking('+i.item_id+')'}">
           Book Now
         </button>
       </div>
@@ -393,25 +235,35 @@ async function loadItems(category){
   });
 }
 
-async function loadHistory(){
-  const res = await fetch(`/api/create-request?customer_id=${customerId}`);
-  const d = await res.json();
-  history.innerHTML="";
-  d.history.forEach(b=>{
-    history.innerHTML+=`
-      <div class="card">
-        <b>${b.item_name}</b><br>
-        ${b.shop_name}<br>
-        Days: ${b.rental_duration}<br>
-        Status: <span class="${b.status}">${b.status}</span>
-      </div>`;
-  });
+/* ===== BOOKING ===== */
+function openBooking(id){
+  selectedItem = id;
+  bookingModal.style.display="flex";
+}
+function closeBooking(){
+  bookingModal.style.display="none";
 }
 
-window.onload=()=>{
-  loadLocations();
-  loadHistory();
+confirmBtn.onclick = async ()=>{
+  await fetch("/api/create-request",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      action:"createBooking",
+      item_id:selectedItem,
+      customer_id:customerId,
+      name:custName.value,
+      phone:custPhone.value,
+      address:custAddress.value,
+      aadhaar:custAadhaar.value,
+      rental_duration:duration.value
+    })
+  });
+  alert("Booking placed");
+  closeBooking();
 };
+
+loadLocations();
 </script>
 </body>
 </html>
