@@ -17,16 +17,20 @@ export default async function handler(req, res) {
     return res.status(405).send("Method not allowed");
   }
 
-  const { username, currentPassword, newPassword } = req.body;
+  const { username, role, currentPassword, newPassword } = req.body;
 
-  if (!username || !currentPassword || !newPassword) {
+  if (!username || !role || !currentPassword || !newPassword) {
     return res.status(400).send("All fields are required");
   }
 
   try {
+    // Determine table based on role
+    const table = role === "owner" ? "owners" : "customers";
+
     /* 1. Get user password */
     const [rows] = await pool.query(
-      "SELECT password FROM users WHERE username = ?",
+      `SELECT ${role === "owner" ? "owner_id" : "customer_id"} AS id, password 
+       FROM ${table} WHERE username = ?`,
       [username]
     );
 
@@ -47,7 +51,7 @@ export default async function handler(req, res) {
 
     /* 4. Update password */
     await pool.query(
-      "UPDATE users SET password = ? WHERE username = ?",
+      `UPDATE ${table} SET password = ? WHERE username = ?`,
       [hashedPassword, username]
     );
 
