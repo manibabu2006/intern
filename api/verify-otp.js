@@ -1,24 +1,19 @@
-import pool from "./_db.js";
+const { verifyOTP, deleteOTP } = require("./_otpstore");
 
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   if (req.method !== "POST") return res.status(405).send("Method not allowed");
 
   const { username, otp } = req.body;
+  if (!username || !otp) return res.status(400).send("Username and OTP required");
 
   try {
-    const [rows] = await pool.query(
-      "SELECT * FROM otp_table WHERE username = ? AND otp = ? AND expires_at > NOW()",
-      [username, otp]
-    );
+    const valid = await verifyOTP(username, otp);
+    if (!valid) return res.status(401).send("Invalid or expired OTP");
 
-    if (rows.length === 0) {
-      return res.status(401).send("Invalid or expired OTP");
-    }
-
+    await deleteOTP(username); // OTP is one-time use
     res.status(200).send("OTP verified");
-
   } catch (err) {
     console.error(err);
     res.status(500).send("Verification failed");
   }
-}
+};
