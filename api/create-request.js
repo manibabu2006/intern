@@ -18,33 +18,42 @@ export default async function handler(req, res) {
           payment_method
         } = req.body;
 
-        // Basic validation
-        if (!item_id || !customer_id || !rental_duration || !aadhaar) {
+        /* ===== REQUIRED FIELD CHECK ===== */
+        if (
+          !item_id ||
+          !customer_id ||
+          !rental_duration ||
+          !name ||
+          !phone ||
+          !address ||
+          !aadhaar
+        ) {
           return res.status(400).json({
             success: false,
             message: "Missing required booking fields"
           });
         }
 
-        // Aadhaar validation (12 digits)
-        if (!/^\d{12}$/.test(aadhaar)) {
+        /* ===== AADHAAR VALIDATION ===== */
+        if (!/^\d{12}$/.test(String(aadhaar))) {
           return res.status(400).json({
             success: false,
-            message: "Invalid Aadhaar number"
+            message: "Invalid Aadhaar number (must be 12 digits)"
           });
         }
 
         await db.execute(
-          `INSERT INTO bookings 
-           (item_id, customer_id, rental_duration, status, customer_name, phone, address, aadhaar, payment_method)
+          `INSERT INTO bookings
+           (item_id, customer_id, rental_duration, status,
+            customer_name, phone, address, aadhaar, payment_method)
            VALUES (?, ?, ?, 'Pending', ?, ?, ?, ?, ?)`,
           [
             Number(item_id),
             Number(customer_id),
             Number(rental_duration),
-            name || null,
-            phone || null,
-            address || null,
+            name,
+            phone,
+            address,
             aadhaar,
             payment_method || "COD"
           ]
@@ -63,7 +72,7 @@ export default async function handler(req, res) {
     if (req.method === "GET") {
       if (req.query.customer_id) {
         const [history] = await db.execute(
-          `SELECT 
+          `SELECT
              b.booking_id,
              b.rental_duration,
              b.status,
@@ -83,7 +92,7 @@ export default async function handler(req, res) {
       /* ================= OWNER REQUESTS ================= */
       if (req.query.owner_id) {
         const [requests] = await db.execute(
-          `SELECT 
+          `SELECT
              b.booking_id,
              b.status,
              b.rental_duration,
