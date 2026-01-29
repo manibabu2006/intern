@@ -322,24 +322,27 @@ async function loadAll() {
       return;
     }
     d.requests.forEach(r => {
-      if (r.status === "Pending") {
-        reqBox.innerHTML += `
-          <div class="request">
-            <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
-            Days: ${r.rental_duration}<br>
-            Phone: ${r.phone}<br><br>
-            <button class="accept" onclick="respond(${r.booking_id},'Accepted')">Accept</button>
-            <button class="reject" onclick="respond(${r.booking_id},'Rejected')">Reject</button>
-          </div>`;
-      } else {
-        histBox.innerHTML += `
-          <div class="card">
-            <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
-            Days: ${r.rental_duration}<br>
-            Status: <span class="status-${r.status}">${r.status}</span>
-          </div>`;
-      }
-    });
+  if (r.status === "Pending") {
+    reqBox.innerHTML += `
+      <div class="request">
+        <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
+        Days: ${r.rental_duration}<br>
+        📞 Phone: ${r.phone || "N/A"}<br><br>
+
+        <button class="accept" onclick="respond(${r.booking_id},'Accepted')">Accept</button>
+        <button class="reject" onclick="respond(${r.booking_id},'Rejected')">Reject</button>
+      </div>`;
+  } else {
+    histBox.innerHTML += `
+      <div class="card">
+        <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
+        Days: ${r.rental_duration}<br>
+        📞 Phone: ${r.phone || "N/A"}<br>
+        Status: <span class="status-${r.status}">${r.status}</span>
+      </div>`;
+  }
+});
+
   } catch {
     alert("Failed to load data");
   }
