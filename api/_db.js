@@ -1,19 +1,24 @@
 // _db.js
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
+dotenv.config();
 
-dotenv.config(); // ensure env variables are loaded
+const { DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT } = process.env;
 
-// Create MySQL connection pool
+// Construct MySQL URL
+const url = new URL(
+  `mysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT || 3306}/${DB_NAME}`
+);
+
 const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: Number(process.env.DB_PORT) || 3306,
+  host: url.hostname,
+  user: url.username,
+  password: url.password,
+  database: url.pathname.replace("/", ""), // remove leading "/"
+  port: Number(url.port),
   waitForConnections: true,
   connectionLimit: 10,
-  ssl: { rejectUnauthorized: false }, // required if your DB needs SSL
+  ssl: { rejectUnauthorized: false }, // optional for cloud MySQL
 });
 
 export default db;

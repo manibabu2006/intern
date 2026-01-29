@@ -1,3 +1,4 @@
+// _twilio.js
 import Twilio from "twilio";
 import dotenv from "dotenv";
 dotenv.config();
@@ -11,14 +12,15 @@ if (
 ) {
   client = Twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 } else {
-  console.warn("⚠️ Twilio environment variables are missing");
+  console.warn("⚠️ Twilio env variables are missing. OTP sending will fail!");
 }
 
 export async function sendOTP(mobile, otp) {
   if (!client) throw new Error("Twilio is not configured properly");
 
   try {
-    const toNumber = mobile.startsWith("+") ? mobile : `+91${mobile.replace(/^0/, '')}`;
+    // Remove leading 0 if present, add +91
+    const toNumber = mobile.startsWith("+") ? mobile : `+91${mobile.replace(/^0/, "")}`;
 
     const message = await client.messages.create({
       body: `RentHub OTP: ${otp} (valid for 5 minutes)`,
@@ -26,12 +28,10 @@ export async function sendOTP(mobile, otp) {
       to: toNumber,
     });
 
-    console.log("✅ OTP sent. SID:", message.sid);
+    console.log("✅ OTP sent via Twilio. SID:", message.sid);
     return message;
   } catch (err) {
     console.error("❌ Twilio send error:", err);
-    if (err.code) console.error("Twilio error code:", err.code);
-    if (err.moreInfo) console.error("More info:", err.moreInfo);
     throw new Error("Failed to send OTP via Twilio");
   }
 }

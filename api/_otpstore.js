@@ -1,62 +1,30 @@
+// _otpstore.js
 import db from "./_db.js";
 
-/**
- * Save OTP
- */
+// Save OTP in DB
 export async function saveOTP(username, otp, expiresAt, role) {
   const cleanRole = role.toLowerCase();
-  const trimmedUsername = username.trim();
 
-  // Delete old OTPs first
-  await db.execute(
-    "DELETE FROM otps WHERE username = ? AND role = ?",
-    [trimmedUsername, cleanRole]
-  );
+  // Delete previous OTPs for the user
+  await db.execute("DELETE FROM otps WHERE username = ? AND role = ?", [
+    username,
+    cleanRole,
+  ]);
 
   // Insert new OTP
   await db.execute(
-    `INSERT INTO otps (username, role, otp, expires_at)
-     VALUES (?, ?, ?, ?)`,
-    [trimmedUsername, cleanRole, otp, expiresAt]
+    "INSERT INTO otps (username, role, otp, expires_at) VALUES (?, ?, ?, ?)",
+    [username, cleanRole, otp, expiresAt]
   );
 
-  console.log("✅ OTP SAVED:", { username: trimmedUsername, role: cleanRole, otp, expiresAt });
+  console.log("✅ OTP SAVED:", { username, cleanRole, otp, expiresAt });
 }
 
-/**
- * Verify OTP
- */
-export async function verifyOTP(username, otp, role) {
-  const cleanRole = role.toLowerCase();
-  const trimmedUsername = username.trim();
-
-  const [rows] = await db.execute(
-    `SELECT id, otp, expires_at FROM otps
-     WHERE username = ? AND role = ?
-     ORDER BY created_at DESC
-     LIMIT 1`,
-    [trimmedUsername, cleanRole]
-  );
-
-  if (rows.length === 0) return { valid: false, reason: "OTP_NOT_FOUND" };
-
-  const dbOTP = String(rows[0].otp).trim();
-  const userOTP = String(otp).trim();
-
-  if (dbOTP !== userOTP) return { valid: false, reason: "OTP_MISMATCH" };
-  if (new Date(rows[0].expires_at) < new Date()) return { valid: false, reason: "OTP_EXPIRED" };
-
-  return { valid: true, otpId: rows[0].id };
-}
-
-/**
- * Delete OTP after success
- */
+// Delete OTP after successful reset
 export async function deleteOTP(username, role) {
   const cleanRole = role.toLowerCase();
-  const trimmedUsername = username.trim();
-  await db.execute(
-    "DELETE FROM otps WHERE username = ? AND role = ?",
-    [trimmedUsername, cleanRole]
-  );
+  await db.execute("DELETE FROM otps WHERE username = ? AND role = ?", [
+    username,
+    cleanRole,
+  ]);
 }
