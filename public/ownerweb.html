@@ -260,26 +260,28 @@ async function loadMyItems() {
 
   d.items.forEach(i => {
     box.innerHTML += `
-      <div class="card">
-        <b>${i.shop_name}</b><br><br>
+      <div class="card" style="display:flex; align-items:center; gap:12px; padding:12px;">
+        ${i.image_url ? `<img src="${i.image_url}" class="item-img" style="width:80px; height:80px;">` : 
+        `<div style="width:80px; height:80px; background:rgba(255,255,255,0.1); border-radius:10px; display:flex; align-items:center; justify-content:center;">No Img</div>`}
 
-        <input id="name-${i.item_id}" value="${i.item_name}">
-        <input type="number" id="price-${i.item_id}" value="${i.price_per_day}">
-        <input id="img-${i.item_id}" placeholder="Image URL" value="${i.image_url || ""}">
+        <div style="flex:1; display:flex; flex-direction:column; gap:4px;">
+          <b>${i.shop_name}</b>
+          <input id="name-${i.item_id}" value="${i.item_name}" style="padding:6px; border-radius:8px; border:none; background:#020617; color:#fff; width:100%;" placeholder="Item Name">
+          <div style="display:flex; gap:6px;">
+            <input type="number" id="price-${i.item_id}" value="${i.price_per_day}" style="padding:6px; border-radius:8px; border:none; background:#020617; color:#fff; flex:1;" placeholder="Price/day">
+            <select id="status-${i.item_id}" style="padding:6px; border-radius:8px; border:none; background:#020617; color:#fff;">
+              <option value="1" ${i.is_active ? "selected" : ""}>Active</option>
+              <option value="0" ${!i.is_active ? "selected" : ""}>Inactive</option>
+            </select>
+          </div>
+        </div>
 
-        <select id="status-${i.item_id}">
-          <option value="1" ${i.is_active ? "selected" : ""}>Active</option>
-          <option value="0" ${!i.is_active ? "selected" : ""}>Inactive</option>
-        </select>
-
-        ${i.image_url ? `<br><img src="${i.image_url}" style="width:120px;border-radius:10px">` : ""}
-
-        <br><br>
-        <button class="primary" onclick="updateItem(${i.item_id})">Update</button>
+        <button class="primary" style="padding:8px 12px; height:fit-content;" onclick="updateItem(${i.item_id})">Update</button>
       </div>
     `;
   });
 }
+
 
 async function updateItem(item_id) {
   const data = {
