@@ -50,11 +50,12 @@ if (req.method === "POST" && req.body.action === "getItems") {
         location,
         is_active,
         image_url
-     FROM items
-     WHERE category = ? AND location = ?
-     ORDER BY item_id DESC`,
-    [category, location]
-  );
+      FROM items
+      WHERE LOWER(TRIM(category)) = LOWER(TRIM(?))
+      AND LOWER(TRIM(location)) = LOWER(TRIM(?))
+      ORDER BY item_id DESC`,
+      [category, location]
+    );
 
   return res.json({ success: true, items });
 }

@@ -355,8 +355,8 @@ async function loadLocations(){
   const d = await res.json();
   locationSelect.innerHTML=`<option value="">Select location</option>`;
   d.locations.forEach(l=>{
-    locationSelect.innerHTML+=`<option>${l}</option>`;
-  });
+  locationSelect.innerHTML+=`<option value="${l.trim()}">${l}</option>`;
+});
 }
 
 async function loadItems(category){
