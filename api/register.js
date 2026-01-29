@@ -1,44 +1,37 @@
 import db from "./_db.js";
 import bcrypt from "bcryptjs";
 
-export default async function handler(req, res){
-  if(req.method !== "POST"){
-    return res.status(405).json({ success:false, message:"Method not allowed" });
-  }
+export default async function handler(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ success: false, message: "Method not allowed" });
 
   const { name, username, password, aadhaar, phone, role } = req.body;
 
-  if(!name || !username || !password || !aadhaar || !phone || !role){
-    return res.status(400).json({ success:false, message:"All fields are required" });
+  if (!name || !username || !password || !aadhaar || !phone || !role) {
+    return res.status(400).json({ success: false, message: "All fields are required" });
   }
 
   try {
-    // Check table columns
-    const [cols] = await db.query("SHOW COLUMNS FROM users");
-    const colNames = cols.map(c => c.Field);
-    if(!colNames.includes("name") || !colNames.includes("username") || !colNames.includes("password")){
-      return res.status(500).json({ success:false, message:"Database columns missing in users table" });
+    const table = role === "owner" ? "owners" : "customers";
+
+    // Check if username already exists
+    const [exists] = await db.execute(`SELECT * FROM ${table} WHERE username = ?`, [username]);
+    if (exists.length > 0) {
+      return res.json({ success: false, message: "Username already taken" });
     }
 
-    // Check if username exists
-    const [existing] = await db.query("SELECT username FROM users WHERE username=?", [username]);
-    if(existing.length > 0){
-      return res.status(400).json({ success:false, message:"Username already exists" });
-    }
-
-    // Hash password
     const hashed = bcrypt.hashSync(password, 10);
 
-    // Insert user
-    const [result] = await db.query(
-      `INSERT INTO users (name, username, password, aadhaar, phone, role) VALUES (?, ?, ?, ?, ?, ?)`,
-      [name.trim(), username.trim(), hashed, aadhaar.trim(), phone.trim(), role.trim()]
+    const [result] = await db.execute(
+      `INSERT INTO ${table} (name, username, password, aadhaar, phone) VALUES (?, ?, ?, ?, ?)`,
+      [name, username, hashed, aadhaar, phone]
     );
 
-    return res.status(200).json({ success:true, user_id: result.insertId });
+    const user_id = result.insertId;
 
-  } catch(err){
-    console.error("❌ Registration Error:", err.message);
-    return res.status(500).json({ success:false, message:"Registration failed: " + err.message });
+    res.json({ success: true, user_id });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: "Registration failed" });
   }
 }
