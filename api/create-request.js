@@ -113,9 +113,6 @@ export default async function handler(req, res) {
       return res.json({ success: true, message: `Booking ${status}` });
     }
 
-    /* =====================================================
-       METHOD NOT ALLOWED
-    ===================================================== */
     return res.status(405).json({ success: false, message: "Method not allowed" });
 
   } catch (err) {
