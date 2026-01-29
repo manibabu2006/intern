@@ -204,7 +204,7 @@ confirmBtn.onclick = async ()=>{
 ========================== */
 async function loadLocations(){
   try{
-    const res = await fetch("/api/items");
+    const res = await fetch("/api/create-request", { method: "POST" }); // <--- fix here
     const d = await res.json();
 
     const locSelect = document.getElementById("location");
@@ -215,15 +215,17 @@ async function loadLocations(){
       return;
     }
 
-    const unique = [...new Set(d.items.map(i=>i.location))];
-    unique.forEach(l=>{
+    const unique = [...new Set(d.items.map(i => i.location))]; // get unique locations
+    unique.forEach(l => {
       locSelect.innerHTML += `<option value="${l}">${l}</option>`;
     });
 
-  }catch{
+  } catch(err){
+    console.error("Error loading locations:", err);
     document.getElementById("location").innerHTML = `<option>Error loading locations</option>`;
   }
 }
+
 
 /* ==========================
    LOAD ITEMS
