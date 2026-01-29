@@ -1,14 +1,5 @@
-import mysql from "mysql2/promise";
+import db from "./_db.js";
 import bcrypt from "bcryptjs";
-
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-  ssl: { rejectUnauthorized: false }
-});
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -16,25 +7,26 @@ export default async function handler(req, res) {
   }
 
   const { username, password } = req.body;
-
   if (!username || !password) {
     return res.status(400).json({ success: false, message: "All fields are required" });
   }
 
   try {
+    const trimmedUsername = username.trim();
+
     // 1️⃣ Check OWNER
-    let [rows] = await pool.query(
+    let [rows] = await db.execute(
       "SELECT owner_id AS id, username, password, name FROM owners WHERE username = ?",
-      [username]
+      [trimmedUsername]
     );
 
     let role = "owner";
 
     // 2️⃣ If not owner → check CUSTOMER
     if (rows.length === 0) {
-      [rows] = await pool.query(
+      [rows] = await db.execute(
         "SELECT customer_id AS id, username, password, name FROM customers WHERE username = ?",
-        [username]
+        [trimmedUsername]
       );
       role = "customer";
     }
@@ -57,9 +49,8 @@ export default async function handler(req, res) {
       name: user.name,
       role
     });
-
   } catch (err) {
-    console.error("Login error:", err);
-    return res.status(500).json({ success: false, message: "Database error" });
+    console.error("LOGIN ERROR:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 }

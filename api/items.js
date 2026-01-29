@@ -2,38 +2,30 @@ import db from "./_db.js";
 
 export default async function handler(req, res) {
   try {
-
     /* ================= GET ALL LOCATIONS ================= */
-    // GET /api/items → returns all unique active locations
     if (req.method === "GET" && !req.query.owner_id) {
       const [rows] = await db.execute(
         `SELECT DISTINCT location FROM items WHERE is_active=1 ORDER BY location`
       );
-
       const locations = rows.map(r => r.location);
       return res.json({ success: true, locations });
     }
 
     /* ================= GET ITEMS BY OWNER ================= */
-    // GET /api/items?owner_id=123
     if (req.method === "GET" && req.query.owner_id) {
       const owner_id = Number(req.query.owner_id);
-
       const [items] = await db.execute(
         `SELECT item_id, shop_name, item_name, category, price_per_day, location, is_active, image_url
          FROM items
          WHERE owner_id = ? ORDER BY item_id DESC`,
         [owner_id]
       );
-
       return res.json({ success: true, items });
     }
 
     /* ================= GET ITEMS BY CATEGORY & LOCATION ================= */
-    // POST /api/items { action: "getItems", category, location }
     if (req.method === "POST" && req.body.action === "getItems") {
       const { category, location } = req.body;
-
       if (!category || !location) {
         return res.status(400).json({ success: false, message: "Category and location required" });
       }
@@ -45,7 +37,6 @@ export default async function handler(req, res) {
          ORDER BY item_id DESC`,
         [category, location]
       );
-
       return res.json({ success: true, items });
     }
 
@@ -65,10 +56,10 @@ export default async function handler(req, res) {
           Number(owner_id),
           shop_name.trim(),
           item_name.trim(),
-          category,
+          category.trim(),
           Number(price_per_day),
           location.trim(),
-          image_url || null,
+          image_url?.trim() || null,
           Number(is_active) === 1 ? 1 : 0
         ]
       );
@@ -84,22 +75,17 @@ export default async function handler(req, res) {
         return res.status(400).json({ success: false, message: "Missing required fields" });
       }
 
-      const itemIdNum = Number(item_id);
-      const ownerIdNum = Number(owner_id);
-      const priceNum = Number(price_per_day);
-      const activeFlag = Number(is_active) === 1 ? 1 : 0;
-
       const [result] = await db.execute(
         `UPDATE items
          SET item_name=?, price_per_day=?, is_active=?, image_url=?
          WHERE item_id=? AND owner_id=?`,
         [
           item_name.trim(),
-          priceNum,
-          activeFlag,
+          Number(price_per_day),
+          Number(is_active) === 1 ? 1 : 0,
           image_url?.trim() || null,
-          itemIdNum,
-          ownerIdNum
+          Number(item_id),
+          Number(owner_id)
         ]
       );
 
@@ -111,7 +97,6 @@ export default async function handler(req, res) {
     }
 
     res.status(405).json({ success: false, message: "Method not allowed" });
-
   } catch (err) {
     console.error(err);
     return res.status(500).json({ success: false, message: "Server error" });

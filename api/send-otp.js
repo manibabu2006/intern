@@ -1,4 +1,3 @@
-// send-otp.js
 import db from "./_db.js";
 import { saveOTP } from "./_otpstore.js";
 import { sendOTP } from "./_twilio.js";
@@ -11,15 +10,18 @@ export default async function handler(req, res) {
   }
 
   const { username, role } = req.body;
-
   if (!username || !role) {
     return res.status(400).json({ success: false, message: "Username and role are required" });
   }
 
   try {
-    const table = role === "owner" ? "owners" : "customers";
+    const cleanRole = role.toLowerCase();
+    const table = cleanRole === "owner" ? "owners" : "customers";
 
-    const [rows] = await db.query(`SELECT phone FROM ${table} WHERE username = ?`, [username]);
+    const [rows] = await db.execute(
+      `SELECT phone FROM ${table} WHERE username = ?`,
+      [username.trim()]
+    );
 
     if (rows.length === 0) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -33,9 +35,9 @@ export default async function handler(req, res) {
     const otp = Math.floor(100000 + Math.random() * 900000);
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
-    await saveOTP(username, otp, expiresAt, role);
+    await saveOTP(username.trim(), otp, expiresAt, cleanRole);
     console.log("OTP saved, now sending SMS...");
-    await sendOTP(mobile, otp); // will throw error if Twilio not set
+    await sendOTP(mobile, otp);
 
     res.status(200).json({ success: true, message: "OTP sent successfully" });
   } catch (err) {

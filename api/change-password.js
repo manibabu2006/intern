@@ -1,64 +1,51 @@
-import mysql from "mysql2/promise";
+import db from "./_db.js";
 import bcrypt from "bcryptjs";
 
-/* ---------- DB CONNECTION ---------- */
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
-  port: process.env.DB_PORT,
-  ssl: { rejectUnauthorized: false }
-});
-
-/* ---------- CHANGE PASSWORD HANDLER ---------- */
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).send("Method not allowed");
+    return res.status(405).json({ success: false, message: "Method not allowed" });
   }
 
   const { username, role, currentPassword, newPassword } = req.body;
-
   if (!username || !role || !currentPassword || !newPassword) {
-    return res.status(400).send("All fields are required");
+    return res.status(400).json({ success: false, message: "All fields are required" });
   }
 
   try {
-    // Determine table based on role
-    const table = role === "owner" ? "owners" : "customers";
+    const cleanRole = role.toLowerCase();
+    const table = cleanRole === "owner" ? "owners" : "customers";
 
-    /* 1. Get user password */
-    const [rows] = await pool.query(
-      `SELECT ${role === "owner" ? "owner_id" : "customer_id"} AS id, password 
+    // 1️⃣ Get user password
+    const [rows] = await db.execute(
+      `SELECT ${cleanRole === "owner" ? "owner_id" : "customer_id"} AS id, password 
        FROM ${table} WHERE username = ?`,
-      [username]
+      [username.trim()]
     );
 
     if (rows.length === 0) {
-      return res.status(404).send("User not found");
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
     const user = rows[0];
 
-    /* 2. Verify current password */
-    const isMatch = bcrypt.compareSync(currentPassword, user.password);
+    // 2️⃣ Verify current password asynchronously
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
-      return res.status(401).send("Current password is incorrect");
+      return res.status(401).json({ success: false, message: "Current password is incorrect" });
     }
 
-    /* 3. Hash new password */
-    const hashedPassword = bcrypt.hashSync(newPassword, 10);
+    // 3️⃣ Hash new password asynchronously
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    /* 4. Update password */
-    await pool.query(
+    // 4️⃣ Update password
+    await db.execute(
       `UPDATE ${table} SET password = ? WHERE username = ?`,
-      [hashedPassword, username]
+      [hashedPassword, username.trim()]
     );
 
-    return res.status(200).send("Password changed successfully");
-
+    return res.status(200).json({ success: true, message: "Password changed successfully" });
   } catch (err) {
-    console.error("Change password error:", err);
-    return res.status(500).send("Database error");
+    console.error("CHANGE PASSWORD ERROR:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 }
