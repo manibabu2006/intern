@@ -13,6 +13,13 @@ export default async function handler(req, res){
   }
 
   try {
+    // Check table columns
+    const [cols] = await db.query("SHOW COLUMNS FROM users");
+    const colNames = cols.map(c => c.Field);
+    if(!colNames.includes("name") || !colNames.includes("username") || !colNames.includes("password")){
+      return res.status(500).json({ success:false, message:"Database columns missing in users table" });
+    }
+
     // Check if username exists
     const [existing] = await db.query("SELECT username FROM users WHERE username=?", [username]);
     if(existing.length > 0){
@@ -25,12 +32,13 @@ export default async function handler(req, res){
     // Insert user
     const [result] = await db.query(
       `INSERT INTO users (name, username, password, aadhaar, phone, role) VALUES (?, ?, ?, ?, ?, ?)`,
-      [name.trim(), username.trim(), hashed, aadhaar.trim(), phone.trim(), role]
+      [name.trim(), username.trim(), hashed, aadhaar.trim(), phone.trim(), role.trim()]
     );
 
     return res.status(200).json({ success:true, user_id: result.insertId });
+
   } catch(err){
-    console.error(err);
-    return res.status(500).json({ success:false, message:"Registration failed" });
+    console.error("❌ Registration Error:", err.message);
+    return res.status(500).json({ success:false, message:"Registration failed: " + err.message });
   }
 }
