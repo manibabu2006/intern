@@ -7,7 +7,7 @@ export async function saveOTP(username, otp, expiresAt, role) {
   const cleanRole = role.toLowerCase();
   const trimmedUsername = username.trim();
 
-  // Delete old OTPs first (important)
+  // Delete old OTPs first
   await db.execute(
     "DELETE FROM otps WHERE username = ? AND role = ?",
     [trimmedUsername, cleanRole]
@@ -31,7 +31,7 @@ export async function verifyOTP(username, otp, role) {
   const trimmedUsername = username.trim();
 
   const [rows] = await db.execute(
-    `SELECT otp, expires_at FROM otps
+    `SELECT id, otp, expires_at FROM otps
      WHERE username = ? AND role = ?
      ORDER BY created_at DESC
      LIMIT 1`,
@@ -46,11 +46,11 @@ export async function verifyOTP(username, otp, role) {
   if (dbOTP !== userOTP) return { valid: false, reason: "OTP_MISMATCH" };
   if (new Date(rows[0].expires_at) < new Date()) return { valid: false, reason: "OTP_EXPIRED" };
 
-  return { valid: true };
+  return { valid: true, otpId: rows[0].id };
 }
 
 /**
- * Delete OTP (after success)
+ * Delete OTP after success
  */
 export async function deleteOTP(username, role) {
   const cleanRole = role.toLowerCase();

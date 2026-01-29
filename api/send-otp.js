@@ -2,6 +2,7 @@ import db from "./_db.js";
 import { saveOTP } from "./_otpstore.js";
 import { sendOTP } from "./_twilio.js";
 import dotenv from "dotenv";
+
 dotenv.config();
 
 export default async function handler(req, res) {
@@ -32,16 +33,17 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, message: "No mobile linked with this user" });
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    const otp = Math.floor(100000 + Math.random() * 900000); // 6-digit
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 mins
 
     await saveOTP(username.trim(), otp, expiresAt, cleanRole);
-    console.log("OTP saved, now sending SMS...");
+
+    console.log("OTP saved, sending SMS...");
     await sendOTP(mobile, otp);
 
-    res.status(200).json({ success: true, message: "OTP sent successfully" });
+    return res.status(200).json({ success: true, message: "OTP sent successfully" });
   } catch (err) {
     console.error("SEND OTP ERROR:", err);
-    res.status(500).json({ success: false, message: err.message || "Failed to send OTP" });
+    return res.status(500).json({ success: false, message: err.message || "Failed to send OTP" });
   }
 }
