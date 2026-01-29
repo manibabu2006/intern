@@ -30,9 +30,9 @@ button{padding:8px 12px;border:none;border-radius:10px;font-weight:600;cursor:po
 <body>
 
 <header>
-  <h2>🚀 RentHub – Customer</h2>
-  <div>Welcome, <b id="customerName"></b></div>
-  <button onclick="logout()">Logout</button>
+<h2>🚀 RentHub – Customer</h2>
+<div>Welcome, <b id="customerName"></b></div>
+<button onclick="logout()">Logout</button>
 </header>
 
 <div class="container">
@@ -73,7 +73,6 @@ const customerName=document.getElementById("customerName");
 const locationSelect=document.getElementById("location");
 const items=document.getElementById("items");
 const history=document.getElementById("history");
-
 customerName.innerText = localStorage.getItem("name") || "Customer";
 
 function logout(){ localStorage.clear(); location.href="index.html"; }
@@ -92,8 +91,8 @@ confirmBtn.onclick = async ()=>{
   try{
     const res = await fetch("/api/create-request",{
       method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ item_id:selectedItem, customer_id:customerId, rental_duration:duration.value })
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({ action:"createBooking", item_id:selectedItem, customer_id:customerId, rental_duration:duration.value })
     });
     const d = await res.json();
     if(d.success){ alert("✅ Booking sent"); closeBooking(); loadHistory(); } 
@@ -103,12 +102,11 @@ confirmBtn.onclick = async ()=>{
 
 async function loadLocations(){
   try{
-    const res = await fetch("/api/items");
+    const res = await fetch("/api/items"); // GET request
     const d = await res.json();
     locationSelect.innerHTML=`<option value="">Select location</option>`;
-    if(!d.success || !d.items || !d.items.length){ locationSelect.innerHTML+=`<option>No locations found</option>`; return; }
-    const uniqueLocations = [...new Set(d.items.map(i=>i.location))];
-    uniqueLocations.forEach(l=>{ locationSelect.innerHTML+=`<option value="${l}">${l}</option>`; });
+    if(!d.success || !d.locations?.length){ locationSelect.innerHTML+=`<option>No locations found</option>`; return; }
+    d.locations.forEach(l=>{ locationSelect.innerHTML+=`<option value="${l}">${l}</option>`; });
   }catch{ locationSelect.innerHTML=`<option>Error loading locations</option>`; }
 }
 
@@ -117,12 +115,12 @@ async function loadItems(category){
   try{
     const res = await fetch("/api/items",{
       method:"POST",
-      headers:{ "Content-Type":"application/json" },
+      headers:{"Content-Type":"application/json"},
       body:JSON.stringify({ action:"getItems", category, location:locationSelect.value })
     });
     const d = await res.json();
     items.innerHTML="";
-    if(!d.success || !d.items || !d.items.length){ items.innerHTML="<p>No items found</p>"; return; }
+    if(!d.success || !d.items?.length){ items.innerHTML="<p>No items found</p>"; return; }
     d.items.forEach(i=>{
       items.innerHTML+=`<div class="card"><h4>${i.item_name}</h4><p>₹${i.price_per_day}/day</p><p>${i.shop_name}</p><button class="primary" onclick="openBooking(${i.item_id})">Book</button></div>`;
     });
@@ -134,7 +132,7 @@ async function loadHistory(){
     const res=await fetch(`/api/create-request?customer_id=${customerId}`);
     const d=await res.json();
     history.innerHTML="";
-    if(!d.success || !d.history || !d.history.length){ history.innerHTML="<p>No bookings yet</p>"; return; }
+    if(!d.success || !d.history?.length){ history.innerHTML="<p>No bookings yet</p>"; return; }
     d.history.forEach(b=>{
       history.innerHTML+=`<div class="card"><b>${b.item_name}</b><br>${b.shop_name}<br>Days: ${b.rental_duration}<br>Status: <span class="${b.status}">${b.status}</span></div>`;
     });

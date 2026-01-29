@@ -52,14 +52,14 @@ button:hover{background:#0ea5e9;}
 
 <script>
 const ownerId = localStorage.getItem("owner_id");
-if(!ownerId){ alert("Please login first"); location.href="index.html"; }
+if(!ownerId){ alert("Login first"); location.href="index.html"; }
 document.getElementById("ownerName").innerText = localStorage.getItem("name") || "Owner";
 
-const shop_name = document.getElementById("shop_name");
-const item_name = document.getElementById("item_name");
-const category = document.getElementById("category");
-const price_per_day = document.getElementById("price_per_day");
-const locationInput = document.getElementById("location");
+const shop_name=document.getElementById("shop_name");
+const item_name=document.getElementById("item_name");
+const category=document.getElementById("category");
+const price_per_day=document.getElementById("price_per_day");
+const locationInput=document.getElementById("location");
 
 document.getElementById("addItemBtn").onclick = async ()=>{
   const data = {
@@ -70,14 +70,12 @@ document.getElementById("addItemBtn").onclick = async ()=>{
     price_per_day: price_per_day.value,
     location: locationInput.value.trim()
   };
-  if(Object.values(data).some(v=>!v)){
-    alert("Fill all fields");
-    return;
-  }
+  if(Object.values(data).some(v=>!v)){ alert("Fill all fields"); return; }
+
   try{
-    const res = await fetch("/api/items",{
+    const res = await fetch("/api/items", {
       method:"POST",
-      headers:{ "Content-Type":"application/json" },
+      headers:{"Content-Type":"application/json"},
       body:JSON.stringify(data)
     });
     const d = await res.json();
@@ -86,11 +84,8 @@ document.getElementById("addItemBtn").onclick = async ()=>{
       shop_name.value=item_name.value=price_per_day.value=locationInput.value="";
       category.value="";
       loadAll();
-    } else alert(d.message || "Failed to add item");
-  }catch(err){
-    console.error(err);
-    alert("Server error");
-  }
+    } else alert(d.message || "Failed");
+  }catch(err){ console.error(err); alert("Server error"); }
 };
 
 async function loadAll(){
@@ -101,57 +96,41 @@ async function loadAll(){
     const histBox=document.getElementById("history");
     reqBox.innerHTML="";
     histBox.innerHTML="";
-    if(!d.success || !d.requests || !d.requests.length){
-      reqBox.innerHTML="<p>No booking requests</p>";
-      histBox.innerHTML="<p>No booking history</p>";
-      return;
-    }
+    if(!d.success || !d.requests?.length){ reqBox.innerHTML="<p>No booking requests</p>"; histBox.innerHTML="<p>No booking history</p>"; return; }
+
     let hasPending=false, hasHistory=false;
     d.requests.forEach(r=>{
       if(r.status==="Pending"){
         hasPending=true;
-        reqBox.innerHTML+=`
-        <div class="request">
-          <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
-          Days: ${r.rental_duration}<br>
-          Phone: ${r.phone}<br><br>
-          <button class="accept" onclick="respond(${r.booking_id},'Accepted')">Accept</button>
-          <button class="reject" onclick="respond(${r.booking_id},'Rejected')">Reject</button>
-        </div>`;
+        reqBox.innerHTML+=`<div class="request"><b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
+        Days: ${r.rental_duration}<br>Phone: ${r.phone}<br><br>
+        <button class="accept" onclick="respond(${r.booking_id},'Accepted')">Accept</button>
+        <button class="reject" onclick="respond(${r.booking_id},'Rejected')">Reject</button></div>`;
       } else {
         hasHistory=true;
-        histBox.innerHTML+=`
-        <div class="card">
-          <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
-          Days: ${r.rental_duration}<br>
-          Status: <span class="status-${r.status}"><b>${r.status}</b></span>
-        </div>`;
+        histBox.innerHTML+=`<div class="card"><b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
+        Days: ${r.rental_duration}<br>Status: <span class="status-${r.status}"><b>${r.status}</b></span></div>`;
       }
     });
     if(!hasPending) reqBox.innerHTML="<p>No pending requests</p>";
     if(!hasHistory) histBox.innerHTML="<p>No booking history</p>";
-  }catch(err){
-    console.error(err);
-    alert("Failed to load requests/history");
-  }
+  }catch(err){ console.error(err); alert("Failed to load requests/history"); }
 }
 
 async function respond(booking_id,status){
   try{
     const res = await fetch("/api/create-request",{
       method:"PUT",
-      headers:{ "Content-Type":"application/json" },
-      body: JSON.stringify({ booking_id, status })
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({booking_id,status})
     });
     const d = await res.json();
-    if(d.success) loadAll();
-    else alert(d.message || "Action failed");
-  }catch{
-    alert("Server error");
-  }
+    if(d.success) loadAll(); else alert(d.message || "Action failed");
+  }catch{ alert("Server error"); }
 }
 
 loadAll();
+function logout(){ localStorage.clear(); location.href="index.html"; }
 </script>
 </body>
 </html>
