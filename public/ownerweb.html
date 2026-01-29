@@ -163,6 +163,13 @@ img.item-img{
     <button id="addItemBtn" class="primary">Add Item</button>
   </div>
 
+  <!-- ===== MY ITEMS ===== -->
+<div class="section">
+  <h3>My Items</h3>
+  <div id="myItems"></div>
+</div>
+
+
   <!-- REQUESTS -->
   <div class="section">
     <h3>Pending Requests</h3>
@@ -178,22 +185,24 @@ img.item-img{
 </main>
 
 <script>
+/* ================= AUTH ================= */
 const ownerId = localStorage.getItem("owner_id");
-if(!ownerId){
+if (!ownerId) {
   alert("Login first");
-  location.href="index.html";
+  location.href = "index.html";
 }
 
 document.getElementById("ownerName").innerText =
   localStorage.getItem("name") || "Owner";
 
-const shop_name=document.getElementById("shop_name");
-const item_name=document.getElementById("item_name");
-const category=document.getElementById("category");
-const price_per_day=document.getElementById("price_per_day");
-const locationInput=document.getElementById("location");
-const image_url=document.getElementById("image_url");
-const is_active=document.getElementById("is_active");
+/* ================= ADD ITEM ================= */
+const shop_name = document.getElementById("shop_name");
+const item_name = document.getElementById("item_name");
+const category = document.getElementById("category");
+const price_per_day = document.getElementById("price_per_day");
+const locationInput = document.getElementById("location");
+const image_url = document.getElementById("image_url");
+const is_active = document.getElementById("is_active");
 
 document.getElementById("addItemBtn").onclick = async () => {
   const data = {
@@ -204,7 +213,7 @@ document.getElementById("addItemBtn").onclick = async () => {
     price_per_day: price_per_day.value,
     location: locationInput.value.trim(),
     image_url: image_url.value.trim() || null,
-    is_active: is_active.value
+    is_active: is_active.value === "1" ? 1 : 0
   };
 
   if (!data.shop_name || !data.item_name || !data.category ||
@@ -222,12 +231,12 @@ document.getElementById("addItemBtn").onclick = async () => {
 
     const d = await res.json();
     if (d.success) {
-      alert("✅ Item added successfully");
+      alert("✅ Item added");
       shop_name.value = item_name.value = price_per_day.value =
       locationInput.value = image_url.value = "";
       category.value = "";
       is_active.value = "1";
-      loadAll();
+      loadMyItems();
     } else {
       alert(d.message || "Failed to add item");
     }
@@ -236,26 +245,88 @@ document.getElementById("addItemBtn").onclick = async () => {
   }
 };
 
-async function loadAll(){
-  try{
+/* ================= MY ITEMS ================= */
+async function loadMyItems() {
+  const res = await fetch(`/api/items?owner_id=${ownerId}`);
+  const d = await res.json();
+  const box = document.getElementById("myItems");
+
+  box.innerHTML = "";
+
+  if (!d.success || !d.items.length) {
+    box.innerHTML = "<p>No items added yet</p>";
+    return;
+  }
+
+  d.items.forEach(i => {
+    box.innerHTML += `
+      <div class="card">
+        <b>${i.shop_name}</b><br><br>
+
+        <input id="name-${i.item_id}" value="${i.item_name}">
+        <input type="number" id="price-${i.item_id}" value="${i.price_per_day}">
+        <input id="img-${i.item_id}" placeholder="Image URL" value="${i.image_url || ""}">
+
+        <select id="status-${i.item_id}">
+          <option value="1" ${i.is_active ? "selected" : ""}>Active</option>
+          <option value="0" ${!i.is_active ? "selected" : ""}>Inactive</option>
+        </select>
+
+        ${i.image_url ? `<br><img src="${i.image_url}" style="width:120px;border-radius:10px">` : ""}
+
+        <br><br>
+        <button class="primary" onclick="updateItem(${i.item_id})">Update</button>
+      </div>
+    `;
+  });
+}
+
+async function updateItem(item_id) {
+  const data = {
+    item_id,
+    owner_id: ownerId,
+    item_name: document.getElementById(`name-${item_id}`).value.trim(),
+    price_per_day: document.getElementById(`price-${item_id}`).value,
+    image_url: document.getElementById(`img-${item_id}`).value.trim() || null,
+    is_active: document.getElementById(`status-${item_id}`).value
+  };
+
+  const res = await fetch("/api/items", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+
+  const d = await res.json();
+  if (d.success) {
+    alert("✅ Item updated");
+    loadMyItems();
+  } else {
+    alert("Update failed");
+  }
+}
+
+/* ================= BOOKINGS ================= */
+async function loadAll() {
+  try {
     const res = await fetch(`/api/create-request?owner_id=${ownerId}`);
     const d = await res.json();
 
-    const reqBox=document.getElementById("requests");
-    const histBox=document.getElementById("history");
+    const reqBox = document.getElementById("requests");
+    const histBox = document.getElementById("history");
 
-    reqBox.innerHTML="";
-    histBox.innerHTML="";
+    reqBox.innerHTML = "";
+    histBox.innerHTML = "";
 
-    if(!d.success || !d.requests?.length){
-      reqBox.innerHTML="<p>No booking requests</p>";
-      histBox.innerHTML="<p>No booking history</p>";
+    if (!d.success || !d.requests?.length) {
+      reqBox.innerHTML = "<p>No booking requests</p>";
+      histBox.innerHTML = "<p>No booking history</p>";
       return;
     }
 
-    d.requests.forEach(r=>{
-      if(r.status==="Pending"){
-        reqBox.innerHTML+=`
+    d.requests.forEach(r => {
+      if (r.status === "Pending") {
+        reqBox.innerHTML += `
           <div class="request">
             <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
             Days: ${r.rental_duration}<br>
@@ -264,39 +335,39 @@ async function loadAll(){
             <button class="reject" onclick="respond(${r.booking_id},'Rejected')">Reject</button>
           </div>`;
       } else {
-        histBox.innerHTML+=`
+        histBox.innerHTML += `
           <div class="card">
             <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
             Days: ${r.rental_duration}<br>
             Status: <span class="status-${r.status}">${r.status}</span>
-            ${r.image_url ? `<img src="${r.image_url}" class="item-img">` : ""}
           </div>`;
       }
     });
-  }catch{
+  } catch {
     alert("Failed to load data");
   }
 }
 
-async function respond(booking_id,status){
-  const res = await fetch("/api/create-request",{
-    method:"PUT",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({booking_id,status})
+async function respond(booking_id, status) {
+  const res = await fetch("/api/create-request", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ booking_id, status })
   });
 
   const d = await res.json();
-  if(d.success) loadAll();
+  if (d.success) loadAll();
   else alert("Action failed");
 }
 
+/* ================= INIT ================= */
 loadAll();
+loadMyItems();
 
-function logout(){
+function logout() {
   localStorage.clear();
-  location.href="index.html";
+  location.href = "index.html";
 }
 </script>
-
 </body>
 </html>
