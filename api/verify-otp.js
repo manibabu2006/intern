@@ -3,7 +3,10 @@ import db from "./_db.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ success: false });
+    return res.status(405).json({
+      success: false,
+      message: "Method not allowed"
+    });
   }
 
   const { username, role, otp } = req.body;
@@ -11,27 +14,31 @@ export default async function handler(req, res) {
   if (!username || !role || !otp) {
     return res.status(400).json({
       success: false,
-      message: "Missing fields"
+      message: "Username, role and OTP are required"
     });
   }
+
+  // 🔑 normalize role
+  const cleanRole = role.toLowerCase();
 
   try {
     const [rows] = await db.query(
       `SELECT id, otp, expires_at FROM otps
        WHERE username = ? AND role = ?
+       ORDER BY created_at DESC
        LIMIT 1`,
-      [username, role]
+      [username, cleanRole]
     );
 
     if (rows.length === 0) {
       return res.status(400).json({
         success: false,
-        message: "Invalid OTP"
+        message: "Invalid or expired OTP"
       });
     }
 
-    const dbOTP = rows[0].otp.toString().trim();
-    const userOTP = otp.toString().trim();
+    const dbOTP = String(rows[0].otp).trim();
+    const userOTP = String(otp).trim();
 
     if (dbOTP !== userOTP) {
       return res.status(400).json({
@@ -41,17 +48,16 @@ export default async function handler(req, res) {
     }
 
     if (new Date(rows[0].expires_at) < new Date()) {
-      await db.query("DELETE FROM otps WHERE id = ?", [rows[0].id]);
       return res.status(400).json({
         success: false,
         message: "OTP expired"
       });
     }
 
-    // single-use OTP
-    await db.query("DELETE FROM otps WHERE id = ?", [rows[0].id]);
+    // ❌ DO NOT DELETE OTP HERE
+    // OTP will be deleted after password reset
 
-    return res.json({
+    return res.status(200).json({
       success: true,
       message: "OTP verified successfully"
     });
