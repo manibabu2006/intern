@@ -111,9 +111,10 @@ button{
   display:none;
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,0.7);
+  background:rgba(0,0,0,0.75);
   justify-content:center;
   align-items:center;
+  z-index:1000;
 }
 
 .modal-content{
@@ -125,43 +126,57 @@ button{
   border:1px solid var(--border);
 }
 
-.modal-content input{
+.modal-content h3{
+  text-align:center;
+  margin-top:0;
+}
+
+.modal-content input,
+.modal-content textarea{
   width:100%;
   padding:10px;
-  margin:12px 0;
+  margin:10px 0;
   border-radius:10px;
   border:none;
   background:#020617;
   color:#fff;
 }
 
+.modal-content textarea{resize:none}
+
 .modal-content label{
   display:flex;
   align-items:center;
   gap:10px;
   cursor:pointer;
-  margin-bottom:10px;
+  margin:8px 0;
+  font-size:14px;
+}
+
+.modal-content ul{
+  padding-left:18px;
+  font-size:13px;
+  opacity:.85;
 }
 
 .modal-content input[type="checkbox"]{
   appearance:none;
-  width:20px;
-  height:20px;
+  width:18px;
+  height:18px;
   border-radius:5px;
   border:2px solid var(--primary);
-  position:relative;
 }
 
 .modal-content input[type="checkbox"]:checked{
   background:var(--primary);
 }
 .modal-content input[type="checkbox"]:checked::after{
-  content:'✔';
+  content:"✔";
   color:#000;
-  position:absolute;
-  top:-1px;
+  font-size:12px;
+  position:relative;
   left:3px;
-  font-size:14px;
+  top:-1px;
 }
 </style>
 </head>
@@ -212,176 +227,171 @@ button{
 <!-- ===== BOOKING MODAL ===== -->
 <div class="modal" id="bookingModal">
   <div class="modal-content">
-    <h3>Confirm Booking</h3>
+    <h3>📝 Complete Booking</h3>
+
+    <input type="text" id="custName" placeholder="Full Name">
+    <input type="tel" id="custPhone" placeholder="Phone Number">
+    <textarea id="custAddress" rows="2" placeholder="Pickup Address"></textarea>
+    <input type="number" id="duration" placeholder="Rental Days" min="1">
+
+    <label>
+      <input type="checkbox" checked disabled>
+      Cash on Delivery (Only)
+    </label>
+
+    <div>
+      <b>Terms & Conditions</b>
+      <ul>
+        <li>Valid ID proof is mandatory</li>
+        <li>Late returns may incur extra charges</li>
+        <li>Damage costs must be paid by customer</li>
+        <li>Owner can cancel if item unavailable</li>
+      </ul>
+    </div>
+
     <label>
       <input type="checkbox" id="terms">
-      Accept terms and conditions
+      I agree to the terms and conditions
     </label>
-    <input type="number" id="duration" placeholder="Days" min="1">
-    <button id="confirmBtn" class="primary" disabled>Book</button>
+
+    <button id="confirmBtn" class="primary" disabled>Confirm Booking</button>
     <button class="danger" onclick="closeBooking()">Cancel</button>
   </div>
 </div>
 
 <script>
 const customerId = localStorage.getItem("customer_id");
-if(!customerId){ 
-    alert("Login required"); 
-    location.href="index.html"; 
+if(!customerId){
+  alert("Login required");
+  location.href="index.html";
 }
 
-const customerName = document.getElementById("customerName");
+document.getElementById("customerName").innerText =
+  localStorage.getItem("name") || "Customer";
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
+
 const locationSelect = document.getElementById("location");
 const items = document.getElementById("items");
 const history = document.getElementById("history");
-customerName.innerText = localStorage.getItem("name") || "Customer";
-
-function logout() { 
-    localStorage.clear(); 
-    location.href="index.html"; 
-}
 
 let selectedItem = null;
 const bookingModal = document.getElementById("bookingModal");
 const confirmBtn = document.getElementById("confirmBtn");
-const terms = document.getElementById("terms");
+
+const custName = document.getElementById("custName");
+const custPhone = document.getElementById("custPhone");
+const custAddress = document.getElementById("custAddress");
 const duration = document.getElementById("duration");
+const terms = document.getElementById("terms");
 
-// Enable confirm button only if terms accepted and duration > 0
-terms.onchange = duration.oninput = () => { 
-    confirmBtn.disabled = !terms.checked || !duration.value || duration.value <= 0; 
+[custName,custPhone,custAddress,duration,terms].forEach(el=>{
+  el.oninput = validateForm;
+});
+
+function validateForm(){
+  confirmBtn.disabled = !(
+    custName.value.trim() &&
+    custPhone.value.trim().length >= 10 &&
+    custAddress.value.trim() &&
+    duration.value > 0 &&
+    terms.checked
+  );
+}
+
+function openBooking(id){
+  selectedItem = id;
+  bookingModal.style.display="flex";
+  custName.value="";
+  custPhone.value="";
+  custAddress.value="";
+  duration.value="";
+  terms.checked=false;
+  confirmBtn.disabled=true;
+}
+
+function closeBooking(){
+  bookingModal.style.display="none";
+}
+
+confirmBtn.onclick = async ()=>{
+  try{
+    const res = await fetch("/api/create-request",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        action:"createBooking",
+        item_id:selectedItem,
+        customer_id:customerId,
+        name:custName.value,
+        phone:custPhone.value,
+        address:custAddress.value,
+        rental_duration:duration.value,
+        payment_method:"COD"
+      })
+    });
+    const d = await res.json();
+    if(d.success){
+      alert("✅ Booking placed successfully");
+      closeBooking();
+      loadHistory();
+    } else alert(d.message || "Failed");
+  } catch {
+    alert("Server error");
+  }
 };
 
-function openBooking(id) { 
-    selectedItem = id; 
-    bookingModal.style.display = "flex"; 
-    terms.checked = false; 
-    duration.value = ""; 
-    confirmBtn.disabled = true; 
-}
-function closeBooking() { bookingModal.style.display = "none"; }
-
-confirmBtn.onclick = async () => {
-    try {
-        const res = await fetch("/api/create-request", {
-            method: "POST",
-            headers: {"Content-Type":"application/json"},
-            body: JSON.stringify({ 
-                action: "createBooking", 
-                item_id: selectedItem, 
-                customer_id: customerId, 
-                rental_duration: duration.value 
-            })
-        });
-        const d = await res.json();
-        if(d.success) { 
-            alert("✅ Booking sent"); 
-            closeBooking(); 
-            loadHistory(); 
-        } else {
-            alert(d.message || "Failed");
-        }
-    } catch {
-        alert("Server error");
-    }
-};
-
-// ========== LOAD LOCATIONS ==========
-async function loadLocations() {
-    locationSelect.disabled = true;
-    locationSelect.innerHTML = `<option>Loading locations...</option>`;
-    
-    try {
-        const res = await fetch("/api/items");
-        const d = await res.json();
-
-        if (!d.success || !d.locations?.length) {
-            locationSelect.innerHTML = `<option>No locations found</option>`;
-            return;
-        }
-
-        locationSelect.innerHTML = `<option value="">Select location</option>`;
-        d.locations.forEach(l => {
-            locationSelect.innerHTML += `<option value="${l}">${l}</option>`;
-        });
-        locationSelect.disabled = false;
-
-    } catch {
-        locationSelect.innerHTML = `<option>Error loading locations</option>`;
-        locationSelect.disabled = false;
-    }
+async function loadLocations(){
+  const res = await fetch("/api/items");
+  const d = await res.json();
+  locationSelect.innerHTML=`<option value="">Select location</option>`;
+  d.locations.forEach(l=>{
+    locationSelect.innerHTML+=`<option>${l}</option>`;
+  });
 }
 
-// ========== LOAD ITEMS BY CATEGORY ==========
-async function loadItems(category) {
-    if(!locationSelect.value){ 
-        alert("Select location first"); 
-        return; 
-    }
-    items.innerHTML = `<p>Loading items...</p>`;
-
-    try {
-        const res = await fetch("/api/items", {
-            method: "POST",
-            headers: {"Content-Type":"application/json"},
-            body: JSON.stringify({ action: "getItems", category, location: locationSelect.value })
-        });
-        const d = await res.json();
-
-        if(!d.success || !d.items?.length) {
-            items.innerHTML = "<p>No items found</p>";
-            return;
-        }
-
-        items.innerHTML = "";
-        d.items.forEach(i => {
-            items.innerHTML += `
-                <div class="card">
-                    <h4>${i.item_name}</h4>
-                    <p>₹${i.price_per_day}/day</p>
-                    <p>${i.shop_name}</p>
-                    <button class="primary" onclick="openBooking(${i.item_id})">Book</button>
-                </div>
-            `;
-        });
-
-    } catch {
-        items.innerHTML = "<p>Error loading items</p>";
-    }
+async function loadItems(category){
+  if(!locationSelect.value){ alert("Select location"); return; }
+  items.innerHTML="Loading...";
+  const res = await fetch("/api/items",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({action:"getItems",category,location:locationSelect.value})
+  });
+  const d = await res.json();
+  items.innerHTML="";
+  d.items.forEach(i=>{
+    items.innerHTML+=`
+      <div class="card">
+        <h4>${i.item_name}</h4>
+        <p>₹${i.price_per_day}/day</p>
+        <p>${i.shop_name}</p>
+        <button class="primary" onclick="openBooking(${i.item_id})">Book Now</button>
+      </div>`;
+  });
 }
 
-// ========== LOAD BOOKING HISTORY ==========
-async function loadHistory() {
-    history.innerHTML = `<p>Loading history...</p>`;
-    try {
-        const res = await fetch(`/api/create-request?customer_id=${customerId}`);
-        const d = await res.json();
-
-        if(!d.success || !d.history?.length) {
-            history.innerHTML = "<p>No bookings yet</p>";
-            return;
-        }
-
-        history.innerHTML = "";
-        d.history.forEach(b => {
-            history.innerHTML += `
-                <div class="card">
-                    <b>${b.item_name}</b><br>
-                    ${b.shop_name}<br>
-                    Days: ${b.rental_duration}<br>
-                    Status: <span class="${b.status}">${b.status}</span>
-                </div>
-            `;
-        });
-    } catch {
-        history.innerHTML = "<p>Error loading history</p>";
-    }
+async function loadHistory(){
+  const res = await fetch(`/api/create-request?customer_id=${customerId}`);
+  const d = await res.json();
+  history.innerHTML="";
+  d.history.forEach(b=>{
+    history.innerHTML+=`
+      <div class="card">
+        <b>${b.item_name}</b><br>
+        ${b.shop_name}<br>
+        Days: ${b.rental_duration}<br>
+        Status: <span class="${b.status}">${b.status}</span>
+      </div>`;
+  });
 }
 
-// Load locations and history on page load
-window.onload = () => { 
-    loadLocations(); 
-    loadHistory(); 
+window.onload=()=>{
+  loadLocations();
+  loadHistory();
 };
 </script>
 
