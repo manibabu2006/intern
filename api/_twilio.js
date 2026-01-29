@@ -2,7 +2,7 @@
 import Twilio from "twilio";
 import dotenv from "dotenv";
 
-dotenv.config(); // ensure env variables are loaded
+dotenv.config();
 
 let client = null;
 
@@ -16,39 +16,32 @@ if (
     process.env.TWILIO_AUTH_TOKEN
   );
 } else {
-  console.warn(
-    "⚠️ Twilio environment variables are missing. OTP sending will fail."
-  );
+  console.warn("⚠️ Twilio environment variables are missing");
 }
 
-/**
- * Send OTP SMS via Twilio
- * @param {string} mobile - recipient mobile number (without country code)
- * @param {string|number} otp - OTP to send
- * @param {string} [countryCode='+91'] - optional country code
- */
-export async function sendOTP(mobile, otp, countryCode = "+91") {
+export async function sendOTP(mobile, otp) {
   if (!client) {
-    throw new Error(
-      "Twilio environment variables are missing. Please set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, and TWILIO_PHONE."
-    );
+    throw new Error("Twilio is not configured properly");
   }
 
   try {
-    const toNumber = mobile.startsWith("+") ? mobile : `+91${mobile}`;
+    const toNumber = mobile.startsWith("+")
+      ? mobile
+      : `+91${mobile}`;
 
     const message = await client.messages.create({
       body: `RentHub OTP: ${otp} (valid for 5 minutes)`,
-      from: process.env.TWILIO_PHONE,
+      from: process.env.TWILIO_PHONE_NUMBER, // ✅ FIXED
       to: toNumber,
     });
 
-    console.log(`✅ OTP sent to ${toNumber}, SID: ${message.sid}`);
+    console.log("✅ OTP sent. SID:", message.sid);
+    console.log("FROM:", process.env.TWILIO_PHONE_NUMBER);
     return message;
   } catch (err) {
-  console.error("❌ Twilio send error:", err);
-  if (err.code) console.error("Twilio error code:", err.code);
-  if (err.moreInfo) console.error("More info:", err.moreInfo);
-  throw new Error("Failed to send OTP via Twilio");
-}
+    console.error("❌ Twilio send error:", err);
+    console.error("Twilio error code:", err.code);
+    console.error("More info:", err.moreInfo);
+    throw new Error("Failed to send OTP via Twilio");
+  }
 }
