@@ -70,6 +70,7 @@ export default async function handler(req, res) {
 
     /* ================= CUSTOMER HISTORY ================= */
     if (req.method === "GET") {
+      // Customer booking history
       if (req.query.customer_id) {
         const [history] = await db.execute(
           `SELECT
@@ -89,7 +90,7 @@ export default async function handler(req, res) {
         return res.json({ success: true, history });
       }
 
-      /* ================= OWNER REQUESTS ================= */
+      // Owner booking requests
       if (req.query.owner_id) {
         const [requests] = await db.execute(
           `SELECT
@@ -144,6 +145,7 @@ export default async function handler(req, res) {
       return res.json({ success: true });
     }
 
+    /* ================= METHOD NOT ALLOWED ================= */
     res.status(405).json({
       success: false,
       message: "Method not allowed"

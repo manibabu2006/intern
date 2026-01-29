@@ -231,7 +231,7 @@ button{
 
     <input type="text" id="custName" placeholder="Full Name">
     <input type="tel" id="custPhone" placeholder="Phone Number">
-    <input type="text" id="custAadhaar" placeholder="Aadhaar Number (12 digits)" maxlength="12" required>
+    <input type="text" id="custAadhaar" placeholder="Aadhaar Number (12 digits)" maxlength="12">
     <textarea id="custAddress" rows="2" placeholder="Pickup Address"></textarea>
     <input type="number" id="duration" placeholder="Rental Days" min="1">
 
@@ -253,16 +253,11 @@ button{
         <li>Owner can cancel if item unavailable</li>
       </ul>
 
-    <!-- Actions -->
     <div style="display:flex;gap:10px;margin-top:15px">
-      <button id="confirmBtn" class="primary" disabled style="flex:1">
-        Confirm Booking
-      </button>
-      <button class="danger" onclick="closeBooking()" style="flex:1">
-        Cancel
-      </button>
+      <button id="confirmBtn" class="primary" disabled style="flex:1">Confirm Booking</button>
+      <button class="danger" onclick="closeBooking()" style="flex:1">Cancel</button>
+    </div>
   </div>
-</div>
 </div>
 
 <script>
@@ -290,20 +285,23 @@ const confirmBtn = document.getElementById("confirmBtn");
 
 const custName = document.getElementById("custName");
 const custPhone = document.getElementById("custPhone");
+const custAadhaar = document.getElementById("custAadhaar");
 const custAddress = document.getElementById("custAddress");
 const duration = document.getElementById("duration");
 const terms = document.getElementById("terms");
 
-[custName,custPhone,custAddress,duration,terms].forEach(el=>{
+[custName,custPhone,custAadhaar,custAddress,duration,terms].forEach(el=>{
   el.oninput = validateForm;
 });
 
 function validateForm(){
+  const aadhaarValid = /^\d{12}$/.test(custAadhaar.value.trim());
   confirmBtn.disabled = !(
     custName.value.trim() &&
     custPhone.value.trim().length >= 10 &&
     custAddress.value.trim() &&
     duration.value > 0 &&
+    aadhaarValid &&
     terms.checked
   );
 }
@@ -313,6 +311,7 @@ function openBooking(id){
   bookingModal.style.display="flex";
   custName.value="";
   custPhone.value="";
+  custAadhaar.value="";
   custAddress.value="";
   duration.value="";
   terms.checked=false;
@@ -332,9 +331,10 @@ confirmBtn.onclick = async ()=>{
         action:"createBooking",
         item_id:selectedItem,
         customer_id:customerId,
-        name:custName.value,
-        phone:custPhone.value,
-        address:custAddress.value,
+        name:custName.value.trim(),
+        phone:custPhone.value.trim(),
+        address:custAddress.value.trim(),
+        aadhaar:custAadhaar.value.trim(),
         rental_duration:duration.value,
         payment_method:"COD"
       })
@@ -400,6 +400,4 @@ window.onload=()=>{
   loadHistory();
 };
 </script>
-
-</body>
-</html>
+</body></html>
