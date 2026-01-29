@@ -2,10 +2,11 @@ import db from "./_db.js";
 
 export default async function handler(req, res) {
   try {
+
     /* ================= GET ALL LOCATIONS ================= */
     if (req.method === "GET" && !req.query.owner_id) {
       const [rows] = await db.execute(
-        `SELECT DISTINCT location FROM items WHERE is_active=1 ORDER BY location`
+        `SELECT DISTINCT location FROM items ORDER BY location`
       );
       const locations = rows.map(r => r.location);
       return res.json({ success: true, locations });
@@ -14,38 +15,63 @@ export default async function handler(req, res) {
     /* ================= GET ITEMS BY OWNER ================= */
     if (req.method === "GET" && req.query.owner_id) {
       const owner_id = Number(req.query.owner_id);
+
       const [items] = await db.execute(
-        `SELECT item_id, shop_name, item_name, category, price_per_day, location, is_active, image_url
+        `SELECT 
+           item_id, shop_name, item_name, category, price_per_day,
+           location, is_active, image_url
          FROM items
-         WHERE owner_id = ? ORDER BY item_id DESC`,
+         WHERE owner_id=?
+         ORDER BY item_id DESC`,
         [owner_id]
       );
+
       return res.json({ success: true, items });
     }
 
     /* ================= GET ITEMS BY CATEGORY & LOCATION ================= */
     if (req.method === "POST" && req.body.action === "getItems") {
       const { category, location } = req.body;
+
       if (!category || !location) {
-        return res.status(400).json({ success: false, message: "Category and location required" });
+        return res.status(400).json({
+          success: false,
+          message: "Category and location required"
+        });
       }
 
+      // ❌ DO NOT FILTER is_active HERE
       const [items] = await db.execute(
-        `SELECT item_id, shop_name, item_name, category, price_per_day, location, is_active, image_url
+        `SELECT 
+           item_id, shop_name, item_name, category, price_per_day,
+           location, is_active, image_url
          FROM items
-         WHERE category=? AND location=? AND is_active=1
+         WHERE category=? AND location=?
          ORDER BY item_id DESC`,
         [category, location]
       );
+
       return res.json({ success: true, items });
     }
 
     /* ================= ADD NEW ITEM ================= */
     if (req.method === "POST" && !req.body.action) {
-      const { owner_id, shop_name, item_name, category, price_per_day, location, image_url, is_active } = req.body;
+      const {
+        owner_id,
+        shop_name,
+        item_name,
+        category,
+        price_per_day,
+        location,
+        image_url,
+        is_active
+      } = req.body;
 
       if (!owner_id || !shop_name || !item_name || !category || !price_per_day || !location) {
-        return res.status(400).json({ success: false, message: "All fields required" });
+        return res.status(400).json({
+          success: false,
+          message: "All fields required"
+        });
       }
 
       await db.execute(
@@ -72,7 +98,10 @@ export default async function handler(req, res) {
       const { item_id, owner_id, item_name, price_per_day, is_active, image_url } = req.body;
 
       if (!item_id || !owner_id || !item_name || !price_per_day) {
-        return res.status(400).json({ success: false, message: "Missing required fields" });
+        return res.status(400).json({
+          success: false,
+          message: "Missing required fields"
+        });
       }
 
       const [result] = await db.execute(
@@ -90,15 +119,19 @@ export default async function handler(req, res) {
       );
 
       if (result.affectedRows === 0) {
-        return res.status(404).json({ success: false, message: "Item not found or owner mismatch" });
+        return res.status(404).json({
+          success: false,
+          message: "Item not found or owner mismatch"
+        });
       }
 
       return res.json({ success: true });
     }
 
     res.status(405).json({ success: false, message: "Method not allowed" });
+
   } catch (err) {
-    console.error(err);
+    console.error("ITEM API ERROR:", err);
     return res.status(500).json({ success: false, message: "Server error" });
   }
 }
