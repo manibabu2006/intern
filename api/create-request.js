@@ -17,15 +17,15 @@ export default async function handler(req, res) {
        POST REQUEST
        - Create booking (item_id provided)
        - Get filtered items (category + location)
-       - Get all items (for location list)
+       - Get all items (for locations dropdown)
     ===================================================== */
     if (req.method === "POST") {
-      const { item_id, customer_id, rental_duration, category, location } = req.body;
+      const { item_id, customer_id, rental_duration, category, location } = req.body || {};
 
-      // 1️⃣ Create a booking
+      // 1️⃣ Create a booking request
       if (item_id) {
         if (!customer_id || !rental_duration) {
-          return res.status(400).json({ success: false, message: "Missing fields" });
+          return res.status(400).json({ success: false, message: "Missing booking fields" });
         }
 
         await db.execute(
@@ -95,7 +95,7 @@ export default async function handler(req, res) {
        - Accept / Reject bookings (owner)
     ===================================================== */
     if (req.method === "PUT") {
-      const { request_id, status } = req.body;
+      const { request_id, status } = req.body || {};
 
       if (!request_id || !["Accepted", "Rejected"].includes(status)) {
         return res.status(400).json({ success: false, message: "Invalid request data" });
