@@ -8,7 +8,9 @@ export default async function handler(req, res) {
 
   const { username, otp, newPassword, role } = req.body;
 
-  if (!username || !otp || !newPassword || !role) return res.status(400).json({ success: false, message: "All fields required" });
+  if (!username || !otp || !newPassword || !role) {
+    return res.status(400).json({ success: false, message: "All fields required" });
+  }
 
   try {
     const validOTP = await verifyOTP(username, otp, role);
@@ -17,7 +19,6 @@ export default async function handler(req, res) {
     const table = role === "owner" ? "owners" : "customers";
 
     const hashed = bcrypt.hashSync(newPassword, 10);
-
     await db.query(`UPDATE ${table} SET password = ? WHERE username = ?`, [hashed, username]);
 
     await deleteOTP(username, role);
@@ -25,6 +26,6 @@ export default async function handler(req, res) {
     res.status(200).json({ success: true, message: "Password reset successful" });
   } catch (err) {
     console.error("RESET PASSWORD ERROR:", err);
-    res.status(500).json({ success: false, message: "Reset failed" });
+    res.status(500).json({ success: false, message: "Password reset failed" });
   }
 }
