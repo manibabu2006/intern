@@ -231,17 +231,22 @@ button{
 
     <input type="text" id="custName" placeholder="Full Name">
     <input type="tel" id="custPhone" placeholder="Phone Number">
+    <input type="text" id="custAadhaar" placeholder="Aadhaar Number (12 digits)" maxlength="12" required>
     <textarea id="custAddress" rows="2" placeholder="Pickup Address"></textarea>
     <input type="number" id="duration" placeholder="Rental Days" min="1">
 
-    <label>
-      <input type="checkbox" checked disabled>
-      Cash on Delivery (Only)
+    <div style="margin:10px 0;padding:10px;border:1px dashed var(--border);border-radius:10px">
+      <b>Payment Method</b><br>
+      <span style="opacity:.85">💵 Cash on Delivery (COD)</span>
+    </div>
+
+    <label style="font-size:14px">
+      <input type="checkbox" id="terms">
+      I agree to the 
+      <span style="color:var(--primary)">Terms & Conditions</span>
     </label>
 
-    <div>
-      <b>Terms & Conditions</b>
-      <ul>
+    <ul style="font-size:12px;opacity:.75;margin-top:6px">
         <li>Valid ID proof is mandatory</li>
         <li>Late returns may incur extra charges</li>
         <li>Damage costs must be paid by customer</li>
@@ -249,13 +254,14 @@ button{
       </ul>
     </div>
 
-    <label>
-      <input type="checkbox" id="terms">
-      I agree to the terms and conditions
-    </label>
-
-    <button id="confirmBtn" class="primary" disabled>Confirm Booking</button>
-    <button class="danger" onclick="closeBooking()">Cancel</button>
+    <!-- Actions -->
+    <div style="display:flex;gap:10px;margin-top:15px">
+      <button id="confirmBtn" class="primary" disabled style="flex:1">
+        Confirm Booking
+      </button>
+      <button class="danger" onclick="closeBooking()" style="flex:1">
+        Cancel
+      </button>
   </div>
 </div>
 

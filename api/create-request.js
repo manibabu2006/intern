@@ -14,20 +14,30 @@ export default async function handler(req, res) {
           name,
           phone,
           address,
+          aadhaar,
           payment_method
         } = req.body;
 
-        if (!item_id || !customer_id || !rental_duration) {
+        // Basic validation
+        if (!item_id || !customer_id || !rental_duration || !aadhaar) {
           return res.status(400).json({
             success: false,
-            message: "Missing booking fields"
+            message: "Missing required booking fields"
+          });
+        }
+
+        // Aadhaar validation (12 digits)
+        if (!/^\d{12}$/.test(aadhaar)) {
+          return res.status(400).json({
+            success: false,
+            message: "Invalid Aadhaar number"
           });
         }
 
         await db.execute(
           `INSERT INTO bookings 
-           (item_id, customer_id, rental_duration, status, customer_name, phone, address, payment_method)
-           VALUES (?, ?, ?, 'Pending', ?, ?, ?, ?)`,
+           (item_id, customer_id, rental_duration, status, customer_name, phone, address, aadhaar, payment_method)
+           VALUES (?, ?, ?, 'Pending', ?, ?, ?, ?, ?)`,
           [
             Number(item_id),
             Number(customer_id),
@@ -35,6 +45,7 @@ export default async function handler(req, res) {
             name || null,
             phone || null,
             address || null,
+            aadhaar,
             payment_method || "COD"
           ]
         );
@@ -79,6 +90,8 @@ export default async function handler(req, res) {
              b.customer_name,
              b.phone,
              b.address,
+             b.aadhaar,
+             b.payment_method,
              i.item_name
            FROM bookings b
            JOIN items i ON b.item_id = i.item_id
