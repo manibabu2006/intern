@@ -88,6 +88,7 @@ main{
   padding:16px;
   text-align:center;
   transition:.25s;
+  position:relative;
 }
 .card:hover{transform:translateY(-4px)}
 
@@ -359,8 +360,12 @@ async function loadLocations(){
   });
 }
 
+// ===== Updated loadItems to show inactive items =====
 async function loadItems(category){
-  if(!locationSelect.value){ alert("Select location"); return; }
+  if(!locationSelect.value){ 
+    alert("Select location"); 
+    return; 
+  }
   items.innerHTML="Loading...";
   const res = await fetch("/api/items",{
     method:"POST",
@@ -369,13 +374,20 @@ async function loadItems(category){
   });
   const d = await res.json();
   items.innerHTML="";
+
   d.items.forEach(i=>{
+    const isInactive = i.is_active == 0; // check if inactive
     items.innerHTML+=`
-      <div class="card">
+      <div class="card" style="position:relative;">
         <h4>${i.item_name}</h4>
         <p>₹${i.price_per_day}/day</p>
         <p>${i.shop_name}</p>
-        <button class="primary" onclick="openBooking(${i.item_id})">Book Now</button>
+        ${isInactive ? '<span style="position:absolute; top:10px; right:10px; background:#ef4444; color:#fff; padding:3px 6px; border-radius:6px; font-size:12px;">Unavailable</span>' : ''}
+        <button class="primary" 
+          onclick="${isInactive ? 'alert(\'Item unavailable\')' : `openBooking(${i.item_id})`}"
+          ${isInactive ? 'disabled style="opacity:0.6; cursor:not-allowed;"' : ''}>
+          Book Now
+        </button>
       </div>`;
   });
 }
