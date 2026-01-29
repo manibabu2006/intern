@@ -1,8 +1,7 @@
-import db from "./db.js";
+import db from "./_db.js";
 
 export default async function handler(req, res) {
   try {
-
     /* ================= GET LOCATIONS ================= */
     if (req.method === "GET") {
       const [rows] = await db.execute(
@@ -15,7 +14,6 @@ export default async function handler(req, res) {
     /* ================= ADD ITEM ================= */
     if (req.method === "POST" && req.body.action !== "getItems") {
       const { owner_id, shop_name, item_name, category, price_per_day, location } = req.body;
-
       if (!owner_id || !shop_name || !item_name || !category || !price_per_day || !location) {
         return res.status(400).json({ success: false, message: "All fields required" });
       }

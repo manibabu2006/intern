@@ -61,7 +61,7 @@ const category=document.getElementById("category");
 const price_per_day=document.getElementById("price_per_day");
 const locationInput=document.getElementById("location");
 
-document.getElementById("addItemBtn").onclick = async ()=>{
+document.getElementById("addItemBtn").onclick = async () => {
   const data = {
     owner_id: ownerId,
     shop_name: shop_name.value.trim(),
@@ -70,23 +70,24 @@ document.getElementById("addItemBtn").onclick = async ()=>{
     price_per_day: price_per_day.value,
     location: locationInput.value.trim()
   };
-  if(Object.values(data).some(v=>!v)){ alert("Fill all fields"); return; }
+  if (Object.values(data).some(v => !v)) { alert("Fill all fields"); return; }
 
-  try{
+  try {
     const res = await fetch("/api/items", {
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(data)
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
     });
     const d = await res.json();
-    if(d.success){
+    if (d.success) {
       alert("✅ Item added");
-      shop_name.value=item_name.value=price_per_day.value=locationInput.value="";
-      category.value="";
-      loadAll();
+      shop_name.value = item_name.value = price_per_day.value = locationInput.value = "";
+      category.value = "";
+      loadAll(); // reload requests & history
     } else alert(d.message || "Failed");
-  }catch(err){ console.error(err); alert("Server error"); }
+  } catch { alert("Server error"); }
 };
+
 
 async function loadAll(){
   try{
