@@ -90,20 +90,21 @@ button:hover{ background:#0ea5e9; }
 </div>
 
 <script>
-/* ---------- AUTH ---------- */
+/* ================= AUTH ================= */
 const ownerId = localStorage.getItem("owner_id");
 if(!ownerId){
   alert("Please login first");
-  window.location.href="index.html";
+  location.href="index.html";
 }
-ownerName.innerText = localStorage.getItem("name") || "Owner";
+document.getElementById("ownerName").innerText =
+  localStorage.getItem("name") || "Owner";
 
 function logout(){
   localStorage.clear();
-  window.location.href="index.html";
+  location.href="index.html";
 }
 
-/* ---------- ADD ITEM ---------- */
+/* ================= ADD ITEM ================= */
 async function addItem(){
   const data = {
     action:"addItem",
@@ -129,15 +130,15 @@ async function addItem(){
     const d = await res.json();
     if(d.success){
       alert("✅ Item added");
-    }else{
-      alert(d.message || "Failed");
-    }
+      shop_name.value=item_name.value=price_per_day.value=location.value="";
+      category.value="";
+    }else alert(d.message || "Failed");
   }catch{
     alert("Server error");
   }
 }
 
-/* ---------- LOAD REQUESTS & HISTORY ---------- */
+/* ================= LOAD REQUESTS + HISTORY ================= */
 async function loadAll(){
   try{
     const res = await fetch(`/api/create-request?owner_id=${ownerId}`);
@@ -145,12 +146,13 @@ async function loadAll(){
 
     const reqBox = document.getElementById("requests");
     const histBox = document.getElementById("history");
+
     reqBox.innerHTML="";
     histBox.innerHTML="";
 
-    if(!d.success || d.requests.length===0){
+    if(!d.success || !d.requests || d.requests.length===0){
       reqBox.innerHTML="<p>No booking requests</p>";
-      histBox.innerHTML="<p>No history yet</p>";
+      histBox.innerHTML="<p>No booking history</p>";
       return;
     }
 
@@ -163,10 +165,9 @@ async function loadAll(){
           <div class="request">
             <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
             Days: ${r.rental_duration}<br>
-            Phone: ${r.phone}<br>
-            Aadhaar: ${r.aadhaar}<br><br>
-            <button class="accept" onclick="respond(${r.request_id},'Accepted')">Accept</button>
-            <button class="reject" onclick="respond(${r.request_id},'Rejected')">Reject</button>
+            Phone: ${r.phone}<br><br>
+            <button class="accept" onclick="respond(${r.booking_id},'Accepted')">Accept</button>
+            <button class="reject" onclick="respond(${r.booking_id},'Rejected')">Reject</button>
           </div>`;
       }else{
         hasHistory=true;
@@ -183,30 +184,29 @@ async function loadAll(){
     if(!hasPending) reqBox.innerHTML="<p>No pending requests</p>";
     if(!hasHistory) histBox.innerHTML="<p>No booking history</p>";
 
-  }catch{
+  }catch(err){
+    console.error(err);
     alert("Failed to load data");
   }
 }
 
-/* ---------- ACCEPT / REJECT ---------- */
-async function respond(request_id,status){
+/* ================= ACCEPT / REJECT ================= */
+async function respond(booking_id,status){
   try{
     const res = await fetch("/api/create-request",{
       method:"PUT",
       headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({ request_id, status })
+      body:JSON.stringify({ booking_id, status })
     });
     const d = await res.json();
-    if(d.success){
-      loadAll();
-    }else{
-      alert(d.message || "Action failed");
-    }
+    if(d.success) loadAll();
+    else alert(d.message || "Action failed");
   }catch{
     alert("Server error");
   }
 }
 
+/* ================= INIT ================= */
 loadAll();
 </script>
 

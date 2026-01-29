@@ -5,6 +5,7 @@
 <title>Customer Dashboard | RentHub</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
 :root{
   --glass:rgba(255,255,255,0.08);
@@ -15,26 +16,86 @@
   --pending:#facc15;
 }
 *{box-sizing:border-box}
-body{margin:0;font-family:Poppins,sans-serif;background:linear-gradient(135deg,#020617,#0f172a,#020617);color:#fff}
-header{padding:20px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.4);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);}
+body{
+  margin:0;
+  font-family:Poppins,sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a,#020617);
+  color:#fff;
+}
+header{
+  padding:20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:rgba(0,0,0,0.4);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+}
 .container{padding:20px;max-width:1200px;margin:auto}
-.location-select{width:100%;padding:12px 18px;border-radius:14px;border:none;background:rgba(15,23,42,0.9);color:#fff;font-size:16px;margin-bottom:20px}
+.location-select{
+  width:100%;
+  padding:12px 18px;
+  border-radius:14px;
+  border:none;
+  background:rgba(15,23,42,0.9);
+  color:#fff;
+  font-size:16px;
+  margin-bottom:20px;
+}
 .location-select option{background:#020617;color:#fff}
-.categories,.items,.history{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:25px}
-.card{background:var(--glass);border:1px solid var(--border);border-radius:15px;padding:15px;text-align:center;transition:.3s}
+.categories,.items,.history{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:15px;
+  margin-bottom:25px
+}
+.card{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:15px;
+  padding:15px;
+  text-align:center;
+  transition:.3s
+}
 .card:hover{transform:scale(1.04)}
-button{padding:8px 12px;border:none;border-radius:10px;font-weight:600;cursor:pointer}
+button{
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer
+}
 .primary{background:var(--primary);color:#fff}
 .danger{background:var(--danger);color:#fff}
 .status{font-weight:600}
 .Pending{color:var(--pending)}
 .Accepted{color:var(--success)}
 .Rejected{color:var(--danger)}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);justify-content:center;align-items:center}
-.modal-content{background:var(--glass);padding:25px;border-radius:15px;width:90%;max-width:400px}
-.modal-content input{width:100%;padding:10px;margin:12px 0;border-radius:10px;border:none}
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  justify-content:center;
+  align-items:center
+}
+.modal-content{
+  background:var(--glass);
+  padding:25px;
+  border-radius:15px;
+  width:90%;
+  max-width:400px
+}
+.modal-content input{
+  width:100%;
+  padding:10px;
+  margin:12px 0;
+  border-radius:10px;
+  border:none
+}
 </style>
 </head>
+
 <body>
 
 <header>
@@ -44,6 +105,7 @@ button{padding:8px 12px;border:none;border-radius:10px;font-weight:600;cursor:po
 </header>
 
 <div class="container">
+
 <h3>Select Location</h3>
 <select id="location" class="location-select">
   <option value="">Loading...</option>
@@ -65,7 +127,7 @@ button{padding:8px 12px;border:none;border-radius:10px;font-weight:600;cursor:po
 <div class="history" id="history"></div>
 </div>
 
-<!-- Booking Modal -->
+<!-- BOOKING MODAL -->
 <div class="modal" id="bookingModal">
   <div class="modal-content">
     <h3>Confirm Booking</h3>
@@ -77,99 +139,143 @@ button{padding:8px 12px;border:none;border-radius:10px;font-weight:600;cursor:po
 </div>
 
 <script>
+/* ========== AUTH ========== */
 const customerId = localStorage.getItem("customer_id");
-if(!customerId){ alert("Login required"); location="index.html"; }
-document.getElementById("customerName").innerText = localStorage.getItem("name") || "Customer";
+if(!customerId){
+  alert("Login required");
+  location="index.html";
+}
+customerName.innerText = localStorage.getItem("name") || "Customer";
 
-function logout(){ localStorage.clear(); location="index.html"; }
+function logout(){
+  localStorage.clear();
+  location="index.html";
+}
 
-/* ======== Booking Modal ======== */
-let selectedItem = null;
-const bookingModal = document.getElementById("bookingModal");
-const confirmBtn = document.getElementById("confirmBtn");
-const terms = document.getElementById("terms");
-const duration = document.getElementById("duration");
+/* ========== BOOKING MODAL ========== */
+let selectedItem=null;
+const bookingModal=document.getElementById("bookingModal");
+const confirmBtn=document.getElementById("confirmBtn");
+const terms=document.getElementById("terms");
+const duration=document.getElementById("duration");
 
-terms.onchange = duration.oninput = () => {
-  confirmBtn.disabled = !terms.checked || !duration.value || duration.value<=0;
+terms.onchange = duration.oninput = ()=>{
+  confirmBtn.disabled=!terms.checked || !duration.value || duration.value<=0;
 };
-function openBooking(id){ selectedItem=id; bookingModal.style.display="flex"; terms.checked=false; duration.value=""; confirmBtn.disabled=true; }
+
+function openBooking(id){
+  selectedItem=id;
+  bookingModal.style.display="flex";
+  terms.checked=false;
+  duration.value="";
+  confirmBtn.disabled=true;
+}
 function closeBooking(){ bookingModal.style.display="none"; }
 
-/* ======== Create Booking ======== */
+/* ========== CREATE BOOKING ========== */
 confirmBtn.onclick = async ()=>{
   try{
     const res = await fetch("/api/create-request",{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({ item_id:selectedItem, customer_id:customerId, rental_duration:duration.value })
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        item_id:selectedItem,
+        customer_id:customerId,
+        rental_duration:duration.value
+      })
     });
     const d = await res.json();
-    if(d.success){ alert("✅ Booking sent"); closeBooking(); loadHistory(); }
-    else alert(d.message);
-  }catch{ alert("❌ Server error"); }
+    if(d.success){
+      alert("✅ Booking sent");
+      closeBooking();
+      loadHistory();
+    }else alert(d.message || "Failed");
+  }catch{ alert("Server error"); }
 };
 
-/* ======== Load Locations ======== */
-const locationSelect = document.getElementById("location");
+/* ========== LOAD LOCATIONS ========== */
+const locationSelect=document.getElementById("location");
+
 async function loadLocations(){
-  locationSelect.innerHTML = `<option value="">Loading...</option>`;
   try{
-    const res = await fetch("/api/create-request", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({}) });
-    const d = await res.json();
-    if(!d.success || !d.items.length){ locationSelect.innerHTML=`<option value="">No locations found</option>`; return; }
-    const unique = [...new Set(d.items.map(i=>i.location).filter(l=>l))];
-    if(!unique.length){ locationSelect.innerHTML=`<option value="">No locations found</option>`; return; }
+    const res=await fetch("/api/items");
+    const d=await res.json();
+
     locationSelect.innerHTML=`<option value="">Select location</option>`;
-    unique.forEach(l=>{ locationSelect.innerHTML += `<option value="${l}">${l}</option>`; });
-  }catch(err){ console.error(err); locationSelect.innerHTML=`<option value="">Error loading locations</option>`; }
+    if(!d.success || !d.locations?.length){
+      locationSelect.innerHTML+=`<option>No locations found</option>`;
+      return;
+    }
+    d.locations.forEach(l=>{
+      locationSelect.innerHTML+=`<option value="${l}">${l}</option>`;
+    });
+  }catch{
+    locationSelect.innerHTML=`<option>Error loading locations</option>`;
+  }
 }
 
-/* ======== Load Items ======== */
+/* ========== LOAD ITEMS ========== */
 async function loadItems(category){
-  if(!locationSelect.value) return alert("Select location first");
+  if(!locationSelect.value){
+    alert("Select location first");
+    return;
+  }
   try{
-    const res = await fetch("/api/create-request",{
+    const res=await fetch("/api/items",{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({ category, location:locationSelect.value })
+      headers:{ "Content-Type":"application/json" },
+      body:JSON.stringify({
+        action:"getItems",
+        category,
+        location:locationSelect.value
+      })
     });
-    const d = await res.json();
-    const itemsDiv = document.getElementById("items");
-    itemsDiv.innerHTML="";
-    if(!d.success || !d.items.length){ itemsDiv.innerHTML="<p>No items found</p>"; return; }
+    const d=await res.json();
+    items.innerHTML="";
+    if(!d.success || !d.items.length){
+      items.innerHTML="<p>No items found</p>";
+      return;
+    }
     d.items.forEach(i=>{
-      itemsDiv.innerHTML+=`<div class="card">
+      items.innerHTML+=`
+      <div class="card">
         <h4>${i.item_name}</h4>
         <p>₹${i.price_per_day}/day</p>
         <p>${i.shop_name}</p>
         <button class="primary" onclick="openBooking(${i.item_id})">Book</button>
       </div>`;
     });
-  }catch(err){ console.error(err); document.getElementById("items").innerHTML="<p>Error loading items</p>"; }
+  }catch{
+    items.innerHTML="<p>Error loading items</p>";
+  }
 }
 
-/* ======== Load Booking History ======== */
+/* ========== LOAD HISTORY ========== */
 async function loadHistory(){
   try{
-    const res = await fetch(`/api/create-request?customer_id=${customerId}`);
-    const d = await res.json();
-    const histDiv = document.getElementById("history");
-    histDiv.innerHTML="";
-    if(!d.success || !d.history.length){ histDiv.innerHTML="<p>No bookings yet</p>"; return; }
+    const res=await fetch(`/api/create-request?customer_id=${customerId}`);
+    const d=await res.json();
+    history.innerHTML="";
+    if(!d.success || !d.history.length){
+      history.innerHTML="<p>No bookings yet</p>";
+      return;
+    }
     d.history.forEach(b=>{
-      histDiv.innerHTML+=`<div class="card">
+      history.innerHTML+=`
+      <div class="card">
         <b>${b.item_name}</b><br>
         ${b.shop_name}<br>
         Days: ${b.rental_duration}<br>
-        Status: <span class="status ${b.status}">${b.status}</span>
+        Status: <span class="${b.status}">${b.status}</span>
       </div>`;
     });
-  }catch(err){ console.error(err); document.getElementById("history").innerHTML="<p>Error loading history</p>"; }
+  }catch{
+    history.innerHTML="<p>Error loading history</p>";
+  }
 }
 
-/* ======== INIT ======== */
-window.onload = ()=>{
+/* ========== INIT ========== */
+window.onload=()=>{
   loadLocations();
   loadHistory();
 };
