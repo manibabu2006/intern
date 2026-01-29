@@ -6,25 +6,154 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
-:root{--glass:rgba(255,255,255,0.08);--border:rgba(255,255,255,0.18);--primary:#38bdf8;--success:#22c55e;--danger:#ef4444;--pending:#facc15;}
-*{box-sizing:border-box}
-body{margin:0;font-family:Poppins,sans-serif;background:linear-gradient(135deg,#020617,#0f172a,#020617);color:#fff;}
-header{padding:20px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.4);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);}
-.container{padding:20px;max-width:1200px;margin:auto;}
-.location-select{width:100%;padding:12px 18px;border-radius:14px;border:none;background:rgba(15,23,42,0.9);color:#fff;font-size:16px;margin-bottom:20px;}
-.location-select option{background:#020617;color:#fff;}
-.categories,.items,.history{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:25px;}
-.card{background:var(--glass);border:1px solid var(--border);border-radius:15px;padding:15px;text-align:center;transition:.3s;}
+:root{
+  --glass:rgba(255,255,255,0.08);
+  --border:rgba(255,255,255,0.18);
+  --primary:#38bdf8;
+  --success:#22c55e;
+  --danger:#ef4444;
+  --pending:#facc15;
+}
+
+*{box-sizing:border-box;}
+
+body{
+  margin:0;
+  font-family:Poppins,sans-serif;
+  background:linear-gradient(135deg,#020617,#0f172a,#020617);
+  color:#fff;
+}
+
+header{
+  padding:20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:rgba(0,0,0,0.4);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+}
+
+.container{
+  padding:20px;
+  max-width:1200px;
+  margin:auto;
+}
+
+.location-select{
+  width:100%;
+  padding:12px 18px;
+  border-radius:14px;
+  border:none;
+  background:rgba(15,23,42,0.9);
+  color:#fff;
+  font-size:16px;
+  margin-bottom:20px;
+}
+
+.location-select option{
+  background:#020617;
+  color:#fff;
+}
+
+.categories,.items,.history{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:15px;
+  margin-bottom:25px;
+}
+
+.card{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:15px;
+  padding:15px;
+  text-align:center;
+  transition:.3s;
+}
+
 .card:hover{transform:scale(1.04);}
-button{padding:8px 12px;border:none;border-radius:10px;font-weight:600;cursor:pointer;}
+
+button{
+  padding:8px 12px;
+  border:none;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
+}
+
 .primary{background:var(--primary);color:#fff;}
 .danger{background:var(--danger);color:#fff;}
 .Pending{color:var(--pending);}
 .Accepted{color:var(--success);}
 .Rejected{color:var(--danger);}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);justify-content:center;align-items:center;}
-.modal-content{background:var(--glass);padding:25px;border-radius:15px;width:90%;max-width:400px;}
-.modal-content input{width:100%;padding:10px;margin:12px 0;border-radius:10px;border:none;}
+
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,0.7);
+  justify-content:center;
+  align-items:center;
+}
+
+.modal-content{
+  background:var(--glass);
+  padding:25px;
+  border-radius:15px;
+  width:90%;
+  max-width:400px;
+}
+
+/* Input fields inside modal */
+.modal-content input{
+  width:100%;
+  padding:10px;
+  margin:12px 0;
+  border-radius:10px;
+  border:none;
+}
+
+/* ================= Checkbox styling ================= */
+.modal-content label{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  cursor:pointer;
+  font-weight:500;
+  margin-bottom:10px;
+}
+
+/* Hide default checkbox */
+.modal-content input[type="checkbox"]{
+  appearance:none;
+  -webkit-appearance:none;
+  width:20px;
+  height:20px;
+  border-radius:5px;
+  border:2px solid var(--primary);
+  background:rgba(255,255,255,0.05);
+  position:relative;
+  cursor:pointer;
+  transition: all 0.2s ease;
+}
+
+/* Checked state */
+.modal-content input[type="checkbox"]:checked{
+  background:var(--primary);
+  border-color:var(--primary);
+}
+
+/* Tick mark */
+.modal-content input[type="checkbox"]:checked::after{
+  content:'✔';
+  color:#fff;
+  font-size:14px;
+  position:absolute;
+  top:0;
+  left:3px;
+}
+
 </style>
 </head>
 <body>
@@ -58,11 +187,13 @@ button{padding:8px 12px;border:none;border-radius:10px;font-weight:600;cursor:po
 <div class="modal" id="bookingModal">
 <div class="modal-content">
 <h3>Confirm Booking</h3>
-<label><input type="checkbox" id="terms"> Accept terms</label>
-<input type="number" id="duration" placeholder="Days" min="1">
-<button id="confirmBtn" class="primary" disabled>Book</button>
-<button class="danger" onclick="closeBooking()">Cancel</button>
-</div>
+<label>
+    <input type="checkbox" id="terms">
+    Accept terms and conditions
+  </label>
+  <input type="number" id="duration" placeholder="Days" min="1">
+  <button id="confirmBtn" class="primary" disabled>Book</button>
+  <button class="danger" onclick="closeBooking()">Cancel</button>
 </div>
 
 <script>
