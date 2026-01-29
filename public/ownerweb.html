@@ -109,6 +109,15 @@ button.primary{
 .status-Pending{color:var(--pending)}
 .status-Accepted{color:var(--success)}
 .status-Rejected{color:var(--danger)}
+.status-Inactive{color:#94a3b8}
+
+img.item-img{
+  width:100%;
+  max-height:140px;
+  object-fit:cover;
+  border-radius:12px;
+  margin-top:8px;
+}
 </style>
 </head>
 
@@ -131,6 +140,7 @@ button.primary{
     <div class="grid">
       <input id="shop_name" placeholder="Shop Name">
       <input id="item_name" placeholder="Item Name">
+
       <select id="category">
         <option value="">Category</option>
         <option>Electronics</option>
@@ -139,8 +149,15 @@ button.primary{
         <option>Tent</option>
         <option>Appliance</option>
       </select>
+
       <input id="price_per_day" type="number" placeholder="Price / day">
       <input id="location" placeholder="Location">
+      <input id="image_url" placeholder="Image URL (optional)">
+
+      <select id="is_active">
+        <option value="1">Active</option>
+        <option value="0">Inactive</option>
+      </select>
     </div>
     <br>
     <button id="addItemBtn" class="primary">Add Item</button>
@@ -160,18 +177,23 @@ button.primary{
 
 </main>
 
-<!-- 🔒 ORIGINAL SCRIPT (UNCHANGED) -->
 <script>
-/* SAME SCRIPT YOU SENT — NOT MODIFIED */
 const ownerId = localStorage.getItem("owner_id");
-if(!ownerId){ alert("Login first"); location.href="index.html"; }
-document.getElementById("ownerName").innerText = localStorage.getItem("name") || "Owner";
+if(!ownerId){
+  alert("Login first");
+  location.href="index.html";
+}
+
+document.getElementById("ownerName").innerText =
+  localStorage.getItem("name") || "Owner";
 
 const shop_name=document.getElementById("shop_name");
 const item_name=document.getElementById("item_name");
 const category=document.getElementById("category");
 const price_per_day=document.getElementById("price_per_day");
 const locationInput=document.getElementById("location");
+const image_url=document.getElementById("image_url");
+const is_active=document.getElementById("is_active");
 
 document.getElementById("addItemBtn").onclick = async () => {
   const data = {
@@ -180,9 +202,16 @@ document.getElementById("addItemBtn").onclick = async () => {
     item_name: item_name.value.trim(),
     category: category.value,
     price_per_day: price_per_day.value,
-    location: locationInput.value.trim()
+    location: locationInput.value.trim(),
+    image_url: image_url.value.trim() || null,
+    is_active: is_active.value
   };
-  if (Object.values(data).some(v => !v)) { alert("Fill all fields"); return; }
+
+  if (!data.shop_name || !data.item_name || !data.category ||
+      !data.price_per_day || !data.location) {
+    alert("Fill all required fields");
+    return;
+  }
 
   try {
     const res = await fetch("/api/items", {
@@ -190,48 +219,83 @@ document.getElementById("addItemBtn").onclick = async () => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
+
     const d = await res.json();
     if (d.success) {
-      alert("✅ Item added");
-      shop_name.value = item_name.value = price_per_day.value = locationInput.value = "";
+      alert("✅ Item added successfully");
+      shop_name.value = item_name.value = price_per_day.value =
+      locationInput.value = image_url.value = "";
       category.value = "";
+      is_active.value = "1";
       loadAll();
-    } else alert(d.message || "Failed");
-  } catch { alert("Server error"); }
+    } else {
+      alert(d.message || "Failed to add item");
+    }
+  } catch {
+    alert("Server error");
+  }
 };
 
 async function loadAll(){
   try{
     const res = await fetch(`/api/create-request?owner_id=${ownerId}`);
     const d = await res.json();
+
     const reqBox=document.getElementById("requests");
     const histBox=document.getElementById("history");
+
     reqBox.innerHTML="";
     histBox.innerHTML="";
-    if(!d.success || !d.requests?.length){ reqBox.innerHTML="<p>No booking requests</p>"; histBox.innerHTML="<p>No booking history</p>"; return; }
+
+    if(!d.success || !d.requests?.length){
+      reqBox.innerHTML="<p>No booking requests</p>";
+      histBox.innerHTML="<p>No booking history</p>";
+      return;
+    }
 
     d.requests.forEach(r=>{
       if(r.status==="Pending"){
-        reqBox.innerHTML+=`<div class="request"><b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
-        Days: ${r.rental_duration}<br>Phone: ${r.phone}<br><br>
-        <button class="accept" onclick="respond(${r.booking_id},'Accepted')">Accept</button>
-        <button class="reject" onclick="respond(${r.booking_id},'Rejected')">Reject</button></div>`;
+        reqBox.innerHTML+=`
+          <div class="request">
+            <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
+            Days: ${r.rental_duration}<br>
+            Phone: ${r.phone}<br><br>
+            <button class="accept" onclick="respond(${r.booking_id},'Accepted')">Accept</button>
+            <button class="reject" onclick="respond(${r.booking_id},'Rejected')">Reject</button>
+          </div>`;
       } else {
-        histBox.innerHTML+=`<div class="card"><b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
-        Days: ${r.rental_duration}<br>Status: <span class="status-${r.status}">${r.status}</span></div>`;
+        histBox.innerHTML+=`
+          <div class="card">
+            <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
+            Days: ${r.rental_duration}<br>
+            Status: <span class="status-${r.status}">${r.status}</span>
+            ${r.image_url ? `<img src="${r.image_url}" class="item-img">` : ""}
+          </div>`;
       }
     });
-  }catch{ alert("Failed to load"); }
+  }catch{
+    alert("Failed to load data");
+  }
 }
 
 async function respond(booking_id,status){
-  const res = await fetch("/api/create-request",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({booking_id,status})});
+  const res = await fetch("/api/create-request",{
+    method:"PUT",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({booking_id,status})
+  });
+
   const d = await res.json();
-  if(d.success) loadAll(); else alert("Failed");
+  if(d.success) loadAll();
+  else alert("Action failed");
 }
 
 loadAll();
-function logout(){ localStorage.clear(); location.href="index.html"; }
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
+}
 </script>
 
 </body>
