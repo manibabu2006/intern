@@ -30,7 +30,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ success: false, message: "No mobile linked with this user" });
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = Math.floor(100000 + Math.random() * 900000);
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
     await saveOTP(username, otp, expiresAt, role);
