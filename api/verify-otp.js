@@ -1,3 +1,4 @@
+// verify-otp.js
 import db from "./_db.js";
 
 export default async function handler(req, res) {
@@ -15,17 +16,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    console.log("VERIFY REQUEST:", { username, role, otp });
-
     const [rows] = await db.query(
-      `SELECT id, otp, expires_at 
-       FROM otps
+      `SELECT id, otp, expires_at FROM otps
        WHERE username = ? AND role = ?
        LIMIT 1`,
       [username, role]
     );
 
-    // 🔴 OTP not found
     if (rows.length === 0) {
       return res.status(400).json({
         success: false,
@@ -36,9 +33,6 @@ export default async function handler(req, res) {
     const dbOTP = rows[0].otp.toString().trim();
     const userOTP = otp.toString().trim();
 
-    console.log("OTP CHECK:", { dbOTP, userOTP });
-
-    // 🔴 OTP mismatch
     if (dbOTP !== userOTP) {
       return res.status(400).json({
         success: false,
@@ -46,7 +40,6 @@ export default async function handler(req, res) {
       });
     }
 
-    // 🔴 Expired OTP
     if (new Date(rows[0].expires_at) < new Date()) {
       await db.query("DELETE FROM otps WHERE id = ?", [rows[0].id]);
       return res.status(400).json({
@@ -55,12 +48,12 @@ export default async function handler(req, res) {
       });
     }
 
-    // ✅ OTP valid → delete it
+    // single-use OTP
     await db.query("DELETE FROM otps WHERE id = ?", [rows[0].id]);
 
     return res.json({
       success: true,
-      message: "OTP verified"
+      message: "OTP verified successfully"
     });
 
   } catch (err) {

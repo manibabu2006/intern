@@ -17,12 +17,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 1️⃣ Verify OTP
     const [rows] = await db.query(
-      `SELECT id, expires_at FROM otps
-       WHERE username = ? AND role = ? AND otp = ?
+      `SELECT id, otp, expires_at FROM otps
+       WHERE username = ? AND role = ?
        LIMIT 1`,
-      [username, role, otp.toString()]
+      [username, role]
     );
 
     if (rows.length === 0) {
@@ -32,17 +31,24 @@ export default async function handler(req, res) {
       });
     }
 
-    const { id, expires_at } = rows[0];
+    const dbOTP = rows[0].otp.toString().trim();
+    const userOTP = otp.toString().trim();
 
-    if (new Date(expires_at) < new Date()) {
-      await db.query("DELETE FROM otps WHERE id = ?", [id]);
+    if (dbOTP !== userOTP) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP"
+      });
+    }
+
+    if (new Date(rows[0].expires_at) < new Date()) {
+      await db.query("DELETE FROM otps WHERE id = ?", [rows[0].id]);
       return res.status(400).json({
         success: false,
         message: "OTP expired"
       });
     }
 
-    // 2️⃣ Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     const table = role === "owner" ? "owners" : "customers";
 
@@ -51,8 +57,7 @@ export default async function handler(req, res) {
       [hashedPassword, username]
     );
 
-    // 3️⃣ Delete OTP (single-use)
-    await db.query("DELETE FROM otps WHERE id = ?", [id]);
+    await db.query("DELETE FROM otps WHERE id = ?", [rows[0].id]);
 
     return res.json({
       success: true,
