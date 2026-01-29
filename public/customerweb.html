@@ -5,155 +5,69 @@
 <title>Customer Dashboard | RentHub</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
 <style>
-:root{
-  --glass:rgba(255,255,255,0.08);
-  --border:rgba(255,255,255,0.18);
-  --primary:#38bdf8;
-  --success:#22c55e;
-  --danger:#ef4444;
-  --pending:#facc15;
-}
+:root{--glass:rgba(255,255,255,0.08);--border:rgba(255,255,255,0.18);--primary:#38bdf8;--success:#22c55e;--danger:#ef4444;--pending:#facc15;}
 *{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:Poppins,sans-serif;
-  background:linear-gradient(135deg,#020617,#0f172a,#020617);
-  color:#fff;
-}
-header{
-  padding:20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:rgba(0,0,0,0.4);
-  backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--border);
-}
-.container{padding:20px;max-width:1200px;margin:auto}
-.location-select{
-  width:100%;
-  padding:12px 18px;
-  border-radius:14px;
-  border:none;
-  background:rgba(15,23,42,0.9);
-  color:#fff;
-  font-size:16px;
-  margin-bottom:20px;
-}
-.location-select option{background:#020617;color:#fff}
-.categories,.items,.history{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-  gap:15px;
-  margin-bottom:25px
-}
-.card{
-  background:var(--glass);
-  border:1px solid var(--border);
-  border-radius:15px;
-  padding:15px;
-  text-align:center;
-  transition:.3s
-}
-.card:hover{transform:scale(1.04)}
-button{
-  padding:8px 12px;
-  border:none;
-  border-radius:10px;
-  font-weight:600;
-  cursor:pointer
-}
-.primary{background:var(--primary);color:#fff}
-.danger{background:var(--danger);color:#fff}
-.Pending{color:var(--pending)}
-.Accepted{color:var(--success)}
-.Rejected{color:var(--danger)}
-.modal{
-  display:none;
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,0.7);
-  justify-content:center;
-  align-items:center
-}
-.modal-content{
-  background:var(--glass);
-  padding:25px;
-  border-radius:15px;
-  width:90%;
-  max-width:400px
-}
-.modal-content input{
-  width:100%;
-  padding:10px;
-  margin:12px 0;
-  border-radius:10px;
-  border:none
-}
+body{margin:0;font-family:Poppins,sans-serif;background:linear-gradient(135deg,#020617,#0f172a,#020617);color:#fff;}
+header{padding:20px;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,0.4);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);}
+.container{padding:20px;max-width:1200px;margin:auto;}
+.location-select{width:100%;padding:12px 18px;border-radius:14px;border:none;background:rgba(15,23,42,0.9);color:#fff;font-size:16px;margin-bottom:20px;}
+.location-select option{background:#020617;color:#fff;}
+.categories,.items,.history{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;margin-bottom:25px;}
+.card{background:var(--glass);border:1px solid var(--border);border-radius:15px;padding:15px;text-align:center;transition:.3s;}
+.card:hover{transform:scale(1.04);}
+button{padding:8px 12px;border:none;border-radius:10px;font-weight:600;cursor:pointer;}
+.primary{background:var(--primary);color:#fff;}
+.danger{background:var(--danger);color:#fff;}
+.Pending{color:var(--pending);}
+.Accepted{color:var(--success);}
+.Rejected{color:var(--danger);}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);justify-content:center;align-items:center;}
+.modal-content{background:var(--glass);padding:25px;border-radius:15px;width:90%;max-width:400px;}
+.modal-content input{width:100%;padding:10px;margin:12px 0;border-radius:10px;border:none;}
 </style>
 </head>
-
 <body>
-
 <header>
-  <h2>🚀 RentHub – Customer</h2>
-  <div>Welcome, <b id="customerName"></b></div>
-  <button onclick="logout()">Logout</button>
+<h2>🚀 RentHub – Customer</h2>
+<div>Welcome, <b id="customerName"></b></div>
+<button onclick="logout()">Logout</button>
 </header>
-
 <div class="container">
-
 <h3>Select Location</h3>
-<select id="location" class="location-select">
-  <option value="">Loading...</option>
-</select>
-
+<select id="location" class="location-select"><option value="">Loading...</option></select>
 <h3>Select Category</h3>
 <div class="categories">
-  <div class="card" onclick="loadItems('Electronics')">💻 Electronics</div>
-  <div class="card" onclick="loadItems('Bike')">🏍 Bikes</div>
-  <div class="card" onclick="loadItems('Car')">🚗 Cars</div>
-  <div class="card" onclick="loadItems('Tent')">🏕 Tents</div>
-  <div class="card" onclick="loadItems('Appliance')">🏠 Appliances</div>
+<div class="card" onclick="loadItems('Electronics')">💻 Electronics</div>
+<div class="card" onclick="loadItems('Bike')">🏍 Bikes</div>
+<div class="card" onclick="loadItems('Car')">🚗 Cars</div>
+<div class="card" onclick="loadItems('Tent')">🏕 Tents</div>
+<div class="card" onclick="loadItems('Appliance')">🏠 Appliances</div>
 </div>
-
 <h3>Available Items</h3>
 <div class="items" id="items"></div>
-
 <h3>Your Booking History</h3>
 <div class="history" id="history"></div>
 </div>
-
 <div class="modal" id="bookingModal">
-  <div class="modal-content">
-    <h3>Confirm Booking</h3>
-    <label><input type="checkbox" id="terms"> Accept terms</label>
-    <input type="number" id="duration" placeholder="Days" min="1">
-    <button id="confirmBtn" class="primary" disabled>Book</button>
-    <button class="danger" onclick="closeBooking()">Cancel</button>
-  </div>
+<div class="modal-content">
+<h3>Confirm Booking</h3>
+<label><input type="checkbox" id="terms"> Accept terms</label>
+<input type="number" id="duration" placeholder="Days" min="1">
+<button id="confirmBtn" class="primary" disabled>Book</button>
+<button class="danger" onclick="closeBooking()">Cancel</button>
 </div>
-
+</div>
 <script>
-const customerId = localStorage.getItem("customer_id");
-if(!customerId){
-  alert("Login required");
-  location.href="index.html";
-}
-
+const customerId=localStorage.getItem("customer_id");
+if(!customerId){alert("Login required");location.href="index.html";}
 const customerName=document.getElementById("customerName");
 const locationSelect=document.getElementById("location");
 const items=document.getElementById("items");
 const history=document.getElementById("history");
-
 customerName.innerText = localStorage.getItem("name") || "Customer";
 
-function logout(){
-  localStorage.clear();
-  location.href="index.html";
-}
+function logout(){localStorage.clear();location.href="index.html";}
 
 let selectedItem=null;
 const bookingModal=document.getElementById("bookingModal");
@@ -161,124 +75,50 @@ const confirmBtn=document.getElementById("confirmBtn");
 const terms=document.getElementById("terms");
 const duration=document.getElementById("duration");
 
-terms.onchange = duration.oninput = ()=>{
-  confirmBtn.disabled=!terms.checked || !duration.value || duration.value<=0;
-};
-
-function openBooking(id){
-  selectedItem=id;
-  bookingModal.style.display="flex";
-  terms.checked=false;
-  duration.value="";
-  confirmBtn.disabled=true;
-}
-function closeBooking(){
-  bookingModal.style.display="none";
-}
+terms.onchange = duration.oninput = ()=>{confirmBtn.disabled=!terms.checked || !duration.value || duration.value<=0;}
+function openBooking(id){selectedItem=id;bookingModal.style.display="flex";terms.checked=false;duration.value="";confirmBtn.disabled=true;}
+function closeBooking(){bookingModal.style.display="none";}
 
 confirmBtn.onclick = async ()=>{
-  if(!selectedItem || !duration.value || duration.value<=0) return;
-  try{
-    const res = await fetch("/api/create-request",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        item_id:selectedItem,
-        customer_id:customerId,
-        rental_duration:Number(duration.value)
-      })
-    });
-    const d = await res.json();
-    if(d.success){
-      alert("✅ Booking sent");
-      closeBooking();
-      loadHistory();
-    }else alert(d.message || "Failed");
-  }catch{
-    alert("Server error");
-  }
+try{
+const res = await fetch("/api/create-request",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"createBooking",item_id:selectedItem,customer_id:customerId,rental_duration:duration.value})});
+const d = await res.json();
+if(d.success){alert("✅ Booking sent");closeBooking();loadHistory();}else alert(d.message||"Failed");
+}catch{alert("Server error");}
 };
 
 async function loadLocations(){
-  try{
-    const res=await fetch("/api/items");
-    const d=await res.json();
-    locationSelect.innerHTML=`<option value="">Select location</option>`;
-    if(!d.success || !Array.isArray(d.locations) || d.locations.length===0){
-      locationSelect.innerHTML+=`<option>No locations found</option>`;
-      return;
-    }
-    d.locations.forEach(l=>{
-      locationSelect.innerHTML+=`<option value="${l}">${l}</option>`;
-    });
-  }catch{
-    locationSelect.innerHTML=`<option>Error loading locations</option>`;
-  }
+try{
+const res=await fetch("/api/items?type=locations");
+const d = await res.json();
+locationSelect.innerHTML=`<option value="">Select location</option>`;
+if(!d.success || !d.locations || !d.locations.length){locationSelect.innerHTML+=`<option>No locations found</option>`;return;}
+d.locations.forEach(l=>{locationSelect.innerHTML+=`<option value="${l}">${l}</option>`;});
+}catch{locationSelect.innerHTML=`<option>Error loading locations</option>`;}
 }
 
 async function loadItems(category){
-  if(!locationSelect.value){
-    alert("Select location first");
-    return;
-  }
-  try{
-    const res=await fetch("/api/items",{
-      method:"POST",
-      headers:{ "Content-Type":"application/json" },
-      body:JSON.stringify({
-        action:"getItems",
-        category,
-        location:locationSelect.value
-      })
-    });
-    const d=await res.json();
-    items.innerHTML="";
-    if(!d.success || !Array.isArray(d.items) || d.items.length===0){
-      items.innerHTML="<p>No items found</p>";
-      return;
-    }
-    d.items.forEach(i=>{
-      items.innerHTML+=`
-      <div class="card">
-        <h4>${i.item_name}</h4>
-        <p>₹${i.price_per_day}/day</p>
-        <p>${i.shop_name}</p>
-        <button class="primary" onclick="openBooking(${i.item_id})">Book</button>
-      </div>`;
-    });
-  }catch{
-    items.innerHTML="<p>Error loading items</p>";
-  }
+if(!locationSelect.value){alert("Select location first");return;}
+try{
+const res=await fetch("/api/create-request",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"getItems",category,location:locationSelect.value})});
+const d = await res.json();
+items.innerHTML="";
+if(!d.success || !d.items || !d.items.length){items.innerHTML="<p>No items found</p>";return;}
+d.items.forEach(i=>{items.innerHTML+=`<div class="card"><h4>${i.item_name}</h4><p>₹${i.price_per_day}/day</p><p>${i.shop_name}</p><button class="primary" onclick="openBooking(${i.item_id})">Book</button></div>`;});
+}catch{items.innerHTML="<p>Error loading items</p>";}
 }
 
 async function loadHistory(){
-  try{
-    const res=await fetch(`/api/create-request?customer_id=${customerId}`);
-    const d=await res.json();
-    history.innerHTML="";
-    if(!d.success || !Array.isArray(d.history) || d.history.length===0){
-      history.innerHTML="<p>No bookings yet</p>";
-      return;
-    }
-    d.history.forEach(b=>{
-      history.innerHTML+=`
-      <div class="card">
-        <b>${b.item_name}</b><br>
-        ${b.shop_name}<br>
-        Days: ${b.rental_duration}<br>
-        Status: <span class="${b.status}">${b.status}</span>
-      </div>`;
-    });
-  }catch{
-    history.innerHTML="<p>Error loading history</p>";
-  }
+try{
+const res=await fetch(`/api/create-request?customer_id=${customerId}`);
+const d = await res.json();
+history.innerHTML="";
+if(!d.success || !d.history || !d.history.length){history.innerHTML="<p>No bookings yet</p>";return;}
+d.history.forEach(b=>{history.innerHTML+=`<div class="card"><b>${b.item_name}</b><br>${b.shop_name}<br>Days: ${b.rental_duration}<br>Status: <span class="${b.status}">${b.status}</span></div>`;});
+}catch{history.innerHTML="<p>Error loading history</p>";}
 }
 
-window.onload=()=>{
-  loadLocations();
-  loadHistory();
-};
+window.onload=()=>{loadLocations();loadHistory();};
 </script>
-
 </body>
 </html>

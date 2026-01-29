@@ -12,95 +12,95 @@ const db = mysql.createPool({
 
 export default async function handler(req, res) {
   try {
-
-    /* ========== CREATE BOOKING ========== */
+    /* ================= POST REQUESTS ================= */
     if (req.method === "POST") {
-      const { item_id, customer_id, rental_duration } = req.body || {};
+      const { action } = req.body || {};
 
-      if (!item_id || !customer_id || !rental_duration) {
-        return res.status(400).json({
-          success: false,
-          message: "Missing booking fields",
-        });
+      if (action === "createBooking") {
+        const { item_id, customer_id, rental_duration } = req.body;
+
+        if (!item_id || !customer_id || !rental_duration) {
+          return res.status(400).json({ success: false, message: "Missing booking fields" });
+        }
+
+        await db.execute(
+          `INSERT INTO bookings (item_id, customer_id, rental_duration, status)
+           VALUES (?, ?, ?, 'Pending')`,
+          [Number(item_id), Number(customer_id), Number(rental_duration)]
+        );
+
+        return res.json({ success: true });
       }
 
-      await db.execute(
-        `INSERT INTO bookings
-         (item_id, customer_id, rental_duration, status)
-         VALUES (?, ?, ?, 'Pending')`,
-        [Number(item_id), Number(customer_id), Number(rental_duration)]
-      );
+      if (action === "getItems") {
+        const { category, location } = req.body;
+        if (!category || !location) {
+          return res.status(400).json({ success: false, message: "Category and location required" });
+        }
 
-      return res.json({ success: true });
+        const [rows] = await db.execute(
+          `SELECT item_id, item_name, shop_name, price_per_day
+           FROM items
+           WHERE category=? AND location=?`,
+          [category, location.trim().toLowerCase()]
+        );
+
+        return res.json({ success: true, items: rows });
+      }
+
+      if (action === "getAllItems") {
+        const [rows] = await db.execute(`SELECT location FROM items WHERE location IS NOT NULL`);
+        return res.json({ success: true, items: rows });
+      }
+
+      return res.status(400).json({ success: false, message: "Invalid action" });
     }
 
-    /* ========== CUSTOMER HISTORY ========== */
-    if (req.method === "GET" && req.query.customer_id) {
-      const [rows] = await db.execute(
-        `
-        SELECT
-          b.booking_id,
-          b.rental_duration,
-          b.status,
-          i.item_name,
-          i.shop_name
-        FROM bookings b
-        JOIN items i ON b.item_id = i.item_id
-        WHERE b.customer_id=?
-        ORDER BY b.booking_id DESC
-        `,
-        [Number(req.query.customer_id)]
-      );
+    /* ================= GET REQUESTS ================= */
+    if (req.method === "GET") {
+      if (req.query.customer_id) {
+        const [rows] = await db.execute(
+          `SELECT b.booking_id, b.rental_duration, b.status, i.item_name, i.shop_name
+           FROM bookings b
+           JOIN items i ON b.item_id = i.item_id
+           WHERE b.customer_id=?
+           ORDER BY b.booking_id DESC`,
+          [Number(req.query.customer_id)]
+        );
+        return res.json({ success: true, history: rows });
+      }
 
-      return res.json({ success: true, history: rows });
+      if (req.query.owner_id) {
+        const [rows] = await db.execute(
+          `SELECT b.booking_id, b.status, b.rental_duration, i.item_name, c.name AS customer_name, c.phone
+           FROM bookings b
+           JOIN items i ON b.item_id = i.item_id
+           JOIN customers c ON b.customer_id = c.customer_id
+           WHERE i.owner_id=?
+           ORDER BY b.booking_id DESC`,
+          [Number(req.query.owner_id)]
+        );
+        return res.json({ success: true, requests: rows });
+      }
+
+      return res.status(400).json({ success: false, message: "Missing query parameter" });
     }
 
-    /* ========== OWNER REQUESTS + HISTORY ========== */
-    if (req.method === "GET" && req.query.owner_id) {
-      const [rows] = await db.execute(
-        `
-        SELECT
-          b.booking_id,
-          b.status,
-          b.rental_duration,
-          i.item_name,
-          c.name AS customer_name,
-          c.phone
-        FROM bookings b
-        JOIN items i ON b.item_id = i.item_id
-        JOIN customers c ON b.customer_id = c.customer_id
-        WHERE i.owner_id=?
-        ORDER BY b.booking_id DESC
-        `,
-        [Number(req.query.owner_id)]
-      );
-
-      return res.json({ success: true, requests: rows });
-    }
-
-    /* ========== ACCEPT / REJECT ========== */
+    /* ================= PUT REQUEST ================= */
     if (req.method === "PUT") {
-      const { booking_id, status } = req.body || {};
-
+      const { booking_id, status } = req.body;
       if (!booking_id || !["Accepted", "Rejected"].includes(status)) {
-        return res.status(400).json({
-          success: false,
-          message: "Invalid data",
-        });
+        return res.status(400).json({ success: false, message: "Invalid data" });
       }
 
-      await db.execute(
-        `UPDATE bookings SET status=? WHERE booking_id=?`,
-        [status, Number(booking_id)]
-      );
-
+      await db.execute(`UPDATE bookings SET status=? WHERE booking_id=?`, [status, Number(booking_id)]);
       return res.json({ success: true });
     }
 
-    res.status(405).json({ success: false });
+    return res.status(405).json({ success: false, message: "Method not allowed" });
 
   } catch (err) {
-    console.error("API ERROR:", err);
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error(err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 }
