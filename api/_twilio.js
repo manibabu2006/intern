@@ -9,7 +9,7 @@ let client = null;
 if (
   process.env.TWILIO_ACCOUNT_SID &&
   process.env.TWILIO_AUTH_TOKEN &&
-  process.env.TWILIO_PHONE
+  process.env.TWILIO_PHONE_NUMBER
 ) {
   client = Twilio(
     process.env.TWILIO_ACCOUNT_SID,
