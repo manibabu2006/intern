@@ -30,29 +30,34 @@ export default async function handler(req, res) {
     }
 
     /* ================= GET ITEMS BY CATEGORY & LOCATION ================= */
-    if (req.method === "POST" && req.body.action === "getItems") {
-      const { category, location } = req.body;
+if (req.method === "POST" && req.body.action === "getItems") {
+  const { category, location } = req.body;
 
-      if (!category || !location) {
-        return res.status(400).json({
-          success: false,
-          message: "Category and location required"
-        });
-      }
+  if (!category || !location) {
+    return res.status(400).json({
+      success: false,
+      message: "Category and location required"
+    });
+  }
 
-      // ❌ DO NOT FILTER is_active HERE
-      const [items] = await db.execute(
-        `SELECT 
-           item_id, shop_name, item_name, category, price_per_day,
-           location, is_active, image_url
-         FROM items
-         WHERE category=? AND location=?
-         ORDER BY item_id DESC`,
-        [category, location]
-      );
+  const [items] = await db.execute(
+    `SELECT 
+        item_id,
+        shop_name,
+        item_name,
+        category,
+        price_per_day,
+        location,
+        is_active,
+        image_url
+     FROM items
+     WHERE category = ? AND location = ?
+     ORDER BY item_id DESC`,
+    [category, location]
+  );
 
-      return res.json({ success: true, items });
-    }
+  return res.json({ success: true, items });
+}
 
     /* ================= ADD NEW ITEM ================= */
     if (req.method === "POST" && !req.body.action) {
