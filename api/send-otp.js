@@ -34,7 +34,7 @@ export default async function handler(req, res) {
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
 
     await saveOTP(username, otp, expiresAt, role);
-
+    console.log("OTP saved, now sending SMS...");
     await sendOTP(mobile, otp); // will throw error if Twilio not set
 
     res.status(200).json({ success: true, message: "OTP sent successfully" });

@@ -5,89 +5,108 @@
 <title>Customer Dashboard | RentHub</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
 <style>
 :root{
-  --glass:rgba(255,255,255,0.08);
-  --border:rgba(255,255,255,0.18);
+  --bg:#020617;
+  --panel:#0f172a;
+  --card:rgba(255,255,255,0.06);
+  --border:rgba(255,255,255,0.15);
   --primary:#38bdf8;
   --success:#22c55e;
   --danger:#ef4444;
   --pending:#facc15;
 }
 
-*{box-sizing:border-box;}
+*{box-sizing:border-box}
 
 body{
   margin:0;
   font-family:Poppins,sans-serif;
-  background:linear-gradient(135deg,#020617,#0f172a,#020617);
+  background:var(--bg);
   color:#fff;
-}
-
-header{
-  padding:20px;
+  min-height:100vh;
   display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:rgba(0,0,0,0.4);
-  backdrop-filter:blur(10px);
-  border-bottom:1px solid var(--border);
 }
 
-.container{
-  padding:20px;
-  max-width:1200px;
-  margin:auto;
+/* ===== SIDEBAR ===== */
+aside{
+  width:240px;
+  background:var(--panel);
+  padding:25px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
 }
 
+aside h2{margin:0}
+aside p{opacity:.85}
+
+aside button{
+  margin-top:auto;
+  padding:10px;
+  border:none;
+  border-radius:12px;
+  background:var(--danger);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+}
+
+/* ===== MAIN ===== */
+main{
+  flex:1;
+  padding:25px;
+}
+
+.section{margin-bottom:30px}
+.section h3{margin-bottom:14px}
+
+/* ===== SELECT ===== */
 .location-select{
   width:100%;
-  padding:12px 18px;
+  padding:12px 16px;
   border-radius:14px;
   border:none;
-  background:rgba(15,23,42,0.9);
-  color:#fff;
-  font-size:16px;
-  margin-bottom:20px;
-}
-
-.location-select option{
   background:#020617;
   color:#fff;
+  font-size:15px;
 }
 
-.categories,.items,.history{
+/* ===== GRIDS ===== */
+.grid{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
   gap:15px;
-  margin-bottom:25px;
 }
 
+/* ===== CARDS ===== */
 .card{
-  background:var(--glass);
+  background:var(--card);
   border:1px solid var(--border);
-  border-radius:15px;
-  padding:15px;
+  border-radius:16px;
+  padding:16px;
   text-align:center;
-  transition:.3s;
+  transition:.25s;
 }
-
-.card:hover{transform:scale(1.04);}
+.card:hover{transform:translateY(-4px)}
 
 button{
-  padding:8px 12px;
+  padding:8px 14px;
   border:none;
   border-radius:10px;
   font-weight:600;
   cursor:pointer;
 }
 
-.primary{background:var(--primary);color:#fff;}
-.danger{background:var(--danger);color:#fff;}
-.Pending{color:var(--pending);}
-.Accepted{color:var(--success);}
-.Rejected{color:var(--danger);}
+.primary{background:var(--primary);color:#000}
+.danger{background:var(--danger);color:#fff}
 
+.Pending{color:var(--pending)}
+.Accepted{color:var(--success)}
+.Rejected{color:var(--danger)}
+
+/* ===== MODAL ===== */
 .modal{
   display:none;
   position:fixed;
@@ -98,104 +117,113 @@ button{
 }
 
 .modal-content{
-  background:var(--glass);
+  background:var(--panel);
   padding:25px;
-  border-radius:15px;
+  border-radius:18px;
   width:90%;
-  max-width:400px;
+  max-width:420px;
+  border:1px solid var(--border);
 }
 
-/* Input fields inside modal */
 .modal-content input{
   width:100%;
   padding:10px;
   margin:12px 0;
   border-radius:10px;
   border:none;
+  background:#020617;
+  color:#fff;
 }
 
-/* ================= Checkbox styling ================= */
 .modal-content label{
   display:flex;
   align-items:center;
   gap:10px;
   cursor:pointer;
-  font-weight:500;
   margin-bottom:10px;
 }
 
-/* Hide default checkbox */
 .modal-content input[type="checkbox"]{
   appearance:none;
-  -webkit-appearance:none;
   width:20px;
   height:20px;
   border-radius:5px;
   border:2px solid var(--primary);
-  background:rgba(255,255,255,0.05);
   position:relative;
-  cursor:pointer;
-  transition: all 0.2s ease;
 }
 
-/* Checked state */
 .modal-content input[type="checkbox"]:checked{
   background:var(--primary);
-  border-color:var(--primary);
 }
-
-/* Tick mark */
 .modal-content input[type="checkbox"]:checked::after{
   content:'✔';
-  color:#fff;
-  font-size:14px;
+  color:#000;
   position:absolute;
-  top:0;
+  top:-1px;
   left:3px;
+  font-size:14px;
 }
-
 </style>
 </head>
+
 <body>
 
-<header>
-<h2>🚀 RentHub – Customer</h2>
-<div>Welcome, <b id="customerName"></b></div>
-<button onclick="logout()">Logout</button>
-</header>
+<!-- ===== SIDEBAR ===== -->
+<aside>
+  <h2>🚀 RentHub</h2>
+  <p>Customer Panel</p>
+  <p><b id="customerName"></b></p>
+  <button onclick="logout()">Logout</button>
+</aside>
 
-<div class="container">
-<h3>Select Location</h3>
-<select id="location" class="location-select"><option value="">Loading...</option></select>
+<!-- ===== MAIN ===== -->
+<main>
 
-<h3>Select Category</h3>
-<div class="categories">
-  <div class="card" onclick="loadItems('Electronics')">💻 Electronics</div>
-  <div class="card" onclick="loadItems('Bike')">🏍 Bikes</div>
-  <div class="card" onclick="loadItems('Car')">🚗 Cars</div>
-  <div class="card" onclick="loadItems('Tent')">🏕 Tents</div>
-  <div class="card" onclick="loadItems('Appliance')">🏠 Appliances</div>
-</div>
+  <div class="section">
+    <h3>Select Location</h3>
+    <select id="location" class="location-select">
+      <option>Loading...</option>
+    </select>
+  </div>
 
-<h3>Available Items</h3>
-<div class="items" id="items"></div>
+  <div class="section">
+    <h3>Select Category</h3>
+    <div class="grid">
+      <div class="card" onclick="loadItems('Electronics')">💻 Electronics</div>
+      <div class="card" onclick="loadItems('Bike')">🏍 Bikes</div>
+      <div class="card" onclick="loadItems('Car')">🚗 Cars</div>
+      <div class="card" onclick="loadItems('Tent')">🏕 Tents</div>
+      <div class="card" onclick="loadItems('Appliance')">🏠 Appliances</div>
+    </div>
+  </div>
 
-<h3>Your Booking History</h3>
-<div class="history" id="history"></div>
-</div>
+  <div class="section">
+    <h3>Available Items</h3>
+    <div class="grid" id="items"></div>
+  </div>
 
+  <div class="section">
+    <h3>Your Booking History</h3>
+    <div class="grid" id="history"></div>
+  </div>
+
+</main>
+
+<!-- ===== BOOKING MODAL ===== -->
 <div class="modal" id="bookingModal">
-<div class="modal-content">
-<h3>Confirm Booking</h3>
-<label>
-    <input type="checkbox" id="terms">
-    Accept terms and conditions
-  </label>
-  <input type="number" id="duration" placeholder="Days" min="1">
-  <button id="confirmBtn" class="primary" disabled>Book</button>
-  <button class="danger" onclick="closeBooking()">Cancel</button>
+  <div class="modal-content">
+    <h3>Confirm Booking</h3>
+    <label>
+      <input type="checkbox" id="terms">
+      Accept terms and conditions
+    </label>
+    <input type="number" id="duration" placeholder="Days" min="1">
+    <button id="confirmBtn" class="primary" disabled>Book</button>
+    <button class="danger" onclick="closeBooking()">Cancel</button>
+  </div>
 </div>
 
+<!-- 🔒 ORIGINAL SCRIPT (UNCHANGED) -->
 <script>
 const customerId = localStorage.getItem("customer_id");
 if(!customerId){ alert("Login required"); location.href="index.html"; }
@@ -233,7 +261,7 @@ confirmBtn.onclick = async ()=>{
 
 async function loadLocations() {
   try {
-    const res = await fetch("/api/items"); // GET request
+    const res = await fetch("/api/items");
     const d = await res.json();
     locationSelect.innerHTML = `<option value="">Select location</option>`;
     if (!d.success || !d.locations?.length) {
@@ -248,7 +276,6 @@ async function loadLocations() {
   }
 }
 
-
 async function loadItems(category){
   if(!locationSelect.value){ alert("Select location first"); return; }
   try{
@@ -261,7 +288,12 @@ async function loadItems(category){
     items.innerHTML="";
     if(!d.success || !d.items?.length){ items.innerHTML="<p>No items found</p>"; return; }
     d.items.forEach(i=>{
-      items.innerHTML+=`<div class="card"><h4>${i.item_name}</h4><p>₹${i.price_per_day}/day</p><p>${i.shop_name}</p><button class="primary" onclick="openBooking(${i.item_id})">Book</button></div>`;
+      items.innerHTML+=`<div class="card">
+        <h4>${i.item_name}</h4>
+        <p>₹${i.price_per_day}/day</p>
+        <p>${i.shop_name}</p>
+        <button class="primary" onclick="openBooking(${i.item_id})">Book</button>
+      </div>`;
     });
   }catch{ items.innerHTML="<p>Error loading items</p>"; }
 }
@@ -273,12 +305,18 @@ async function loadHistory(){
     history.innerHTML="";
     if(!d.success || !d.history?.length){ history.innerHTML="<p>No bookings yet</p>"; return; }
     d.history.forEach(b=>{
-      history.innerHTML+=`<div class="card"><b>${b.item_name}</b><br>${b.shop_name}<br>Days: ${b.rental_duration}<br>Status: <span class="${b.status}">${b.status}</span></div>`;
+      history.innerHTML+=`<div class="card">
+        <b>${b.item_name}</b><br>
+        ${b.shop_name}<br>
+        Days: ${b.rental_duration}<br>
+        Status: <span class="${b.status}">${b.status}</span>
+      </div>`;
     });
   }catch{ history.innerHTML="<p>Error loading history</p>"; }
 }
 
 window.onload=()=>{ loadLocations(); loadHistory(); };
 </script>
+
 </body>
 </html>
