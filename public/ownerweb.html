@@ -164,11 +164,10 @@ img.item-img{
   </div>
 
   <!-- ===== MY ITEMS ===== -->
-<div class="section">
-  <h3>My Items</h3>
-  <div id="myItems"></div>
-</div>
-
+  <div class="section">
+    <h3>My Items</h3>
+    <div id="myItems"></div>
+  </div>
 
   <!-- REQUESTS -->
   <div class="section">
@@ -191,7 +190,6 @@ if (!ownerId) {
   alert("Login first");
   location.href = "index.html";
 }
-
 document.getElementById("ownerName").innerText =
   localStorage.getItem("name") || "Owner";
 
@@ -215,20 +213,17 @@ document.getElementById("addItemBtn").onclick = async () => {
     image_url: image_url.value.trim() || null,
     is_active: is_active.value === "1" ? 1 : 0
   };
-
   if (!data.shop_name || !data.item_name || !data.category ||
       !data.price_per_day || !data.location) {
     alert("Fill all required fields");
     return;
   }
-
   try {
     const res = await fetch("/api/items", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
     });
-
     const d = await res.json();
     if (d.success) {
       alert("✅ Item added");
@@ -250,9 +245,7 @@ async function loadMyItems() {
   const res = await fetch(`/api/items?owner_id=${ownerId}`);
   const d = await res.json();
   const box = document.getElementById("myItems");
-
   box.innerHTML = "";
-
   if (!d.success || !d.items.length) {
     box.innerHTML = "<p>No items added yet</p>";
     return;
@@ -260,55 +253,25 @@ async function loadMyItems() {
 
   d.items.forEach(i => {
     box.innerHTML += `
-      <div class="card" style="
-        display:flex; 
-        align-items:center; 
-        gap:12px; 
-        padding:12px 16px; 
-        background:rgba(255,255,255,0.05); 
-        border:1px solid rgba(255,255,255,0.15);
-      ">
+      <div class="card" style="display:flex; align-items:center; gap:12px; padding:12px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15);">
         ${i.image_url ? `<img src="${i.image_url}" class="item-img" style="width:70px; height:70px; border-radius:10px;">` : 
         `<div style="width:70px; height:70px; background:rgba(255,255,255,0.1); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:12px;">No Img</div>`}
 
         <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
           <input id="name-${i.item_id}" value="${i.item_name}" 
-            style="
-              padding:6px 8px; 
-              border-radius:8px; 
-              border:none; 
-              background:rgba(0,0,0,0.2); 
-              color:#fff; 
-              font-weight:500;
-              font-size:14px;
-            " 
-            placeholder="Item Name"
-          >
+            style="padding:6px 8px; border-radius:8px; border:none; background:rgba(0,0,0,0.2); color:#fff; font-weight:500; font-size:14px;" 
+            placeholder="Item Name">
+
+          <input id="img-${i.item_id}" value="${i.image_url || ''}" 
+            style="padding:6px 8px; border-radius:8px; border:none; background:rgba(0,0,0,0.2); color:#fff; font-size:13px;" 
+            placeholder="Image URL">
 
           <div style="display:flex; gap:8px; align-items:center;">
             <input type="number" id="price-${i.item_id}" value="${i.price_per_day}" 
-              style="
-                padding:6px 8px; 
-                border-radius:8px; 
-                border:none; 
-                background:rgba(0,0,0,0.2); 
-                color:#fff; 
-                font-size:13px;
-                width:80px;
-                text-align:right;
-              " 
-              placeholder="Price"
-            >
+              style="padding:6px 8px; border-radius:8px; border:none; background:rgba(0,0,0,0.2); color:#fff; font-size:13px; width:80px; text-align:right;" 
+              placeholder="Price">
 
-            <select id="status-${i.item_id}" style="
-              padding:6px 8px; 
-              border-radius:8px; 
-              border:none; 
-              background:rgba(0,0,0,0.2); 
-              color:#fff; 
-              font-size:13px;
-              width:90px;
-            ">
+            <select id="status-${i.item_id}" style="padding:6px 8px; border-radius:8px; border:none; background:rgba(0,0,0,0.2); color:#fff; font-size:13px; width:90px;">
               <option value="1" ${i.is_active ? "selected" : ""}>Active</option>
               <option value="0" ${!i.is_active ? "selected" : ""}>Inactive</option>
             </select>
@@ -321,7 +284,6 @@ async function loadMyItems() {
   });
 }
 
-
 async function updateItem(item_id) {
   const data = {
     item_id,
@@ -331,19 +293,17 @@ async function updateItem(item_id) {
     image_url: document.getElementById(`img-${item_id}`).value.trim() || null,
     is_active: document.getElementById(`status-${item_id}`).value
   };
-
   const res = await fetch("/api/items", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
   });
-
   const d = await res.json();
   if (d.success) {
     alert("✅ Item updated");
     loadMyItems();
   } else {
-    alert("Update failed");
+    alert(d.message || "Update failed");
   }
 }
 
@@ -352,19 +312,15 @@ async function loadAll() {
   try {
     const res = await fetch(`/api/create-request?owner_id=${ownerId}`);
     const d = await res.json();
-
     const reqBox = document.getElementById("requests");
     const histBox = document.getElementById("history");
-
     reqBox.innerHTML = "";
     histBox.innerHTML = "";
-
     if (!d.success || !d.requests?.length) {
       reqBox.innerHTML = "<p>No booking requests</p>";
       histBox.innerHTML = "<p>No booking history</p>";
       return;
     }
-
     d.requests.forEach(r => {
       if (r.status === "Pending") {
         reqBox.innerHTML += `
@@ -395,7 +351,6 @@ async function respond(booking_id, status) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ booking_id, status })
   });
-
   const d = await res.json();
   if (d.success) loadAll();
   else alert("Action failed");
