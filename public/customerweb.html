@@ -375,6 +375,11 @@ async function loadItems(category){
   const d = await res.json();
   items.innerHTML="";
 
+  if(!d.items || d.items.length === 0){
+    items.innerHTML = "<p>No items found in this category and location.</p>";
+    return;
+  }
+
   d.items.forEach(i=>{
     const isInactive = i.is_active == 0; // check if inactive
     items.innerHTML+=`
@@ -382,7 +387,10 @@ async function loadItems(category){
         <h4>${i.item_name}</h4>
         <p>₹${i.price_per_day}/day</p>
         <p>${i.shop_name}</p>
-        ${isInactive ? '<span style="position:absolute; top:10px; right:10px; background:#ef4444; color:#fff; padding:3px 6px; border-radius:6px; font-size:12px;">Unavailable</span>' : ''}
+        ${isInactive 
+          ? '<p style="color:#ef4444; font-weight:bold;">Unavailable</p>' 
+          : ''
+        }
         <button class="primary" 
           onclick="${isInactive ? 'alert(\'Item unavailable\')' : `openBooking(${i.item_id})`}"
           ${isInactive ? 'disabled style="opacity:0.6; cursor:not-allowed;"' : ''}>
@@ -391,6 +399,7 @@ async function loadItems(category){
       </div>`;
   });
 }
+
 
 async function loadHistory(){
   const res = await fetch(`/api/create-request?customer_id=${customerId}`);
