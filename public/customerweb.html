@@ -88,14 +88,22 @@ if(d.success){alert("✅ Booking sent");closeBooking();loadHistory();}else alert
 };
 
 async function loadLocations(){
-try{
-const res=await fetch("/api/items?type=locations");
-const d = await res.json();
-locationSelect.innerHTML=`<option value="">Select location</option>`;
-if(!d.success || !d.locations || !d.locations.length){locationSelect.innerHTML+=`<option>No locations found</option>`;return;}
-d.locations.forEach(l=>{locationSelect.innerHTML+=`<option value="${l}">${l}</option>`;});
-}catch{locationSelect.innerHTML=`<option>Error loading locations</option>`;}
+  try {
+    const res = await fetch("/api/items"); // GET
+    const d = await res.json();
+    locationSelect.innerHTML = `<option value="">Select location</option>`;
+    if(!d.success || !d.locations || !d.locations.length){
+      locationSelect.innerHTML += `<option>No locations found</option>`;
+      return;
+    }
+    d.locations.forEach(l=>{
+      locationSelect.innerHTML += `<option value="${l}">${l}</option>`;
+    });
+  } catch {
+    locationSelect.innerHTML = `<option>Error loading locations</option>`;
+  }
 }
+
 
 async function loadItems(category){
 if(!locationSelect.value){alert("Select location first");return;}

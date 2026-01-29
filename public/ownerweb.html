@@ -61,7 +61,9 @@ async function addItem(){
     price_per_day: document.getElementById("price_per_day").value,
     location: document.getElementById("location").value.trim()
   };
-  if(Object.values(data).some(v=>!v)){alert("Fill all fields");return;}
+
+  if(Object.values(data).some(v=>!v)){alert("Fill all fields"); return;}
+
   try{
     const res = await fetch("/api/items",{
       method:"POST",
@@ -69,15 +71,19 @@ async function addItem(){
       body:JSON.stringify(data)
     });
     const d = await res.json();
-    if(d.success){alert("✅ Item added");
-      document.getElementById("shop_name").value="";
-      document.getElementById("item_name").value="";
-      document.getElementById("category").value="";
-      document.getElementById("price_per_day").value="";
-      document.getElementById("location").value="";
+    if(d.success){
+      alert("✅ Item added");
+      document.getElementById("shop_name").value = "";
+      document.getElementById("item_name").value = "";
+      document.getElementById("category").value = "";
+      document.getElementById("price_per_day").value = "";
+      document.getElementById("location").value = "";
     } else alert(d.message || "Failed");
-  }catch{alert("Server error");}
+  } catch {
+    alert("Server error");
+  }
 }
+
 
 async function loadAll(){
   try{
