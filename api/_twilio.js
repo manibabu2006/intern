@@ -35,7 +35,7 @@ export async function sendOTP(mobile, otp, countryCode = "+91") {
   }
 
   try {
-    const toNumber = mobile.startsWith("+") ? mobile : `${countryCode}${mobile}`;
+    const toNumber = mobile.startsWith("+") ? mobile : `+91${mobile}`;
 
     const message = await client.messages.create({
       body: `RentHub OTP: ${otp} (valid for 5 minutes)`,
@@ -46,7 +46,9 @@ export async function sendOTP(mobile, otp, countryCode = "+91") {
     console.log(`✅ OTP sent to ${toNumber}, SID: ${message.sid}`);
     return message;
   } catch (err) {
-    console.error("❌ Twilio send error:", err);
-    throw new Error("Failed to send OTP via Twilio");
-  }
+  console.error("❌ Twilio send error:", err);
+  if (err.code) console.error("Twilio error code:", err.code);
+  if (err.moreInfo) console.error("More info:", err.moreInfo);
+  throw new Error("Failed to send OTP via Twilio");
+}
 }
