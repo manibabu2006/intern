@@ -3,7 +3,19 @@ import db from "./_db.js";
 export default async function handler(req, res) {
   try {
 
-    /* ================= GET OWNER ITEMS ================= */
+    /* ================= GET ALL LOCATIONS ================= */
+    // GET /api/items  → returns all unique active locations
+    if (req.method === "GET" && !req.query.owner_id) {
+      const [rows] = await db.execute(
+        `SELECT DISTINCT location FROM items WHERE is_active=1 ORDER BY location`
+      );
+
+      const locations = rows.map(r => r.location);
+      return res.json({ success: true, locations });
+    }
+
+    /* ================= GET ITEMS BY OWNER ================= */
+    // GET /api/items?owner_id=123
     if (req.method === "GET" && req.query.owner_id) {
       const owner_id = Number(req.query.owner_id);
 
@@ -18,7 +30,27 @@ export default async function handler(req, res) {
       return res.json({ success: true, items });
     }
 
-    /* ================= ADD ITEM ================= */
+    /* ================= GET ITEMS BY CATEGORY & LOCATION ================= */
+    // POST /api/items { action: "getItems", category, location }
+    if (req.method === "POST" && req.body.action === "getItems") {
+      const { category, location } = req.body;
+
+      if (!category || !location) {
+        return res.status(400).json({ success: false, message: "Category and location required" });
+      }
+
+      const [items] = await db.execute(
+        `SELECT item_id, shop_name, item_name, category, price_per_day, location, is_active, image_url
+         FROM items
+         WHERE category=? AND location=? AND is_active=1
+         ORDER BY item_id DESC`,
+        [category, location]
+      );
+
+      return res.json({ success: true, items });
+    }
+
+    /* ================= ADD NEW ITEM ================= */
     if (req.method === "POST" && !req.body.action) {
       const {
         owner_id,
