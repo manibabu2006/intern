@@ -1,36 +1,39 @@
-const pool = require("./_db");
+import pool from "./_db.js";
 
 /**
- * Save OTP (old OTPs for same user are removed)
+ * Save OTP (deletes previous OTPs for same user & role)
  */
-async function saveOTP(username, otp, expiresAt) {
-  await pool.query("DELETE FROM otp_codes WHERE username = ?", [username]);
+export async function saveOTP(username, otp, expiresAt, role) {
+  // Delete old OTP for the same user and role
+  await pool.query("DELETE FROM otp_codes WHERE username = ? AND role = ?", [username, role]);
+
+  // Insert new OTP
   await pool.query(
-    "INSERT INTO otp_codes (username, otp, expires_at) VALUES (?, ?, ?)",
-    [username, otp, expiresAt]
+    "INSERT INTO otp_codes (username, otp, expires_at, role) VALUES (?, ?, ?, ?)",
+    [username, otp, expiresAt, role]
   );
 }
 
 /**
- * Verify OTP (without deleting)
+ * Verify OTP
  */
-async function verifyOTP(username, otp) {
+export async function verifyOTP(username, otp, role) {
   const [rows] = await pool.query(
-    "SELECT * FROM otp_codes WHERE username = ? AND otp = ? AND expires_at > NOW()",
-    [username, otp]
+    "SELECT * FROM otp_codes WHERE username = ? AND otp = ? AND expires_at > NOW() AND role = ?",
+    [username, otp, role]
   );
-  return rows.length > 0;
+
+  if (rows.length === 0) return false;
+
+  // OTP is used → delete it
+  await pool.query("DELETE FROM otp_codes WHERE username = ? AND role = ?", [username, role]);
+
+  return true;
 }
 
 /**
- * Delete OTP (used after successful verification)
+ * Cleanup expired OTPs (optional)
  */
-async function deleteOTP(username) {
-  await pool.query("DELETE FROM otp_codes WHERE username = ?", [username]);
+export async function cleanupExpiredOTP() {
+  await pool.query("DELETE FROM otp_codes WHERE expires_at <= NOW()");
 }
-
-module.exports = {
-  saveOTP,
-  verifyOTP,
-  deleteOTP
-};

@@ -1,19 +1,21 @@
-const { verifyOTP, deleteOTP } = require("./_otpstore");
+import { verifyOTP } from "./_otpstore.js";
 
-module.exports = async (req, res) => {
-  if (req.method !== "POST") return res.status(405).send("Method not allowed");
+export default async function handler(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ success: false, message: "Method not allowed" });
 
-  const { username, otp } = req.body;
-  if (!username || !otp) return res.status(400).send("Username and OTP required");
+  const { username, otp, role } = req.body;
+
+  if (!username || !otp || !role) {
+    return res.status(400).json({ success: false, message: "All fields are required" });
+  }
 
   try {
-    const valid = await verifyOTP(username, otp);
-    if (!valid) return res.status(401).send("Invalid or expired OTP");
+    const valid = await verifyOTP(username, otp, role);
+    if (!valid) return res.status(401).json({ success: false, message: "Invalid or expired OTP" });
 
-    await deleteOTP(username); // OTP is one-time use
-    res.status(200).send("OTP verified");
+    res.status(200).json({ success: true, message: "OTP verified" });
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Verification failed");
+    console.error("VERIFY OTP ERROR:", err);
+    res.status(500).json({ success: false, message: "Verification failed" });
   }
-};
+}

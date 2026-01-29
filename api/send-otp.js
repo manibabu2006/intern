@@ -1,26 +1,43 @@
-const pool = require("./_db");
-const { saveOTP } = require("./_otpstore");
-const { sendOTP } = require("./_twilio");
+import pool from "./_db.js";
+import { saveOTP } from "./_otpstore.js";
+import { sendOTP } from "./_twilio.js";
 
-module.exports = async (req, res) => {
-  if (req.method !== "POST") return res.status(405).send("Method not allowed");
+export default async function handler(req, res) {
+  if (req.method !== "POST") return res.status(405).json({ success: false, message: "Method not allowed" });
 
-  const { username } = req.body;
-  if (!username) return res.status(400).send("Username required");
+  const { username, role } = req.body;
+
+  if (!username || !role) {
+    return res.status(400).json({ success: false, message: "Username and role are required" });
+  }
 
   try {
-    const [rows] = await pool.query("SELECT mobile FROM users WHERE username = ?", [username]);
-    if (rows.length === 0) return res.status(404).send("User not found");
+    // Select correct table
+    const table = role === "owner" ? "owners" : "customers";
 
+    const [rows] = await pool.query(`SELECT phone FROM ${table} WHERE username = ?`, [username]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const mobile = rows[0].phone;
+    if (!mobile) return res.status(400).json({ success: false, message: "No mobile linked with this user" });
+
+    // Generate OTP
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 min
 
-    await saveOTP(username, otp, expiresAt);
-    await sendOTP(rows[0].mobile, otp);
+    // Save OTP
+    await saveOTP(username, otp, expiresAt, role);
 
-    res.status(200).send("OTP sent successfully");
+    // Send OTP via Twilio
+    await sendOTP(mobile, otp);
+
+    res.status(200).json({ success: true, message: "OTP sent successfully" });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).send("Failed to send OTP");
+    console.error("SEND OTP ERROR:", err);
+    res.status(500).json({ success: false, message: "Failed to send OTP" });
   }
-};
+}
