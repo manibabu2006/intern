@@ -2,159 +2,136 @@ import db from "./_db.js";
 
 export default async function handler(req, res) {
   try {
-    /* ================= CREATE BOOKING ================= */
-    if (req.method === "POST") {
-      const { action } = req.body;
 
-      if (action === "createBooking") {
-        const {
-          item_id,
-          customer_id,
-          rental_duration,
-          name,
-          phone,
-          address,
-          aadhaar,
-          payment_method
-        } = req.body;
-
-        /* ===== REQUIRED FIELD CHECK ===== */
-        if (
-          !item_id ||
-          !customer_id ||
-          !rental_duration ||
-          !name ||
-          !phone ||
-          !address ||
-          !aadhaar
-        ) {
-          return res.status(400).json({
-            success: false,
-            message: "Missing required booking fields"
-          });
-        }
-
-        /* ===== AADHAAR VALIDATION ===== */
-        if (!/^\d{12}$/.test(String(aadhaar))) {
-          return res.status(400).json({
-            success: false,
-            message: "Invalid Aadhaar number (must be 12 digits)"
-          });
-        }
-
-        await db.execute(
-          `INSERT INTO bookings
-           (item_id, customer_id, rental_duration, status,
-            customer_name, phone, address, aadhaar, payment_method)
-           VALUES (?, ?, ?, 'Pending', ?, ?, ?, ?, ?)`,
-          [
-            Number(item_id),
-            Number(customer_id),
-            Number(rental_duration),
-            name,
-            phone,
-            address,
-            aadhaar,
-            payment_method || "COD"
-          ]
-        );
-
-        return res.json({ success: true });
-      }
-
-      return res.status(400).json({
-        success: false,
-        message: "Invalid action"
-      });
+    /* ================= GET ALL LOCATIONS ================= */
+    if (req.method === "GET" && !req.query.owner_id) {
+      const [rows] = await db.execute(
+        `SELECT DISTINCT location FROM items ORDER BY location`
+      );
+      const locations = rows.map(r => r.location);
+      return res.json({ success: true, locations });
     }
 
-    /* ================= CUSTOMER HISTORY ================= */
-    if (req.method === "GET") {
-      // Customer booking history
-      if (req.query.customer_id) {
-        const [history] = await db.execute(
-          `SELECT
-             b.booking_id,
-             b.rental_duration,
-             b.status,
-             b.payment_method,
-             i.item_name,
-             i.shop_name
-           FROM bookings b
-           JOIN items i ON b.item_id = i.item_id
-           WHERE b.customer_id=?
-           ORDER BY b.booking_id DESC`,
-          [Number(req.query.customer_id)]
-        );
+    /* ================= GET ITEMS BY OWNER ================= */
+    if (req.method === "GET" && req.query.owner_id) {
+      const owner_id = Number(req.query.owner_id);
 
-        return res.json({ success: true, history });
-      }
+      const [items] = await db.execute(
+        `SELECT 
+           item_id, shop_name, item_name, category, price_per_day,
+           location, is_active, image_url
+         FROM items
+         WHERE owner_id=?
+         ORDER BY item_id DESC`,
+        [owner_id]
+      );
 
-      // Owner booking requests
-      if (req.query.owner_id) {
-        const [requests] = await db.execute(
-          `SELECT
-             b.booking_id,
-             b.status,
-             b.rental_duration,
-             b.customer_name,
-             b.phone,
-             b.address,
-             b.aadhaar,
-             b.payment_method,
-             i.item_name
-           FROM bookings b
-           JOIN items i ON b.item_id = i.item_id
-           WHERE i.owner_id=?
-           ORDER BY b.booking_id DESC`,
-          [Number(req.query.owner_id)]
-        );
-
-        return res.json({ success: true, requests });
-      }
-
-      return res.status(400).json({
-        success: false,
-        message: "Missing query parameter"
-      });
+      return res.json({ success: true, items });
     }
 
-    /* ================= ACCEPT / REJECT ================= */
-    if (req.method === "PUT") {
-      const { booking_id, status } = req.body;
+    /* ================= GET ITEMS BY CATEGORY & LOCATION ================= */
+    if (req.method === "POST" && req.body.action === "getItems") {
+      const { category, location } = req.body;
 
-      if (!booking_id || !["Accepted", "Rejected"].includes(status)) {
+      if (!category || !location) {
         return res.status(400).json({
           success: false,
-          message: "Invalid data"
+          message: "Category and location required"
+        });
+      }
+
+      // ❌ DO NOT FILTER is_active HERE
+      const [items] = await db.execute(
+        `SELECT 
+           item_id, shop_name, item_name, category, price_per_day,
+           location, is_active, image_url
+         FROM items
+         WHERE category=? AND location=?
+         ORDER BY item_id DESC`,
+        [category, location]
+      );
+
+      return res.json({ success: true, items });
+    }
+
+    /* ================= ADD NEW ITEM ================= */
+    if (req.method === "POST" && !req.body.action) {
+      const {
+        owner_id,
+        shop_name,
+        item_name,
+        category,
+        price_per_day,
+        location,
+        image_url,
+        is_active
+      } = req.body;
+
+      if (!owner_id || !shop_name || !item_name || !category || !price_per_day || !location) {
+        return res.status(400).json({
+          success: false,
+          message: "All fields required"
+        });
+      }
+
+      await db.execute(
+        `INSERT INTO items
+         (owner_id, shop_name, item_name, category, price_per_day, location, image_url, is_active)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        [
+          Number(owner_id),
+          shop_name.trim(),
+          item_name.trim(),
+          category.trim(),
+          Number(price_per_day),
+          location.trim(),
+          image_url?.trim() || null,
+          Number(is_active) === 1 ? 1 : 0
+        ]
+      );
+
+      return res.json({ success: true });
+    }
+
+    /* ================= UPDATE ITEM ================= */
+    if (req.method === "PUT") {
+      const { item_id, owner_id, item_name, price_per_day, is_active, image_url } = req.body;
+
+      if (!item_id || !owner_id || !item_name || !price_per_day) {
+        return res.status(400).json({
+          success: false,
+          message: "Missing required fields"
         });
       }
 
       const [result] = await db.execute(
-        `UPDATE bookings SET status=? WHERE booking_id=?`,
-        [status, Number(booking_id)]
+        `UPDATE items
+         SET item_name=?, price_per_day=?, is_active=?, image_url=?
+         WHERE item_id=? AND owner_id=?`,
+        [
+          item_name.trim(),
+          Number(price_per_day),
+          Number(is_active) === 1 ? 1 : 0,
+          image_url?.trim() || null,
+          Number(item_id),
+          Number(owner_id)
+        ]
       );
 
       if (result.affectedRows === 0) {
         return res.status(404).json({
           success: false,
-          message: "Booking not found"
+          message: "Item not found or owner mismatch"
         });
       }
 
       return res.json({ success: true });
     }
 
-    /* ================= METHOD NOT ALLOWED ================= */
-    res.status(405).json({
-      success: false,
-      message: "Method not allowed"
-    });
+    res.status(405).json({ success: false, message: "Method not allowed" });
+
   } catch (err) {
-    console.error("CREATE REQUEST ERROR:", err);
-    return res.status(500).json({
-      success: false,
-      message: "Server error"
-    });
+    console.error("ITEM API ERROR:", err);
+    return res.status(500).json({ success: false, message: "Server error" });
   }
 }
