@@ -30,7 +30,6 @@ body{
   min-height:100vh;
 }
 
-/* ===== SIDEBAR ===== */
 aside{
   width:240px;
   background:var(--panel);
@@ -39,9 +38,6 @@ aside{
   flex-direction:column;
   gap:20px;
 }
-
-aside h2{margin:0}
-aside p{opacity:.8}
 
 aside button{
   margin-top:auto;
@@ -54,21 +50,10 @@ aside button{
   cursor:pointer;
 }
 
-/* ===== MAIN ===== */
-main{
-  flex:1;
-  padding:25px;
-}
+main{flex:1;padding:25px}
 
-.section{
-  margin-bottom:30px;
-}
+.section{margin-bottom:30px}
 
-.section h3{
-  margin-bottom:15px;
-}
-
-/* ===== CARDS ===== */
 .card,.request{
   background:var(--card);
   border:1px solid var(--border);
@@ -77,21 +62,9 @@ main{
   margin-bottom:12px;
 }
 
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:15px;
-}
-
-/* ===== FORM ===== */
-input,select{
-  width:100%;
-  padding:10px;
-  border-radius:12px;
-  border:none;
-  background:#020617;
-  color:#fff;
-}
+.status-Pending{color:var(--pending)}
+.status-Accepted{color:var(--success)}
+.status-Rejected{color:var(--danger)}
 
 button.primary{
   background:var(--primary);
@@ -105,25 +78,11 @@ button.primary{
 
 .accept{background:var(--success)}
 .reject{background:var(--danger);margin-left:8px}
-
-.status-Pending{color:var(--pending)}
-.status-Accepted{color:var(--success)}
-.status-Rejected{color:var(--danger)}
-.status-Inactive{color:#94a3b8}
-
-img.item-img{
-  width:100%;
-  max-height:140px;
-  object-fit:cover;
-  border-radius:12px;
-  margin-top:8px;
-}
 </style>
 </head>
 
 <body>
 
-<!-- ===== SIDEBAR ===== -->
 <aside>
   <h2>🏠 RentHub</h2>
   <p>Owner Panel</p>
@@ -131,51 +90,18 @@ img.item-img{
   <button onclick="logout()">Logout</button>
 </aside>
 
-<!-- ===== MAIN CONTENT ===== -->
 <main>
 
-  <!-- ADD ITEM -->
-  <div class="section">
-    <h3>Add Rental Item</h3>
-    <div class="grid">
-      <input id="shop_name" placeholder="Shop Name">
-      <input id="item_name" placeholder="Item Name">
-
-      <select id="category">
-        <option value="">Category</option>
-        <option>Electronics</option>
-        <option>Bike</option>
-        <option>Car</option>
-        <option>Tent</option>
-        <option>Appliance</option>
-      </select>
-
-      <input id="price_per_day" type="number" placeholder="Price / day">
-      <input id="location" placeholder="Location">
-      <input id="image_url" placeholder="Image URL (optional)">
-
-      <select id="is_active">
-        <option value="1">Active</option>
-        <option value="0">Inactive</option>
-      </select>
-    </div>
-    <br>
-    <button id="addItemBtn" class="primary">Add Item</button>
-  </div>
-
-  <!-- ===== MY ITEMS ===== -->
   <div class="section">
     <h3>My Items</h3>
     <div id="myItems"></div>
   </div>
 
-  <!-- REQUESTS -->
   <div class="section">
     <h3>Pending Requests</h3>
     <div id="requests"></div>
   </div>
 
-  <!-- HISTORY -->
   <div class="section">
     <h3>Booking History</h3>
     <div id="history"></div>
@@ -186,191 +112,107 @@ img.item-img{
 <script>
 /* ================= AUTH ================= */
 const ownerId = localStorage.getItem("owner_id");
-if (!ownerId) {
-  alert("Login first");
-  location.href = "index.html";
-}
+if (!ownerId) location.href="index.html";
 document.getElementById("ownerName").innerText =
   localStorage.getItem("name") || "Owner";
 
-/* ================= ADD ITEM ================= */
-const shop_name = document.getElementById("shop_name");
-const item_name = document.getElementById("item_name");
-const category = document.getElementById("category");
-const price_per_day = document.getElementById("price_per_day");
-const locationInput = document.getElementById("location");
-const image_url = document.getElementById("image_url");
-const is_active = document.getElementById("is_active");
-
-document.getElementById("addItemBtn").onclick = async () => {
-  const data = {
-    owner_id: ownerId,
-    shop_name: shop_name.value.trim(),
-    item_name: item_name.value.trim(),
-    category: category.value,
-    price_per_day: price_per_day.value,
-    location: locationInput.value.trim(),
-    image_url: image_url.value.trim() || null,
-    is_active: is_active.value === "1" ? 1 : 0
-  };
-  if (!data.shop_name || !data.item_name || !data.category ||
-      !data.price_per_day || !data.location) {
-    alert("Fill all required fields");
-    return;
-  }
-  try {
-    const res = await fetch("/api/items", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    });
-    const d = await res.json();
-    if (d.success) {
-      alert("✅ Item added");
-      shop_name.value = item_name.value = price_per_day.value =
-      locationInput.value = image_url.value = "";
-      category.value = "";
-      is_active.value = "1";
-      loadMyItems();
-    } else {
-      alert(d.message || "Failed to add item");
-    }
-  } catch {
-    alert("Server error");
-  }
-};
-
 /* ================= MY ITEMS ================= */
-async function loadMyItems() {
+async function loadMyItems(){
   const res = await fetch(`/api/items?owner_id=${ownerId}`);
   const d = await res.json();
   const box = document.getElementById("myItems");
   box.innerHTML = "";
-  if (!d.success || !d.items.length) {
-    box.innerHTML = "<p>No items added yet</p>";
+
+  if(!d.success || !d.items.length){
+    box.innerHTML="<p>No items added</p>";
     return;
   }
 
-  d.items.forEach(i => {
-    box.innerHTML += `
-      <div class="card" style="display:flex; align-items:center; gap:12px; padding:12px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.15);">
-        ${i.image_url ? `<img src="${i.image_url}" class="item-img" style="width:70px; height:70px; border-radius:10px;">` : 
-        `<div style="width:70px; height:70px; background:rgba(255,255,255,0.1); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:12px;">No Img</div>`}
-
-        <div style="flex:1; display:flex; flex-direction:column; gap:6px;">
-          <input id="name-${i.item_id}" value="${i.item_name}" 
-            style="padding:6px 8px; border-radius:8px; border:none; background:rgba(0,0,0,0.2); color:#fff; font-weight:500; font-size:14px;" 
-            placeholder="Item Name">
-
-          <input id="img-${i.item_id}" value="${i.image_url || ''}" 
-            style="padding:6px 8px; border-radius:8px; border:none; background:rgba(0,0,0,0.2); color:#fff; font-size:13px;" 
-            placeholder="Image URL">
-
-          <div style="display:flex; gap:8px; align-items:center;">
-            <input type="number" id="price-${i.item_id}" value="${i.price_per_day}" 
-              style="padding:6px 8px; border-radius:8px; border:none; background:rgba(0,0,0,0.2); color:#fff; font-size:13px; width:80px; text-align:right;" 
-              placeholder="Price">
-
-            <select id="status-${i.item_id}" style="padding:6px 8px; border-radius:8px; border:none; background:rgba(0,0,0,0.2); color:#fff; font-size:13px; width:90px;">
-              <option value="1" ${i.is_active ? "selected" : ""}>Active</option>
-              <option value="0" ${!i.is_active ? "selected" : ""}>Inactive</option>
-            </select>
-          </div>
-        </div>
-
-        <button class="primary" style="padding:6px 12px; height:36px; font-size:13px;" onclick="updateItem(${i.item_id})">Update</button>
-      </div>
-    `;
+  d.items.forEach(i=>{
+    box.innerHTML+=`
+      <div class="card">
+        <b>${i.item_name}</b><br>
+        ₹${i.price_per_day}/day<br>
+        Location: ${i.location}<br>
+        Status: ${i.is_active ? "Active" : "Inactive"}
+      </div>`;
   });
 }
 
-async function updateItem(item_id) {
-  const data = {
-    item_id,
-    owner_id: ownerId,
-    item_name: document.getElementById(`name-${item_id}`).value.trim(),
-    price_per_day: document.getElementById(`price-${item_id}`).value,
-    image_url: document.getElementById(`img-${item_id}`).value.trim() || null,
-    is_active: document.getElementById(`status-${item_id}`).value
-  };
-  const res = await fetch("/api/items", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  });
+/* ================= BOOKINGS (FIXED) ================= */
+async function loadAll(){
+  const res = await fetch(`/api/create-request?owner_id=${ownerId}`);
   const d = await res.json();
-  if (d.success) {
-    alert("✅ Item updated");
-    loadMyItems();
-  } else {
-    alert(d.message || "Update failed");
-  }
-}
 
-/* ================= BOOKINGS ================= */
-async function loadAll() {
-  try {
-    const res = await fetch(`/api/create-request?owner_id=${ownerId}`);
-    const d = await res.json();
-    const reqBox = document.getElementById("requests");
-    const histBox = document.getElementById("history");
-    reqBox.innerHTML = "";
-    histBox.innerHTML = "";
-    if (!d.success || !d.requests?.length) {
-      reqBox.innerHTML = "<p>No booking requests</p>";
-      histBox.innerHTML = "<p>No booking history</p>";
-      return;
+  const reqBox = document.getElementById("requests");
+  const histBox = document.getElementById("history");
+  reqBox.innerHTML="";
+  histBox.innerHTML="";
+
+  if(!d.success){
+    reqBox.innerHTML="<p>Error loading requests</p>";
+    histBox.innerHTML="<p>Error loading history</p>";
+    return;
+  }
+
+  let hasPending=false;
+  let hasHistory=false;
+
+  d.requests.forEach(r=>{
+    const phone = r.phone || "N/A";
+    const aadhaar = r.aadhaar || "N/A";
+    const address = r.address || "N/A";
+
+    if(r.status==="Pending"){
+      hasPending=true;
+      reqBox.innerHTML+=`
+        <div class="request">
+          <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
+          Days: ${r.rental_duration}<br>
+          📞 ${phone}<br>
+          🆔 Aadhaar: ${aadhaar}<br>
+          📍 ${address}<br><br>
+
+          <button class="accept" onclick="respond(${r.booking_id},'Accepted')">Accept</button>
+          <button class="reject" onclick="respond(${r.booking_id},'Rejected')">Reject</button>
+        </div>`;
+    }else{
+      hasHistory=true;
+      histBox.innerHTML+=`
+        <div class="card">
+          <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
+          Days: ${r.rental_duration}<br>
+          📞 ${phone}<br>
+          🆔 Aadhaar: ${aadhaar}<br>
+          📍 ${address}<br>
+          Status:
+          <span class="status-${r.status}">${r.status}</span>
+        </div>`;
     }
+  });
 
-    d.requests.forEach(r => {
-      if (r.status === "Pending") {
-        reqBox.innerHTML += `
-          <div class="request">
-            <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
-            Days: ${r.rental_duration}<br>
-            📞 Phone: ${r.phone || "N/A"}<br>
-            🆔 Aadhaar: ${r.aadhaar || "N/A"}<br><br>
-
-            <button class="accept" onclick="respond(${r.booking_id},'Accepted')">Accept</button>
-            <button class="reject" onclick="respond(${r.booking_id},'Rejected')">Reject</button>
-          </div>`;
-      } else {
-        histBox.innerHTML += `
-          <div class="card">
-            <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
-            Days: ${r.rental_duration}<br>
-            📞 Phone: ${r.phone || "N/A"}<br>
-            🆔 Aadhaar: ${r.aadhaar || "N/A"}<br>
-            Status: <span class="status-${r.status}">${r.status}</span>
-          </div>`;
-      }
-    });
-
-  } catch {
-    alert("Failed to load data");
-  }
+  if(!hasPending) reqBox.innerHTML="<p>No pending requests</p>";
+  if(!hasHistory) histBox.innerHTML="<p>No booking history</p>";
 }
 
-
-async function respond(booking_id, status) {
-  const res = await fetch("/api/create-request", {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ booking_id, status })
+async function respond(booking_id,status){
+  const res = await fetch("/api/create-request",{
+    method:"PUT",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({ booking_id,status })
   });
   const d = await res.json();
-  if (d.success) loadAll();
-  else alert("Action failed");
+  if(d.success) loadAll();
+}
+
+function logout(){
+  localStorage.clear();
+  location.href="index.html";
 }
 
 /* ================= INIT ================= */
-loadAll();
 loadMyItems();
-
-function logout() {
-  localStorage.clear();
-  location.href = "index.html";
-}
+loadAll();
 </script>
 </body>
 </html>

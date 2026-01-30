@@ -8,8 +8,10 @@ export default async function handler(req, res) {
       const [rows] = await db.execute(
         `SELECT DISTINCT location FROM items ORDER BY location`
       );
-      const locations = rows.map(r => r.location);
-      return res.json({ success: true, locations });
+      return res.json({
+        success: true,
+        locations: rows.map(r => r.location)
+      });
     }
 
     /* ================= GET ITEMS BY OWNER ================= */
@@ -18,8 +20,14 @@ export default async function handler(req, res) {
 
       const [items] = await db.execute(
         `SELECT 
-           item_id, shop_name, item_name, category, price_per_day,
-           location, is_active, image_url
+           item_id,
+           shop_name,
+           item_name,
+           category,
+           price_per_day,
+           location,
+           is_active,
+           image_url
          FROM items
          WHERE owner_id=?
          ORDER BY item_id DESC`,
@@ -40,11 +48,17 @@ export default async function handler(req, res) {
         });
       }
 
-      // ❌ DO NOT FILTER is_active HERE
+      // IMPORTANT: do NOT filter is_active here
       const [items] = await db.execute(
         `SELECT 
-           item_id, shop_name, item_name, category, price_per_day,
-           location, is_active, image_url
+           item_id,
+           shop_name,
+           item_name,
+           category,
+           price_per_day,
+           location,
+           is_active,
+           image_url
          FROM items
          WHERE category=? AND location=?
          ORDER BY item_id DESC`,
@@ -54,7 +68,7 @@ export default async function handler(req, res) {
       return res.json({ success: true, items });
     }
 
-    /* ================= ADD NEW ITEM ================= */
+    /* ================= ADD ITEM ================= */
     if (req.method === "POST" && !req.body.action) {
       const {
         owner_id,
@@ -95,7 +109,14 @@ export default async function handler(req, res) {
 
     /* ================= UPDATE ITEM ================= */
     if (req.method === "PUT") {
-      const { item_id, owner_id, item_name, price_per_day, is_active, image_url } = req.body;
+      const {
+        item_id,
+        owner_id,
+        item_name,
+        price_per_day,
+        is_active,
+        image_url
+      } = req.body;
 
       if (!item_id || !owner_id || !item_name || !price_per_day) {
         return res.status(400).json({
@@ -128,10 +149,16 @@ export default async function handler(req, res) {
       return res.json({ success: true });
     }
 
-    res.status(405).json({ success: false, message: "Method not allowed" });
+    return res.status(405).json({
+      success: false,
+      message: "Method not allowed"
+    });
 
   } catch (err) {
     console.error("ITEM API ERROR:", err);
-    return res.status(500).json({ success: false, message: "Server error" });
+    return res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
   }
 }
