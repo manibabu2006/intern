@@ -329,8 +329,7 @@ async function loadAll() {
             <b>${r.customer_name}</b> → <b>${r.item_name}</b><br>
             Days: ${r.rental_duration}<br>
             📞 Phone: ${r.phone || "N/A"}<br>
-            🆔 Aadhaar: ${r.aadhaar || "N/A"}<br>
-            📍 Pickup: ${r.address || "N/A"}<br><br>
+            🆔 Aadhaar: ${r.aadhaar || "N/A"}<br><br>
 
             <button class="accept" onclick="respond(${r.booking_id},'Accepted')">Accept</button>
             <button class="reject" onclick="respond(${r.booking_id},'Rejected')">Reject</button>
@@ -342,7 +341,6 @@ async function loadAll() {
             Days: ${r.rental_duration}<br>
             📞 Phone: ${r.phone || "N/A"}<br>
             🆔 Aadhaar: ${r.aadhaar || "N/A"}<br>
-            📍 Pickup: ${r.address || "N/A"}<br>
             Status: <span class="status-${r.status}">${r.status}</span>
           </div>`;
       }
@@ -352,6 +350,7 @@ async function loadAll() {
     alert("Failed to load data");
   }
 }
+
 
 async function respond(booking_id, status) {
   const res = await fetch("/api/create-request", {
@@ -373,3 +372,5 @@ function logout() {
   location.href = "index.html";
 }
 </script>
+</body>
+</html>
