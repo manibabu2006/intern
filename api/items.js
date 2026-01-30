@@ -19,15 +19,8 @@ export default async function handler(req, res) {
       const owner_id = Number(req.query.owner_id);
 
       const [items] = await db.execute(
-        `SELECT 
-           item_id,
-           shop_name,
-           item_name,
-           category,
-           price_per_day,
-           location,
-           is_active,
-           image_url
+        `SELECT item_id, shop_name, item_name, category,
+                price_per_day, location, is_active, image_url
          FROM items
          WHERE owner_id=?
          ORDER BY item_id DESC`,
@@ -37,7 +30,7 @@ export default async function handler(req, res) {
       return res.json({ success: true, items });
     }
 
-    /* ================= GET ITEMS BY CATEGORY & LOCATION ================= */
+    /* ================= GET ITEMS (CUSTOMER) ================= */
     if (req.method === "POST" && req.body.action === "getItems") {
       const { category, location } = req.body;
 
@@ -48,17 +41,10 @@ export default async function handler(req, res) {
         });
       }
 
-      // IMPORTANT: do NOT filter is_active here
+      // ✅ NO is_active filter (inactive items included)
       const [items] = await db.execute(
-        `SELECT 
-           item_id,
-           shop_name,
-           item_name,
-           category,
-           price_per_day,
-           location,
-           is_active,
-           image_url
+        `SELECT item_id, shop_name, item_name, category,
+                price_per_day, location, is_active, image_url
          FROM items
          WHERE category=? AND location=?
          ORDER BY item_id DESC`,
@@ -68,7 +54,7 @@ export default async function handler(req, res) {
       return res.json({ success: true, items });
     }
 
-    /* ================= ADD ITEM ================= */
+    /* ================= ADD NEW ITEM ================= */
     if (req.method === "POST" && !req.body.action) {
       const {
         owner_id,
@@ -90,7 +76,8 @@ export default async function handler(req, res) {
 
       await db.execute(
         `INSERT INTO items
-         (owner_id, shop_name, item_name, category, price_per_day, location, image_url, is_active)
+         (owner_id, shop_name, item_name, category,
+          price_per_day, location, image_url, is_active)
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           Number(owner_id),
@@ -149,6 +136,7 @@ export default async function handler(req, res) {
       return res.json({ success: true });
     }
 
+    /* ================= FALLBACK ================= */
     return res.status(405).json({
       success: false,
       message: "Method not allowed"

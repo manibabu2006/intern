@@ -2,7 +2,6 @@ import db from "./_db.js";
 
 export default async function handler(req, res) {
   try {
-
     /* ================= CREATE BOOKING ================= */
     if (req.method === "POST") {
       const { action } = req.body;
@@ -19,18 +18,27 @@ export default async function handler(req, res) {
           payment_method
         } = req.body;
 
-        if (!item_id || !customer_id || !rental_duration || !aadhaar) {
+        /* ===== REQUIRED FIELD CHECK ===== */
+        if (
+          !item_id ||
+          !customer_id ||
+          !rental_duration ||
+          !name ||
+          !phone ||
+          !address ||
+          !aadhaar
+        ) {
           return res.status(400).json({
             success: false,
             message: "Missing required booking fields"
           });
         }
 
-        // Aadhaar validation (12 digits)
-        if (!/^\d{12}$/.test(aadhaar)) {
+        /* ===== AADHAAR VALIDATION ===== */
+        if (!/^\d{12}$/.test(String(aadhaar))) {
           return res.status(400).json({
             success: false,
-            message: "Invalid Aadhaar number"
+            message: "Invalid Aadhaar number (must be 12 digits)"
           });
         }
 
@@ -43,9 +51,9 @@ export default async function handler(req, res) {
             Number(item_id),
             Number(customer_id),
             Number(rental_duration),
-            name || null,
-            phone || null,
-            address || null,
+            name,
+            phone,
+            address,
             aadhaar,
             payment_method || "COD"
           ]
@@ -60,10 +68,9 @@ export default async function handler(req, res) {
       });
     }
 
-    /* ================= GET REQUESTS / HISTORY ================= */
+    /* ================= CUSTOMER HISTORY ================= */
     if (req.method === "GET") {
-
-      /* CUSTOMER HISTORY */
+      // Customer booking history
       if (req.query.customer_id) {
         const [history] = await db.execute(
           `SELECT
@@ -83,7 +90,7 @@ export default async function handler(req, res) {
         return res.json({ success: true, history });
       }
 
-      /* OWNER REQUESTS */
+      // Owner booking requests
       if (req.query.owner_id) {
         const [requests] = await db.execute(
           `SELECT
@@ -94,6 +101,7 @@ export default async function handler(req, res) {
              b.phone,
              b.address,
              b.aadhaar,
+             b.payment_method,
              i.item_name
            FROM bookings b
            JOIN items i ON b.item_id = i.item_id
@@ -137,11 +145,11 @@ export default async function handler(req, res) {
       return res.json({ success: true });
     }
 
-    return res.status(405).json({
+    /* ================= METHOD NOT ALLOWED ================= */
+    res.status(405).json({
       success: false,
       message: "Method not allowed"
     });
-
   } catch (err) {
     console.error("CREATE REQUEST ERROR:", err);
     return res.status(500).json({
